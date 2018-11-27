@@ -47,3 +47,11 @@ the running CKAN environment).
   cd /usr/lib/ckan/default/src/ckanext-query-dois
   pip install -r requirements.txt
   ```
+
+6. Initialise database tables
+
+  ```bash
+  paster --plugin=ckanext-query-dois initdb -c /etc/ckan/default/development.ini
+  ```
+  
+  _Replace `/etc/ckan/default/development.ini` with wherever your CKAN config file is located._
