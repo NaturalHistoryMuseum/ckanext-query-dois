@@ -1,0 +1,148 @@
+{% extends "page.html" %}
+
+{% block title %}
+{{ _('DOI') }}: {{ doi }}
+{% endblock %}
+
+{% block primary_content %}
+{% resource 'ckanext-query-dois/main' %}
+<article class="module">
+    <div class="module-content">
+        <h1 class="page-heading">{{ _('DOI') }}: {{ doi }}</h1>
+
+        {% block visual_query %}
+        {% snippet "query_dois/snippets/visual_query.html", search=query_doi.query %}
+        <br />
+        {% endblock %}
+
+        {% block citation %}
+        <h3>{{ _('Cite this as') }}</h3>
+        <hr>
+        <div>
+            <p>
+                {{ authors }} ({{ year }}). Dataset: {{ package['title'] }}. Resource: {{ resource['name'] }}
+                <a href="https://doi.org/{{ doi }}" target="_blank">https://doi.org/{{ doi }}</a>
+            </p>
+        </div>
+        <br />
+        {% endblock %}
+
+        {% block details %}
+        <h3>{{ _('Details') }}</h3>
+        <hr>
+        <div class="qd_details">
+            <div>
+                {% set resource_url = h.url_for(controller='package', action='resource_read', id=package['name'], resource_id=resource['id']) %}
+                {% set package_url = h.url_for(controller='package', action='read', id=package['name']) %}
+                <b>{{ _('Resource:') }}</b> <a href="{{ resource_url }}">{{ resource['name'] }}</a>
+            </div>
+            <div>
+                <b>{{ _('Package:') }}</b> <a href="{{ package_url }}">{{ package['title'] }}</a>
+            </div>
+            <div>
+                <b>{{ _('License:') }}</b> {% snippet "snippets/license.html", pkg_dict=package, text_only=True %}
+            </div>
+            <div>
+                <b>{{ _('Retrieved:') }}</b> {{ query_doi.timestamp }}
+            </div>
+            <div>
+                <b>{{ _('Total records:') }}</b> {{ query_doi.count }}
+            </div>
+        </div>
+        {% endblock %}
+
+        {% block stats %}
+        <h3>{{ _('Statistics') }}</h3>
+        <hr>
+        <div class="qd_stats">
+            <div>
+                <b>{{ _('Total downloads:') }}</b> {{ downloads }}
+            </div>
+            <div>
+                <b>{{ _('Last downloaded:') }}</b> {{ last_download_timestamp }}
+            </div>
+        </div>
+        {% endblock %}
+    </div>
+</article>
+{% endblock %}
+
+
+{% block secondary_content %}
+<div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+        <i class="icon-eye-open icon-large"></i>{{ _('View data') }}
+        <i class="icon-info-sign qd_tooltip">
+            <span class="qd_tooltiptext">
+                {% trans %}
+                Use the links to view the data associated with this DOI.
+                {% endtrans %}
+            </span>
+        </i>
+    </h2>
+    <div class="module-content">
+        <a href="{{ reruns.page.original }}">{{ _('Original') }}</a>
+        <i class="icon-info-sign qd_tooltip">
+            <span class="qd_tooltiptext">
+                {% trans %}
+                View the data as it looked when the DOI was originally minted.
+                {% endtrans %}
+            </span>
+        </i>
+    </div>
+    <div class="module-content">
+        <a href="{{ reruns.page.current }}">{{ _('Current') }}</a>
+        <i class="icon-info-sign qd_tooltip">
+            <span class="qd_tooltiptext">
+                {% trans %}
+                View the data as it looks now. This may result in different results to the DOI's
+                original data if the data has been modified since it was minted.
+                {% endtrans %}
+            </span>
+        </i>
+    </div>
+</div>
+
+<div class="module module-narrow module-shallow">
+    <h2 class="module-heading">
+        <i class="icon-beaker icon-large"></i>{{ _('View with API') }}
+        <i class="icon-info-sign qd_tooltip">
+            <span class="qd_tooltiptext">
+                {% trans %}
+                Use the links to view the data associated with this DOI through the API.
+                {% endtrans %}
+            </span>
+        </i>
+    </h2>
+    <div class="module-content">
+        <a href="{{ reruns.api.original }}">{{ _('Original') }}</a>
+        <i class="icon-info-sign qd_tooltip">
+            <span class="qd_tooltiptext">
+                {% trans %}
+                View the data as it looked when the DOI was originally minted.
+                {% endtrans %}
+            </span>
+        </i>
+    </div>
+    <div class="module-content">
+        <a href="{{ reruns.api.current }}">{{ _('Current') }}</a>
+        <i class="icon-info-sign qd_tooltip">
+            <span class="qd_tooltiptext">
+                {% trans %}
+                View the data as it looks now. This may result in different results to the DOI's
+                original data if the data has been modified since it was minted.
+                {% endtrans %}
+            </span>
+        </i>
+    </div>
+</div>
+
+<div class="module, module-narrow module-shallow">
+    <h2 class="module-heading">
+        <i class="icon-download icon-large"></i>{{ _('Download') }}
+    </h2>
+    {% resource 'ckanext-ckanpackager/main' %}
+    <a data-module="ckanpackager-download-link" data-module-resource-id="{{ resource['id'] }}"
+       class="packager-link btn btn-primary" href="{{ download_url }}">{{ _('Download') }}</a>
+</div>
+{% endblock %}

@@ -1,0 +1,46 @@
+{#
+Visualises a query dict.
+
+Params:
+    - search: a query dict (i.e. including keys like "q" and "filters")
+#}
+
+{% resource 'ckanext-query-dois/visual_query' %}
+
+<div class="visual_query">
+    {% if search.q %}
+    <div class="query-q">
+        <i class="icon-search icon-large query-icon"></i>
+        <ul class="query-part query-ul">
+            {% if search.q is mapping %}
+                {% for field, search_values in search.q.items() %}
+                    {% for search_value in search_values %}
+                        <li>
+                            <span class="query-field">{{ field }}</span>: <span class="query-value">{{ search_value }}</span>
+                        </li>
+                    {% endfor %}
+                {% endfor %}
+            {% else %}
+                <li>
+                    <span class="query-value">{{ search.q }}</span>
+                </li>
+            {% endif %}
+        </ul>
+    </div>
+    {% endif %}
+
+    {% if search.filters %}
+    <div class="query-filters">
+        <i class="icon-filter icon-large query-icon"></i>
+        <ul class="query-part query-ul">
+            {% for field, filter_values in search.filters.items() %}
+                {% for filter_value in filter_values %}
+                    <li>
+                        <span class="query-field">{{ field }}</span>: <span class="query-value">{{ filter_value }}</span>
+                    </li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>

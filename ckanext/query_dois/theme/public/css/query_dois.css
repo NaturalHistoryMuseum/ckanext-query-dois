@@ -1,0 +1,22 @@
+.qd_tooltip {
+    position: relative;
+    display: inline-block;
+}
+
+.qd_tooltip .qd_tooltiptext {
+    visibility: hidden;
+    display: block;
+    width: 350px;
+    word-wrap: break-word;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px;
+    position: absolute;
+    z-index: 1;
+}
+
+.qd_tooltip:hover .qd_tooltiptext {
+    visibility: visible;
+}
