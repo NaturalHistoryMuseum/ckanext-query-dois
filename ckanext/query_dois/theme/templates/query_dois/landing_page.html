@@ -71,7 +71,7 @@
 {% block secondary_content %}
 <div class="module module-narrow module-shallow">
     <h2 class="module-heading">
-        <i class="icon-eye-open icon-large"></i>{{ _('View data') }}
+        <i class="icon-eye-open icon-medium"></i>{{ _('View data') }}
         <i class="icon-info-sign qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
@@ -105,7 +105,7 @@
 
 <div class="module module-narrow module-shallow">
     <h2 class="module-heading">
-        <i class="icon-beaker icon-large"></i>{{ _('View with API') }}
+        <i class="icon-beaker icon-medium"></i>{{ _('View with API') }}
         <i class="icon-info-sign qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
@@ -139,7 +139,7 @@
 
 <div class="module, module-narrow module-shallow">
     <h2 class="module-heading">
-        <i class="icon-download icon-large"></i>{{ _('Download') }}
+        <i class="icon-download icon-medium"></i>{{ _('Download') }}
     </h2>
     {% resource 'ckanext-ckanpackager/main' %}
     <a data-module="ckanpackager-download-link" data-module-resource-id="{{ resource['id'] }}"
