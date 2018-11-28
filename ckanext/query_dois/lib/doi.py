@@ -8,7 +8,7 @@ from datacite.errors import DataCiteError, DataCiteNotFoundError
 from paste.deploy.converters import asbool
 from pylons import config
 
-from ckan import model
+from ckan import model, plugins
 from ckanext.query_dois.lib.utils import get_resource_and_package
 from ckanext.query_dois.model import QueryDOI
 
@@ -147,13 +147,15 @@ def _create_doi_on_datacite(client, doi, package, timestamp, record_count):
     # create the metadata on datacite
     client.metadata_post(schema41.tostring(data))
 
-    # create the URL the DOI will point to, this is the landing page
-    landing_page_url = config.get(u'ckan.site_url')
-    if landing_page_url[-1] != u'/':
-        landing_page_url += u'/'
-    landing_page_url += u'/'.join((u'doi', doi))
+    # create the URL the DOI will point to, i.e. the landing page
+    data_centre, identifier = doi.split(u'/')
+    landing_page_url = plugins.toolkit.url_for(u'query_doi_landing_page', data_centre=data_centre,
+                                               identifier=identifier)
+    site = config.get(u'ckan.site_url')
+    if site[-1] == u'/':
+        site = site[:-1]
     # mint the DOI
-    client.doi_post(doi, landing_page_url)
+    client.doi_post(doi, site + landing_page_url)
 
 
 def _create_database_entry(doi, resource_id, timestamp, datastore_query, rounded_version,
