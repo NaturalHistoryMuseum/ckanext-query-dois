@@ -25,8 +25,8 @@ class StatsController(plugins.toolkit.BaseController):
         '''
         query = model.Session.query(QueryDOIStat)
 
-        # order by id descending to get the newest stat rows first
-        query = query.order_by(QueryDOIStat.id.desc())
+        # order by id ascending to avoid causing pagination issues
+        query = query.order_by(QueryDOIStat.id.asc())
 
         # apply any parameters as filters
         for param_name, column in column_param_mapping:
