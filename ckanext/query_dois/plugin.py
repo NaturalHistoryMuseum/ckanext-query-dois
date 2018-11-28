@@ -2,7 +2,7 @@ import json
 import logging
 
 from ckan import plugins
-from ckanext.query_dois.helpers import render_filter_value
+from ckanext.query_dois import helpers
 from ckanext.query_dois.lib.doi import mint_doi
 from ckanext.query_dois.lib.stats import record_stat, DOWNLOAD_ACTION
 from ckanext.query_dois.model import DatastoreQuery
@@ -85,5 +85,7 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     # ITemplateHelpers
     def get_helpers(self):
         return {
-            'render_filter_value': render_filter_value,
+            u'render_filter_value': helpers.render_filter_value,
+            u'get_most_recent_dois': helpers.get_most_recent_dois,
+            u'get_time_ago_description': helpers.get_time_ago_description,
         }

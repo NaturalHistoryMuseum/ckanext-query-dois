@@ -1,0 +1,27 @@
+{#
+Displays the most recently created DOIs for the given package.
+
+Params:
+    - package_id: the package id to get the most recent DOIs for
+    - number: the number of DOIs to show
+
+Example usage:
+    {% snippet "query_dois/snippets/recent_dois.html", package_id=package.id, number=5 %}
+#}
+
+<section class="module module-narrow">
+    <h2 class="module-heading"><i class="icon-medium icon-time"></i>{{ _('Most recent query DOIs for resources in this dataset') }}</h2>
+    <div>
+        <ul class="nav nav-simple">
+            {% for query_doi in h.get_most_recent_dois(package_id, number) %}
+            <li class="nav-item">
+                <a href="https://doi.org/{{ query_doi.doi }}" title="{{ h.get_time_ago_description(query_doi) }}">
+                    <i class="icon-link"></i>
+                    {{ query_doi.doi }}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+</section>
