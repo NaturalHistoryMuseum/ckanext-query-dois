@@ -47,7 +47,7 @@ class DatastoreQuery(object):
             elif param == u'filters':
                 filters = defaultdict(list)
                 for filter_pair in param_value.split(u'|'):
-                    filter_field, filter_value = filter_pair.split(u':', maxsplit=1)
+                    filter_field, filter_value = filter_pair.split(u':', 1)
                     filters[filter_field].append(filter_value)
                 if requested_version is None:
                     popped_version = filters.pop(u'__version__', None)
