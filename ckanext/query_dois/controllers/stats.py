@@ -2,8 +2,7 @@ import json
 
 from ckan import model, plugins
 from ckan.common import request, response
-from ckanext.query_dois.model import QueryDOIStat
-
+from ckanext.query_dois.model import QueryDOIStat, QueryDOI
 
 # mapping of param names to QueryDOIStat columns
 column_param_mapping = (
@@ -33,6 +32,12 @@ class StatsController(plugins.toolkit.BaseController):
             param_value = request.params.get(param_name, None)
             if param_value:
                 query = query.filter(column == param_value)
+
+        resource_id = request.params.get(u'resource_id', None)
+        if resource_id:
+            query = query\
+                .join(QueryDOI, QueryDOI.doi == QueryDOIStat.doi)\
+                .filter(QueryDOI.resource_ids.like(u'%{}%'.format(resource_id)))
 
         # apply the offset and limit, with sensible defaults
         query = query.offset(request.params.get(u'offset', 0))
