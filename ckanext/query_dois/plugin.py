@@ -2,6 +2,7 @@ import json
 import logging
 
 from ckan import plugins
+from ckanext.query_dois.helpers import render_filter_value
 from ckanext.query_dois.lib.doi import mint_doi
 from ckanext.query_dois.lib.stats import record_stat, DOWNLOAD_ACTION
 from ckanext.query_dois.model import DatastoreQuery
@@ -12,6 +13,7 @@ log = logging.getLogger(__name__)
 class QueryDOIsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IRoutes, inherit=True)
     plugins.implements(plugins.IConfigurer, inherit=True)
+    plugins.implements(plugins.ITemplateHelpers)
 
     # if the ckanpackager is available, we have a hook for it
     try:
@@ -79,3 +81,9 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
                 log.error(u'Failed to mint/retrieve DOI and/or create stats', exc_info=True)
 
         return packager_url, request_params
+
+    # ITemplateHelpers
+    def get_helpers(self):
+        return {
+            'render_filter_value': render_filter_value,
+        }

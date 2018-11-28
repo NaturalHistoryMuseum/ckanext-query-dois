@@ -36,7 +36,7 @@ Params:
             {% for field, filter_values in search.filters.items() %}
                 {% for filter_value in filter_values %}
                     <li>
-                        <span class="query-field">{{ field }}</span>: <span class="query-value">{{ filter_value }}</span>
+                        <span class="query-field">{{ field }}</span>: <span class="query-value">{{ h.render_filter_value(field, filter_value) }}</span>
                     </li>
                 {% endfor %}
             {% endfor %}
