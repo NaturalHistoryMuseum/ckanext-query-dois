@@ -65,3 +65,15 @@ def get_time_ago_description(query_doi):
             value = int(seconds / divisor)
             plural = u's' if value > 1 else u''
             return u'{} {}{} ago'.format(value, unit, plural)
+
+
+def get_landing_page_url(query_doi):
+    '''
+    Given a QueryDOI object, return the landing URL for it.
+
+    :param query_doi: a QueryDOI object
+    :return: the landing page URL
+    '''
+    data_centre, identifier = query_doi.doi.split(u'/')
+    return plugins.toolkit.url_for(u'query_doi_landing_page', data_centre=data_centre,
+                                   identifier=identifier)

@@ -88,4 +88,5 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             u'render_filter_value': helpers.render_filter_value,
             u'get_most_recent_dois': helpers.get_most_recent_dois,
             u'get_time_ago_description': helpers.get_time_ago_description,
+            u'get_landing_page_url': helpers.get_landing_page_url,
         }

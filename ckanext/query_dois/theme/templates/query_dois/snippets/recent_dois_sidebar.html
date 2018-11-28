@@ -15,7 +15,7 @@ Example usage:
         <ul class="nav nav-simple">
             {% for query_doi in h.get_most_recent_dois(package_id, number) %}
             <li class="nav-item">
-                <a href="https://doi.org/{{ query_doi.doi }}" title="{{ h.get_time_ago_description(query_doi) }}">
+                <a href="{{ h.get_landing_page_url(query_doi) }}" title="{{ h.get_time_ago_description(query_doi) }}">
                     <i class="icon-link"></i>
                     {{ query_doi.doi }}
                 </a>
