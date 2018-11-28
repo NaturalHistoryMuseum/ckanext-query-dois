@@ -41,8 +41,8 @@ def get_most_recent_dois(package_id, number):
 # a tuple describing various ways of informing the user something happened a certain number of time
 # units ago
 time_resolutions = (
-    (60, u'sec', 1),
-    (60 * 60, u'min', 60),
+    (60, u'seceond', 1),
+    (60 * 60, u'minute', 60),
     (60 * 60 * 24, u'hour', 60 * 60),
     (60 * 60 * 24 * 7, u'day', 60 * 60 * 24),
     (60 * 60 * 24 * 28, u'week', 60 * 60 * 24 * 7),
