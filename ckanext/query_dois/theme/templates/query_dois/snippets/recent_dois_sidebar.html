@@ -13,14 +13,19 @@ Example usage:
     <h2 class="module-heading"><i class="icon-medium icon-time"></i>{{ _('Most recent query DOIs for resources in this dataset') }}</h2>
     <div>
         <ul class="nav nav-simple">
-            {% for query_doi in h.get_most_recent_dois(package_id, number) %}
-            <li class="nav-item">
-                <a href="{{ h.get_landing_page_url(query_doi) }}" title="{{ h.get_time_ago_description(query_doi) }}">
-                    <i class="icon-link"></i>
-                    {{ query_doi.doi }}
-                </a>
-            </li>
-            {% endfor %}
+            {% set query_dois = h.get_most_recent_dois(package_id, number) %}
+            {% if query_dois %}
+                {% for query_doi in query_dois %}
+                <li class="nav-item">
+                    <a href="{{ h.get_landing_page_url(query_doi) }}" title="{{ h.get_time_ago_description(query_doi) }}">
+                        <i class="icon-link"></i>
+                        {{ query_doi.doi }}
+                    </a>
+                </li>
+                {% endfor %}
+            {% else %}
+                <li class="nav-item">{{ _('No recent DOIs') }}</li>
+            {% endif %}
         </ul>
     </div>
 </section>
