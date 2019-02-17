@@ -19,6 +19,9 @@ def anonymize_email(email_address):
     :param email_address: the email address
     :return: a 2-tuple of the email address and the domain
     '''
+    if email_address is None:
+        return None, None
+
     email_address = email_address.lower()
     # figure out the domain from the email address
     try:
