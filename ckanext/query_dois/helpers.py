@@ -33,6 +33,8 @@ def get_most_recent_dois(package_id, number):
     '''
     package = plugins.toolkit.get_action(u'package_show')({}, {u'id': package_id})
     ors = [QueryDOI.resource_ids.like(u'%{}%'.format(r[u'id'])) for r in package[u'resources']]
+    if not ors:
+        return []
     return list(model.Session.query(QueryDOI)
                 .filter(or_(*ors))
                 .order_by(QueryDOI.id.desc()).limit(number))
