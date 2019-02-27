@@ -5,7 +5,7 @@ from ckan import plugins
 from ckanext.query_dois import helpers
 from ckanext.query_dois.lib.doi import mint_doi
 from ckanext.query_dois.lib.stats import record_stat, DOWNLOAD_ACTION
-from ckanext.query_dois.model import DatastoreQuery
+from ckanext.query_dois.lib.query import DatastoreQuery
 
 log = logging.getLogger(__name__)
 
