@@ -99,18 +99,18 @@ def generate_doi(client):
         raise Exception(u'Failed to generate a DOI')
 
 
-def find_existing_doi(resource_id, query_hash, rounded_version):
+def find_existing_doi(resources_and_versions, query_hash):
     '''
     Returns a QueryDOI object representing the same search, or returns None if one doesn't exist.
 
-    :param resource_id: the resource id being query
+    :param resources_and_versions: the resource ids being queried mapped to the versions they're
+                                   being queried at
     :param query_hash: the hash of the query
-    :param rounded_version: the rounded version of the query
     :return: a QueryDOI object or None
     '''
     return model.Session.query(QueryDOI)\
-        .filter(QueryDOI.resource_ids == resource_id, QueryDOI.query_hash == query_hash,
-                QueryDOI.rounded_versions == unicode(rounded_version)).first()
+        .filter(QueryDOI.resources_and_versions == resources_and_versions,
+                QueryDOI.query_hash == query_hash).first()
 
 
 def _create_doi_on_datacite(client, doi, package, timestamp, record_count):
@@ -158,27 +158,24 @@ def _create_doi_on_datacite(client, doi, package, timestamp, record_count):
     client.doi_post(doi, site + landing_page_url)
 
 
-def _create_database_entry(doi, resource_id, timestamp, datastore_query, rounded_version,
-                           record_count):
+def _create_database_entry(doi, resources_and_versions, timestamp, datastore_query, record_count):
     '''
     Inserts the database row for the query DOI.
 
     :param doi: the doi (full, prefix and suffix)
-    :param resource_id: the resource id
+    :param resources_and_versions: the resource ids mapped to their rounded versions (as a dict)
     :param timestamp: the datetime the DOI was created
     :param datastore_query: the DatastoreQuery object
-    :param rounded_version: the rounded-down-to-the-nearest-resource-version to use
     :param record_count: the number of records contained in the DOI's data
     :return:
     '''
     # create database row
     query_doi = QueryDOI(
         doi=doi,
-        resource_ids=resource_id,
+        resources_and_versions=resources_and_versions,
         timestamp=timestamp,
         query=datastore_query.query,
         query_hash=datastore_query.query_hash,
-        rounded_versions=unicode(rounded_version),
         requested_version=datastore_query.requested_version,
         count=record_count,
     )
@@ -203,9 +200,10 @@ def mint_doi(resource_ids, datastore_query):
     if len(resource_ids) != 1:
         raise NotImplemented(u"This plugin currently doesn't support multi-resource searches")
     resource_id = resource_ids[0]
-
     rounded_version = datastore_query.get_rounded_version(resource_id)
-    existing_doi = find_existing_doi(resource_id, datastore_query.query_hash, rounded_version)
+    resources_and_versions = {resource_id: rounded_version}
+
+    existing_doi = find_existing_doi(resources_and_versions, datastore_query.query_hash)
     if existing_doi is not None:
         return False, existing_doi
 
@@ -218,6 +216,6 @@ def mint_doi(resource_ids, datastore_query):
     # generate a new DOI to store this query against
     doi = generate_doi(client)
     _create_doi_on_datacite(client, doi, package, timestamp, record_count)
-    query_doi = _create_database_entry(doi, resource_id, timestamp, datastore_query,
-                                       rounded_version, record_count)
+    query_doi = _create_database_entry(doi, resources_and_versions, timestamp, datastore_query,
+                                       record_count)
     return True, query_doi

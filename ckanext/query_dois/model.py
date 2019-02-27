@@ -5,11 +5,43 @@ import json
 import time
 from collections import defaultdict
 
-from sqlalchemy import Column, UnicodeText, DateTime, Table, BigInteger
+from sqlalchemy import Column, UnicodeText, DateTime, Table, BigInteger, types
 
 from ckan.model import meta, DomainObject
-from ckan.model.types import JsonDictType
 from ckan.plugins import toolkit
+
+
+class JsonType(types.UserDefinedType):
+    '''
+    A JSONB column type for PostgreSQL databases. This should be removed and replaced by an
+    sqlalchemy core implementation when one becomes available in newer versions of CKAN.
+    '''
+
+    def get_col_spec(self):
+        return u'jsonb'
+
+    def is_mutable(self):
+        return True
+
+    def python_type(self):
+        return dict
+
+    def bind_processor(self, dialect):
+        def process(value):
+            if value is not None:
+                return json.dumps(value)
+            else:
+                return None
+        return process
+
+    def result_processor(self, dialect, coltype):
+        def process(value):
+            if value is None:
+                return None
+            else:
+                return json.loads(value)
+
+        return process
 
 
 class DatastoreQuery(object):
@@ -223,20 +255,16 @@ query_doi_table = Table(
     Column(u'id', BigInteger, primary_key=True),
     # the full doi (prefix/suffix)
     Column(u'doi', UnicodeText, nullable=False, index=True, unique=True),
-    # a comma separated list of the resource ids for this search
-    Column(u'resource_ids', UnicodeText, nullable=False, index=True),
+    # json column representing the resources in this query and their rounded versions, it is a
+    # straight map from resource_id: version
+    Column(u'resources_and_versions', JsonType, nullable=False),
     # the timestamp when the doi was created
     Column(u'timestamp', DateTime, nullable=False),
-    # the query dict that produces the data for this doi (the JsonDictType stores a null in the
-    # database if the query is {} so we have to skip off the nullable=False here. If the value is
-    # null when the data is rehydrated, {} is returned
-    Column(u'query', JsonDictType),
+    # the query dict that produces the data for this doi
+    Column(u'query', JsonType, nullable=False),
     # the hash for the query that produces the data for this doi - this is used in conjunction with
     # the version to check if the query has been run before
     Column(u'query_hash', UnicodeText, nullable=False, index=True),
-    # a comma separated list of rounded versions for this doi - these are calculated based on the
-    # requested version and the available versions of the resources included in this DOI
-    Column(u'rounded_versions', UnicodeText, nullable=False, index=True),
     # the version initially requested by the user
     Column(u'requested_version', BigInteger, nullable=False),
     # record count at time of minting
@@ -267,10 +295,14 @@ class QueryDOI(DomainObject):
     '''
 
     def get_resource_ids(self):
-        return self.resource_ids.split(u',')
+        return list(self.resources_and_versions.keys())
 
     def get_rounded_versions(self):
-        return [int(version) for version in self.rounded_versions.split(u',')]
+        return list(self.resources_and_versions.values())
+
+    @staticmethod
+    def on_resource(resource_id):
+        return QueryDOI.resources_and_versions.op(u'->>')(resource_id) != None
 
 
 class QueryDOIStat(DomainObject):

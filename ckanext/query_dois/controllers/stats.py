@@ -37,7 +37,7 @@ class StatsController(plugins.toolkit.BaseController):
         if resource_id:
             query = query\
                 .join(QueryDOI, QueryDOI.doi == QueryDOIStat.doi)\
-                .filter(QueryDOI.resource_ids.like(u'%{}%'.format(resource_id)))
+                .filter(QueryDOI.on_resource(resource_id))
 
         # apply the offset and limit, with sensible defaults
         query = query.offset(request.params.get(u'offset', 0))

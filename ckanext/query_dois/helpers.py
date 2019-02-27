@@ -32,7 +32,7 @@ def get_most_recent_dois(package_id, number):
     :return: a list of QueryDOI objects
     '''
     package = plugins.toolkit.get_action(u'package_show')({}, {u'id': package_id})
-    ors = [QueryDOI.resource_ids.like(u'%{}%'.format(r[u'id'])) for r in package[u'resources']]
+    ors = [QueryDOI.on_resource(resource[u'id']) for resource in package[u'resources']]
     if not ors:
         return []
     return list(model.Session.query(QueryDOI)
