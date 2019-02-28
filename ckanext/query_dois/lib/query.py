@@ -166,6 +166,8 @@ class DatastoreQuery(object):
             u'resource_id': resource_id,
             # use the version parameter cause it's nicer than having to go in and modify the filters
             u'version': self.get_rounded_version(resource_id),
+            # we don't need the results, just the total
+            u'limit': 0,
         })
         result = toolkit.get_action(u'datastore_search')({}, data_dict)
         return result[u'total']
