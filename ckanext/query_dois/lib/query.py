@@ -146,54 +146,14 @@ class DatastoreQuery(object):
     def get_rounded_version(self, resource_id):
         '''
         Round the requested version of this query down to the nearest actual version of the
-        resource. This is necessary because we work in a system where although you can just query at
-        a timestamp you should round it down to the nearest known version. This guarantees that when
-        you come back and search the data later you'll get the same data. If the version requested
-        is older than the oldest version of the resource then the requested version itself is
-        returned (this is just a choice I made, we could return 0 for example instead).
-
-        An example: a version of resource A is created at t=2 and then a search is completed on it
-        at t=5. If a new version is created at t=3 then the search at t=5 won't return the data it
-        should. We could solve this problem in one of two ways:
-
-            - limit new versions of resources to only be either older than the oldest saved search
-            - rely on the current time when resource versions are created and searches are saved
-
-        There are however issues with both of these approaches:
-
-            - forcing new resource versions to exceed currently created search versions would
-              require excessive a reasonable amount of work to figure out what the latest search
-              version is and also crosses extension boundaries as the versioned-datastore extension
-              would then rely on data in this extension's tables, rather than the other way round
-            - we want to be able to create resource versions beyond the latest version in the system
-              but before the current time to accommodate non-live data (i.e. data that comes from
-              timestamped dumps). There are a few benefits to allowing this, for example it allows
-              loading data where we create a number of resource versions at the same time but the
-              versions themselves represent when the data was extacted from another system or indeed
-              created rather than when it was loaded into CKAN.
-
-        See the versioned_datastore doc for more information on this.
+        resource. See the versioned-search plugin for more details.
 
         :param resource_id: the id of the resource being searched
         :return: the rounded version or None if no versions are available for the given resource id
         '''
-        action = toolkit.get_action(u'datastore_get_resource_versions')
-        versions = sorted(r[u'version'] for r in action({}, {u'resource_id': resource_id}))
-
-        if not versions:
-            # something isn't right, just return None
-            return None
-
-        if self.requested_version < versions[0]:
-            # use the requested version if it's lower than the lowest available version
-            return self.requested_version
-        elif self.requested_version >= versions[-1]:
-            # cap the requested version to the latest version
-            return versions[-1]
-        else:
-            # find the lowest, nearest version to the requested one
-            position = bisect.bisect_right(versions, self.requested_version)
-            return versions[position - 1]
+        # first retrieve the rounded version to use
+        data_dict = {u'resource_id': resource_id, u'version': self.requested_version}
+        return toolkit.get_action(u'datastore_get_rounded_version')({}, data_dict)
 
     def get_count(self, resource_id):
         '''
