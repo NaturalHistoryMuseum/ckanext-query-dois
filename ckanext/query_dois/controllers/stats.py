@@ -44,5 +44,5 @@ class StatsController(plugins.toolkit.BaseController):
         query = query.limit(request.params.get(u'limit', 100))
 
         # return the data as a JSON dumped list of dicts
-        response.headers[u'Content-type'] = u'application/json'
+        response.headers[b'Content-type'] = b'application/json'
         return json.dumps([stat.as_dict() for stat in query])
