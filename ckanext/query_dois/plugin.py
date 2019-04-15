@@ -27,9 +27,12 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         mapper.connect(u'query_doi_landing_page', u'/doi/{data_centre}/{identifier}',
                        controller=u'ckanext.query_dois.controllers.landing_page:LandingPageController',
                        action=u'get')
+        mapper.connect(u'query_doi_stats', u'/doi/downloads',
+                       controller=u'ckanext.query_dois.controllers.stats:StatsController',
+                       action=u'download_stats')
         mapper.connect(u'query_doi_stats', u'/doi/stats',
                        controller=u'ckanext.query_dois.controllers.stats:StatsController',
-                       action=u'get')
+                       action=u'doi_stats')
         return mapper
 
     # IConfigurer

@@ -15,17 +15,43 @@ column_param_mapping = (
 
 class StatsController(plugins.toolkit.BaseController):
 
-    def get(self):
+    def doi_stats(self):
         '''
         Returns statistics in JSON format depending on the request parameters. The return will be a
-        list with a dict representing the QueryDOIStat as each element.
+        list with a dict representing the QueryDOI as each element.
+
+        This endpoint currently only supports filtering on the resource_id.
+
+        :return: a JSON stringified list of dicts
+        '''
+        query = model.Session.query(QueryDOI)
+
+        # by default order by id desc to get the latest first
+        query = query.order_by(QueryDOI.id.desc())
+
+        resource_id = request.params.get(u'resource_id', None)
+        if resource_id:
+            query = query.filter(QueryDOI.on_resource(resource_id))
+
+        # apply the offset and limit, with sensible defaults
+        query = query.offset(request.params.get(u'offset', 0))
+        query = query.limit(request.params.get(u'limit', 100))
+
+        # return the data as a JSON dumped list of dicts
+        response.headers[b'Content-type'] = b'application/json'
+        return json.dumps([stat.as_dict() for stat in query])
+
+    def download_stats(self):
+        '''
+        Returns download statistics in JSON format depending on the request parameters. The return
+        will be a list with a dict representing the QueryDOIStat as each element.
 
         :return: a JSON stringified list of dicts
         '''
         query = model.Session.query(QueryDOIStat)
 
-        # order by id ascending to avoid causing pagination issues
-        query = query.order_by(QueryDOIStat.id.asc())
+        # by default order by id desc to get the latest first
+        query = query.order_by(QueryDOIStat.id.desc())
 
         # apply any parameters as filters
         for param_name, column in column_param_mapping:
