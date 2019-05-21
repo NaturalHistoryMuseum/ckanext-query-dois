@@ -4,6 +4,15 @@
 {{ _('DOI') }}: {{ doi }}
 {% endblock %}
 
+{%- block meta -%}
+    {{ super() }}
+    <meta name="citation_doi" content="doi:https://doi.org/{{ doi }}" />
+    <meta name="citation_title" content="Data Portal Query on {{ resource['name'] }}, {{ query_doi.count }} records" />
+    <meta name="citation_author" content="{{ authors }}" />
+    <meta name="citation_online_date" content="{{ query_doi.timestamp }}" />
+    <meta name="citation_publisher" content="{{ publisher }}" />
+{%- endblock -%}
+
 {% block primary_content %}
 {% resource 'ckanext-query-dois/main' %}
 <article class="module">
@@ -20,8 +29,8 @@
         <hr>
         <div>
             <p>
-                {{ authors }} ({{ year }}). Dataset: {{ package['title'] }}. Resource: {{ resource['name'] }}
-                <a href="https://doi.org/{{ doi }}" target="_blank">https://doi.org/{{ doi }}</a>
+                {{ h.create_citation_text(query_doi.doi, query_doi.timestamp, resource['name'],
+                                          package['title'], package_doi, html=True) | safe }}
             </p>
         </div>
         <br />

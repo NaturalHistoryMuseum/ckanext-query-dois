@@ -215,9 +215,11 @@ class LandingPageController(plugins.toolkit.BaseController):
             u'doi': doi,
             u'resource': resource,
             u'package': package,
+            # this is effectively an integration point with the ckanext-doi extension. If there is
+            # demand we should open this up so that we can support other dois on packages extensions
+            u'package_doi': package[u'doi'] if package.get(u'doi_status', False) else None,
             u'authors': self._get_authors([package]),
             u'version': rounded_version,
-            u'year': query_doi.timestamp.year,
             u'reruns': self._generate_rerun_urls(resource, package, query_doi.query,
                                                  rounded_version),
             u'download_url': self._get_download_url(package, resource, query_doi.query,

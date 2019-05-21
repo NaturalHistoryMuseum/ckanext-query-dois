@@ -1,7 +1,9 @@
 import json
 from datetime import datetime
+from pylons import config
 
 from sqlalchemy import or_
+from webhelpers.html.tags import link_to
 
 from ckan import model, plugins
 from ckanext.query_dois.model import QueryDOI
@@ -79,3 +81,56 @@ def get_landing_page_url(query_doi):
     data_centre, identifier = query_doi.doi.split(u'/')
     return plugins.toolkit.url_for(u'query_doi_landing_page', data_centre=data_centre,
                                    identifier=identifier)
+
+
+def create_citation_text(query_doi, creation_timestamp, resource_name, package_title,
+                         package_doi=None, publisher=None, html=False):
+    '''
+    Creates the citation text for the given query doi and the given additional related arguments.
+
+    :param query_doi: the query's DOI, this should just be the prefix/suffix, e.g. 10.xxxx/xxxxxx,
+                      not the full URL
+    :param creation_timestamp: a datetime object representing the exact moment the DOI was created
+    :param resource_name: the name of the resource the DOI references
+    :param package_title: the title of the package the resource the DOI references is in
+    :param package_doi: the DOI of the package, if there is one (defaults to None)
+    :param publisher: the publisher to use in the citation (defaults to None in which case the
+                      ckanext.query_dois.publisher config value is used
+    :param html: whether to include a tags around URLs in the returned string. Defaults to False
+                 which does not add a tags and therefore the returned string is just pure text
+    :return: a citation string for the given query DOI and associated data
+    '''
+    # default the publisher's value if needed
+    if publisher is None:
+        publisher = config.get(u'ckanext.query_dois.publisher')
+
+    # this is the citation's base form. This form is derived from the recommended RDA citation
+    # format for evolving data when citing with a query. For more information see:
+    # https://github.com/NaturalHistoryMuseum/ckanext-query-dois/issues/2
+    citation_text = u'{publisher} ({year}). Data Portal Query on "{resource_name}" created at ' \
+                    u'{creation_datetime} PID {query_doi}. Subset of "{dataset_name}" (dataset)'
+
+    # these are the parameters which will be used on the above string
+    params = {
+        u'publisher': publisher,
+        u'year': creation_timestamp.year,
+        u'resource_name': resource_name,
+        u'creation_datetime': creation_timestamp,
+        u'query_doi': u'https://doi.org/{}'.format(query_doi),
+        u'dataset_name': package_title,
+    }
+
+    # if we have a DOI for the package, include it
+    if package_doi is not None:
+        citation_text += u' PID {dataset_doi}.'
+        params[u'dataset_doi'] = u'https://doi.org/{}'.format(package_doi)
+
+    if html:
+        # there are currently two fields which should be converted to a tags
+        for field in (u'query_doi', u'dataset_doi'):
+            doi_url = params.get(field, None)
+            # the dataset_doi field is optional, hence the if here
+            if doi_url is not None:
+                params[field] = link_to(label=doi_url, url=doi_url, target=u'_blank')
+
+    return citation_text.format(**params)
