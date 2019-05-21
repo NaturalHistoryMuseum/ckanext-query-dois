@@ -20,8 +20,8 @@
         <hr>
         <div>
             <p>
-                {{ authors }} ({{ year }}). Dataset: {{ package['title'] }}. Resource: {{ resource['name'] }}
-                <a href="https://doi.org/{{ doi }}" target="_blank">https://doi.org/{{ doi }}</a>
+                {{ h.create_citation_text(query_doi.doi, query_doi.timestamp, resource['name'],
+                                          package['title'], package_doi, html=True) | safe }}
             </p>
         </div>
         <br />
