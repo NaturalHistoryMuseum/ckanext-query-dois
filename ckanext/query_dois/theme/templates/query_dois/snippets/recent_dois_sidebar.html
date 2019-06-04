@@ -10,21 +10,33 @@ Example usage:
 #}
 
 <section class="module module-narrow">
-    <h2 class="module-heading"><i class="icon-medium icon-time"></i>{{ _('Most recent query DOIs for resources in this dataset') }}</h2>
+<div class="flex-container flex-between flex-stretch-first nav-simple-heading">
+    <h2 class="module-heading"><i class="fas fa-clock inline-icon-left"></i>{{ _('Recent query DOIs') }}</h2>
+    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+            data-target="#nav-query-dois" aria-expanded="false">
+        <span class="sr-only">expand</span>
+    </button>
+</div>
+
     <div>
-        <ul class="nav nav-simple">
+        <ul class="nav nav-simple navbar-collapse collapse" id="nav-query-dois">
             {% set query_dois = h.get_most_recent_dois(package_id, number) %}
             {% if query_dois %}
                 {% for query_doi in query_dois %}
                 <li class="nav-item">
                     <a href="{{ h.get_landing_page_url(query_doi) }}" title="{{ h.get_time_ago_description(query_doi) }}">
-                        <i class="icon-link"></i>
+                        <i class="fas fa-link inline-icon-left"></i>
                         {{ query_doi.doi }}
                     </a>
                 </li>
                 {% endfor %}
             {% else %}
-                <li class="nav-item">{{ _('No recent DOIs') }}</li>
+                <li class="nav-item">
+                    <p>
+                        <i class="fas fa-unlink inline-icon-left"></i>
+                        {{ _('No recent DOIs') }}
+                    </p>
+                </li>
             {% endif %}
         </ul>
     </div>
