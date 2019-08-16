@@ -36,12 +36,19 @@ def is_test_mode():
 
 def get_prefix():
     '''
-    Gets the prefix to use for the DOIs we mint. If test mode is turned on then the TEST_PREFIX is
-    returned.
+    Gets the prefix to use for the DOIs we mint.
 
     :return: the prefix to use for the new DOIs
     '''
-    return TEST_PREFIX if is_test_mode() else config.get(u'ckanext.query_dois.prefix')
+    prefix = config.get(u'ckanext.query_dois.prefix')
+
+    if prefix == None:
+      raise TypeError(u'You must set the ckanext.query_dois.prefix config value')
+
+    if prefix == TEST_PREFIX:
+      raise ValueError(u'The test prefix ' + TEST_PREFIX + u' has been retired, use a prefix defined in your datacite test account')
+
+    return prefix
 
 
 def get_client():
