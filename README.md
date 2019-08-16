@@ -1,57 +1,114 @@
+<img src=".github/nhm-logo.svg" align="left" width="150px" height="100px" hspace="40"/>
+
 # ckanext-query-dois
 
-Creates DOIs for queries on resources. By recording the query parameters used and the exact version
-of the data at the time of the query, this allows precise retrieval of the data as it looked when
-the DOI was minted.
+[![Travis](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-query-dois/master.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-query-dois)
+[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-query-dois/master.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-query-dois)
+[![CKAN](https://img.shields.io/badge/ckan-2.9.0a-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 
-Must be used in conjunction with the
-[ckanext-versioned-datastore](https://github.com/NaturalHistoryMuseum/ckanext-versioned-datastore).
-
-To get DOIs for downloads
-[ckanext-ckanpackager](https://github.com/NaturalHistoryMuseum/ckanext-versioned-datastore) should
-be used (this extension automatically hooks into it's interface if it finds the plugin is active in
-the running CKAN environment).
+_A CKAN extension that creates DOIs for queries on resources._
 
 
-# Setup
+# Overview
 
-1. Clone the repository into the virtual env's `src` folder:
+This extension creates (mints) digital object identifiers (DOIs) for queries on resources. By recording the query parameters used and the exact version of the data at the time of the query, this allows precise retrieval of the data as it looked when the DOI was minted.
+
+**Must be used in conjunction with the [ckanext-versioned-datastore](https://github.com/NaturalHistoryMuseum/ckanext-versioned-datastore).**
+
+_Optionally:_ [ckanext-ckanpackager](https://github.com/NaturalHistoryMuseum/ckanext-ckanpackager) can be used to get DOIs for downloads (`query-dois` automatically hooks into the `ckanext-ckanpackager` interface if it finds the plugin is active in the running CKAN environment).
+
+You will need an account with a DataCite DOI service provider to use this extension.
+
+
+# Installation
+
+Path variables used below:
+- `$INSTALL_FOLDER` (i.e. where CKAN is installed), e.g. `/usr/lib/ckan/default`
+- `$CONFIG_FILE`, e.g. `/etc/ckan/default/development.ini`
+
+1. Clone the repository into the `src` folder:
 
   ```bash
-  cd /usr/lib/ckan/default/src/
+  cd $INSTALL_FOLDER/src
   git clone https://github.com/NaturalHistoryMuseum/ckanext-query-dois.git
   ```
 
 2. Activate the virtual env:
 
   ```bash
-  . /usr/lib/ckan/default/bin/activate
+  . $INSTALL_FOLDER/bin/activate
   ```
 
-3. Run setup.py:
+3. Install the requirements from requirements.txt:
 
   ```bash
-  cd /usr/lib/ckan/default/src/ckanext-query-dois
+  cd $INSTALL_FOLDER/src/ckanext-query-dois
+  pip install -r requirements.txt
+  ```
+
+4. Run setup.py:
+
+  ```bash
+  cd $INSTALL_FOLDER/src/ckanext-query-dois
   python setup.py develop
   ```
 
-4. Add 'query_dois' to the list of plugins in your config file:
+5. Add 'query_dois' to the list of plugins in your `$CONFIG_FILE`:
 
   ```ini
   ckan.plugins = ... query_dois
   ```
 
-5. Install the requirements from requirements.txt:
-
-  ```bash
-  cd /usr/lib/ckan/default/src/ckanext-query-dois
-  pip install -r requirements.txt
-  ```
-
 6. Initialise database tables
 
   ```bash
-  paster --plugin=ckanext-query-dois initdb -c /etc/ckan/default/development.ini
+  paster --plugin=ckanext-query-dois initdb -c $CONFIG_FILE
   ```
-  
-  _Replace `/etc/ckan/default/development.ini` with wherever your CKAN config file is located._
+
+# Configuration
+
+These are the options that can be specified in your .ini config file.
+
+## **[REQUIRED]**
+
+Name|Description|Options
+--|--|--
+`ckanext.query_dois.prefix`|Prefix to use for the new DOIs|
+`ckanext.query_dois.datacite_username`|Datacite account username|   
+`ckanext.query_dois.datacite_password`|Datacite account password|
+`ckanext.query_dois.doi_title`|Template string for the DOI title: takes `count` as a format argument|
+`ckanext.query_dois.publisher`|DOI publisher name|  
+
+## Other options
+
+Name|Description|Options|Default
+--|--|--|--
+`ckanext.query_dois.test_mode`|Enable/disable using test DOIs (i.e. not creating real DOIs)|True/False|True
+
+
+# Further Setup
+
+This extension will only work if you have signed up for an account with [DataCite](https://datacite.org).
+
+
+# Usage
+
+## Commands
+
+### `initdb`
+Initialises the database table.
+
+1.
+    ```bash
+    paster --plugin=ckanext-query-dois initdb -c $CONFIG_FILE
+    ```
+
+
+# Testing
+
+_Test coverage is currently nonexistent._
+
+To run the tests, use nosetests inside your virtualenv. The `--nocapture` flag will allow you to see the debug statements.
+```bash
+nosetests --ckan --with-pylons=$TEST_CONFIG_FILE --where=$INSTALL_FOLDER/src/ckanext-query-dois --nologcapture --nocapture
+```
