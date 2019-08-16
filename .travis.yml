@@ -5,7 +5,7 @@ python:
   - "2.7"
 
 install:
-  - sh ckanext/query-dois/tests/bin/build.sh
+  - sh ckanext/query_dois/tests/bin/build.sh
 
 services:
   - redis-server
@@ -14,6 +14,6 @@ services:
 addons:
   postgresql: "9.4"
 
-script: coverage run --source=ckanext.query_dois setup.py nosetests --ckan --with-pylons=ckanext/query-dois/tests/bin/test.ini --nologcapture --debug=ckantest,ckanext.query_dois --rednose
+script: coverage run --source=ckanext.query_dois setup.py nosetests --ckan --with-pylons=ckanext/query_dois/tests/bin/test.ini --nologcapture --debug=ckantest,ckanext.query_dois --rednose
 
 after_success: coveralls
