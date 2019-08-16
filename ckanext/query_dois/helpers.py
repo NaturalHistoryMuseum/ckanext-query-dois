@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# This file is part of ckanext-query-dois
+# Created by the Natural History Museum in London, UK
+
 import json
 from datetime import datetime
 from pylons import config

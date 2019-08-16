@@ -1,3 +1,9 @@
+#!/usr/bin/env python
+# encoding: utf-8
+#
+# This file is part of ckanext-query-dois
+# Created by the Natural History Museum in London, UK
+
 from ckan import model
 
 from ckan.lib.cli import CkanCommand
@@ -11,7 +17,7 @@ class QueryDOIsInitDBCommand(CkanCommand):
     paster --plugin=ckanext-query-dois initdb -c /etc/ckan/default/development.ini
     '''
 
-    summary = __doc__.split('\n')[0]
+    summary = __doc__.split(u'\n')[0]
     usage = __doc__
 
     def command(self):
