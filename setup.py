@@ -30,7 +30,10 @@ setup(
     namespace_packages=[u'ckanext', u'ckanext.query_dois'],
     include_package_data=True,
     zip_safe=False,
-    install_requires=[],
+    install_requires=[
+        'datacite==1.0.1',
+        'bcrypt==3.1.4'
+        ],
     entry_points= \
         u'''
         [ckan.plugins]

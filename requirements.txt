@@ -1,2 +1,4 @@
-datacite==1.0.1
-bcrypt==3.1.4
+# install from setup.py
+.
+
+# dev overrides/additional libraries
