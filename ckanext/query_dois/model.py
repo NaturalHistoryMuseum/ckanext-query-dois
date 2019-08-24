@@ -39,7 +39,7 @@ class JsonType(types.UserDefinedType):
             if value is None:
                 return None
             else:
-                return json.loads(value)
+                return value
 
         return process
 

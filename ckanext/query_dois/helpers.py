@@ -5,14 +5,14 @@
 # Created by the Natural History Museum in London, UK
 
 import json
-from datetime import datetime
-from pylons import config
 
+from ckanext.query_dois.model import QueryDOI
+from datetime import datetime
 from sqlalchemy import or_
 from webhelpers.html.tags import link_to
 
-from ckan import model, plugins
-from ckanext.query_dois.model import QueryDOI
+from ckan import model
+from ckan.plugins import toolkit
 
 
 def render_filter_value(field, filter_value):
@@ -39,7 +39,9 @@ def get_most_recent_dois(package_id, number):
     :param number: the number of DOIs to return
     :return: a list of QueryDOI objects
     '''
-    package = plugins.toolkit.get_action(u'package_show')({}, {u'id': package_id})
+    package = toolkit.get_action(u'package_show')({}, {
+        u'id': package_id
+        })
     ors = [QueryDOI.on_resource(resource[u'id']) for resource in package[u'resources']]
     if not ors:
         return []
@@ -58,7 +60,7 @@ time_resolutions = (
     (60 * 60 * 24 * 28, u'week', 60 * 60 * 24 * 7),
     (60 * 60 * 24 * 365, u'month', 60 * 60 * 24 * 28),
     (float(u'inf'), u'year', 60 * 60 * 24 * 365),
-)
+    )
 
 
 def get_time_ago_description(query_doi):
@@ -85,8 +87,8 @@ def get_landing_page_url(query_doi):
     :return: the landing page URL
     '''
     data_centre, identifier = query_doi.doi.split(u'/')
-    return plugins.toolkit.url_for(u'query_doi_landing_page', data_centre=data_centre,
-                                   identifier=identifier)
+    return toolkit.url_for(u'query_doi.landing_page', data_centre=data_centre,
+                           identifier=identifier)
 
 
 def create_citation_text(query_doi, creation_timestamp, resource_name, package_title,
@@ -108,7 +110,7 @@ def create_citation_text(query_doi, creation_timestamp, resource_name, package_t
     '''
     # default the publisher's value if needed
     if publisher is None:
-        publisher = config.get(u'ckanext.query_dois.publisher')
+        publisher = toolkit.config.get(u'ckanext.query_dois.publisher')
 
     # this is the citation's base form. This form is derived from the recommended RDA citation
     # format for evolving data when citing with a query. For more information see:
@@ -124,7 +126,7 @@ def create_citation_text(query_doi, creation_timestamp, resource_name, package_t
         u'creation_datetime': creation_timestamp,
         u'query_doi': u'https://doi.org/{}'.format(query_doi),
         u'dataset_name': package_title,
-    }
+        }
 
     # if we have a DOI for the package, include it
     if package_doi is not None:

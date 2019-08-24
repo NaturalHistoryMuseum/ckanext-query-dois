@@ -7,17 +7,18 @@
 import json
 import logging
 
-from ckan import plugins
-from ckanext.query_dois import helpers
+from ckanext.query_dois import helpers, routes
 from ckanext.query_dois.lib.doi import mint_doi
-from ckanext.query_dois.lib.stats import record_stat, DOWNLOAD_ACTION
 from ckanext.query_dois.lib.query import DatastoreQuery
+from ckanext.query_dois.lib.stats import DOWNLOAD_ACTION, record_stat
+
+from ckan import plugins
 
 log = logging.getLogger(__name__)
 
 
 class QueryDOIsPlugin(plugins.SingletonPlugin):
-    plugins.implements(plugins.IRoutes, inherit=True)
+    plugins.implements(plugins.IBlueprint, inherit=True)
     plugins.implements(plugins.IConfigurer, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
 
@@ -28,18 +29,9 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     except ImportError:
         pass
 
-    # IRoutes
-    def before_map(self, mapper):
-        mapper.connect(u'query_doi_landing_page', u'/doi/{data_centre}/{identifier}',
-                       controller=u'ckanext.query_dois.controllers.landing_page:LandingPageController',
-                       action=u'get')
-        mapper.connect(u'query_doi_stats', u'/doi/downloads',
-                       controller=u'ckanext.query_dois.controllers.stats:StatsController',
-                       action=u'download_stats')
-        mapper.connect(u'query_doi_stats', u'/doi/stats',
-                       controller=u'ckanext.query_dois.controllers.stats:StatsController',
-                       action=u'doi_stats')
-        return mapper
+    ## IBlueprint
+    def get_blueprint(self):
+        return routes.blueprints
 
     # IConfigurer
     def update_config(self, config):
@@ -62,8 +54,12 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         :param request_params: a dict of parameters that will be sent with the request
         :return: the url and the params as a tuple
         '''
-        resource = plugins.toolkit.get_action(u'resource_show')({}, {u'id': resource_id})
-        package = plugins.toolkit.get_action(u'package_show')({}, {u'id': package_id})
+        resource = plugins.toolkit.get_action(u'resource_show')({}, {
+            u'id': resource_id
+            })
+        package = plugins.toolkit.get_action(u'package_show')({}, {
+            u'id': package_id
+            })
         # only handle DOIs for resources with data in the datastore and that aren't in private
         # packages
         if resource.get(u'datastore_active', False) and not package.get(u'private', True):
@@ -99,4 +95,4 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             u'get_time_ago_description': helpers.get_time_ago_description,
             u'get_landing_page_url': helpers.get_landing_page_url,
             u'create_citation_text': helpers.create_citation_text,
-        }
+            }

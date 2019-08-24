@@ -7,17 +7,16 @@
 import logging
 import random
 import string
-from datetime import datetime
 
-from datacite import schema41, DataCiteMDSClient
-from datacite.errors import DataCiteError, DataCiteNotFoundError
-from paste.deploy.converters import asbool
-from pylons import config
-
-from ckan import model, plugins
 from ckanext.query_dois.lib.utils import get_resource_and_package
 from ckanext.query_dois.model import QueryDOI
+from datacite import DataCiteMDSClient, schema41
+from datacite.errors import DataCiteError, DataCiteNotFoundError
+from datetime import datetime
+from paste.deploy.converters import asbool
 
+from ckan import model
+from ckan.plugins import toolkit
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +30,7 @@ def is_test_mode():
 
     :return: True if we should, False if not. Defaults to True.
     '''
-    return asbool(config.get(u'ckanext.query_dois.test_mode', True))
+    return asbool(toolkit.config.get(u'ckanext.query_dois.test_mode', True))
 
 
 def get_prefix():
@@ -40,13 +39,15 @@ def get_prefix():
 
     :return: the prefix to use for the new DOIs
     '''
-    prefix = config.get(u'ckanext.query_dois.prefix')
+    prefix = toolkit.config.get(u'ckanext.query_dois.prefix')
 
     if prefix == None:
-      raise TypeError(u'You must set the ckanext.query_dois.prefix config value')
+        raise TypeError(u'You must set the ckanext.query_dois.prefix config value')
 
     if prefix == TEST_PREFIX:
-      raise ValueError(u'The test prefix ' + TEST_PREFIX + u' has been retired, use a prefix defined in your datacite test account')
+        raise ValueError(
+            u'The test prefix ' + TEST_PREFIX + u' has been retired, use a prefix defined in your '
+                                                u'datacite test account')
 
     return prefix
 
@@ -57,12 +58,14 @@ def get_client():
 
     :return:
     '''
-    return DataCiteMDSClient(
-        username=config.get(u'ckanext.query_dois.datacite_username'),
-        password=config.get(u'ckanext.query_dois.datacite_password'),
+    kwargs = dict(username=toolkit.config.get(u'ckanext.query_dois.datacite_username'),
+        password=toolkit.config.get(u'ckanext.query_dois.datacite_password'),
         prefix=get_prefix(),
-        test_mode=is_test_mode(),
-    )
+        test_mode=is_test_mode(),)
+    # datacite 1.0.1 isn't updated for the test prefix deprecation yet so this is a temp fix
+    if is_test_mode():
+        kwargs.update({u'url': u'https://mds.test.datacite.org'})
+    return DataCiteMDSClient(**kwargs)
 
 
 def generate_doi(client):
@@ -121,7 +124,7 @@ def find_existing_doi(resources_and_versions, query_hash):
     :param query_hash: the hash of the query
     :return: a QueryDOI object or None
     '''
-    return model.Session.query(QueryDOI)\
+    return model.Session.query(QueryDOI) \
         .filter(QueryDOI.resources_and_versions == resources_and_versions,
                 QueryDOI.query_hash == query_hash).first()
 
@@ -141,17 +144,22 @@ def _create_doi_on_datacite(client, doi, package, timestamp, record_count):
         u'identifier': {
             u'identifier': doi,
             u'identifierType': u'DOI',
-        },
-        u'creators': [{u'creatorName': package[u'author']}],
+            },
+        u'creators': [{
+                          u'creatorName': package[u'author']
+                          }],
         u'titles': [
-            {u'title': config.get(u'ckanext.query_dois.doi_title').format(count=record_count)}
-        ],
-        u'publisher': config.get(u'ckanext.query_dois.publisher'),
+            {
+                u'title': toolkit.config.get(u'ckanext.query_dois.doi_title').format(
+                    count=record_count)
+                }
+            ],
+        u'publisher': toolkit.config.get(u'ckanext.query_dois.publisher'),
         u'publicationYear': unicode(timestamp.year),
         u'resourceType': {
             u'resourceTypeGeneral': u'Dataset'
+            }
         }
-    }
 
     # use an assert here because the data should be valid every time, otherwise it's something the
     # developer is going to have to fix
@@ -162,9 +170,9 @@ def _create_doi_on_datacite(client, doi, package, timestamp, record_count):
 
     # create the URL the DOI will point to, i.e. the landing page
     data_centre, identifier = doi.split(u'/')
-    landing_page_url = plugins.toolkit.url_for(u'query_doi_landing_page', data_centre=data_centre,
-                                               identifier=identifier)
-    site = config.get(u'ckan.site_url')
+    landing_page_url = toolkit.url_for(u'query_doi.landing_page', data_centre=data_centre,
+                                       identifier=identifier)
+    site = toolkit.config.get(u'ckan.site_url')
     if site[-1] == u'/':
         site = site[:-1]
     # mint the DOI
@@ -191,7 +199,7 @@ def _create_database_entry(doi, resources_and_versions, timestamp, datastore_que
         query_hash=datastore_query.query_hash,
         requested_version=datastore_query.requested_version,
         count=record_count,
-    )
+        )
     query_doi.save()
     return query_doi
 
@@ -214,7 +222,9 @@ def mint_doi(resource_ids, datastore_query):
         raise NotImplemented(u"This plugin currently doesn't support multi-resource searches")
     resource_id = resource_ids[0]
     rounded_version = datastore_query.get_rounded_version(resource_id)
-    resources_and_versions = {resource_id: rounded_version}
+    resources_and_versions = {
+        resource_id: rounded_version
+        }
 
     existing_doi = find_existing_doi(resources_and_versions, datastore_query.query_hash)
     if existing_doi is not None:
