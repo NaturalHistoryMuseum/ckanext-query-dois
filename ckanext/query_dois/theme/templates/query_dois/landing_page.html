@@ -80,8 +80,8 @@
 {% block secondary_content %}
 <div class="module module-narrow module-shallow">
     <h2 class="module-heading">
-        <i class="icon-eye-open icon-medium"></i>{{ _('View data') }}
-        <i class="icon-info-sign qd_tooltip">
+        <i class="fas fa-eye fa-lg inline-icon-left"></i>{{ _('View data') }}
+        <i class="fas fa-info-circle inline-icon-right qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
                 Use the links to view the data associated with this DOI.
@@ -91,7 +91,7 @@
     </h2>
     <div class="module-content">
         <a href="{{ reruns.page.original }}">{{ _('Original') }}</a>
-        <i class="icon-info-sign qd_tooltip">
+        <i class="fas fa-info-circle inline-icon-right qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
                 View the data as it looked when the DOI was originally minted.
@@ -101,7 +101,7 @@
     </div>
     <div class="module-content">
         <a href="{{ reruns.page.current }}">{{ _('Current') }}</a>
-        <i class="icon-info-sign qd_tooltip">
+        <i class="fas fa-info-circle inline-icon-right qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
                 View the data as it looks now. This may result in different results to the DOI's
@@ -114,8 +114,8 @@
 
 <div class="module module-narrow module-shallow">
     <h2 class="module-heading">
-        <i class="icon-beaker icon-medium"></i>{{ _('View with API') }}
-        <i class="icon-info-sign qd_tooltip">
+        <i class="fas fa-flask fa-lg inline-icon-left"></i>{{ _('View with API') }}
+        <i class="fas fa-info-circle inline-icon-right qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
                 Use the links to view the data associated with this DOI through the API.
@@ -125,7 +125,7 @@
     </h2>
     <div class="module-content">
         <a href="{{ reruns.api.original }}">{{ _('Original') }}</a>
-        <i class="icon-info-sign qd_tooltip">
+        <i class="fas fa-info-circle inline-icon-right qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
                 View the data as it looked when the DOI was originally minted.
@@ -135,7 +135,7 @@
     </div>
     <div class="module-content">
         <a href="{{ reruns.api.current }}">{{ _('Current') }}</a>
-        <i class="icon-info-sign qd_tooltip">
+        <i class="fas fa-info-circle inline-icon-right qd_tooltip">
             <span class="qd_tooltiptext">
                 {% trans %}
                 View the data as it looks now. This may result in different results to the DOI's
@@ -148,7 +148,7 @@
 
 <div class="module, module-narrow module-shallow">
     <h2 class="module-heading">
-        <i class="icon-download icon-medium"></i>{{ _('Download') }}
+        <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
     </h2>
     {% resource 'ckanext-ckanpackager/main' %}
     <a data-module="ckanpackager-download-link" data-module-resource-id="{{ resource['id'] }}"
