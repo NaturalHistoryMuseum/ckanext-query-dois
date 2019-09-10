@@ -134,8 +134,7 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     :param rounded_version: the version rounded down to the nearest available on the resource
     :return: a dict of urls
     '''
-    page_url = toolkit.url_for(controller=u'package', action=u'resource_read', id=package[u'name'],
-                       resource_id=resource[u'id'])
+    page_url = toolkit.url_for(u'resource.read', id=package[u'name'], resource_id=resource[u'id'])
     api_url = u'/api/action/datastore_search'
     api_extras = {
         u'resource_id': resource[u'id']
