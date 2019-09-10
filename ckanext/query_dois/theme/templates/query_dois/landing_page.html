@@ -41,8 +41,8 @@
         <hr>
         <div class="qd_details">
             <div>
-                {% set resource_url = h.url_for(controller='package', action='resource_read', id=package['name'], resource_id=resource['id']) %}
-                {% set package_url = h.url_for(controller='package', action='read', id=package['name']) %}
+                {% set resource_url = h.url_for('resource.read', id=package['name'], resource_id=resource['id']) %}
+                {% set package_url = h.url_for('dataset.read', id=package['name']) %}
                 <b>{{ _('Resource:') }}</b> <a href="{{ resource_url }}">{{ resource['name'] }}</a>
             </div>
             <div>
