@@ -8,7 +8,7 @@
     {{ super() }}
     <meta name="citation_doi" content="doi:https://doi.org/{{ doi }}" />
     <meta name="citation_title" content="Data Portal Query on {{ resource['name'] }}, {{ query_doi.count }} records" />
-    <meta name="citation_author" content="{{ authors }}" />
+    <meta name="citation_author" content="{{', '.join(authors)}}" />
     <meta name="citation_online_date" content="{{ query_doi.timestamp }}" />
     <meta name="citation_publisher" content="{{ publisher }}" />
 {%- endblock -%}
