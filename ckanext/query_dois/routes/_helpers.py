@@ -5,17 +5,15 @@
 # Created by the Natural History Museum in London, UK
 
 import copy
-import itertools
 import json
+from collections import OrderedDict
 from urllib import urlencode
 
-from ckanext.query_dois.lib.stats import DOWNLOAD_ACTION
-from ckanext.query_dois.model import QueryDOI, QueryDOIStat
-from jinja2.filters import do_truncate
-from webhelpers.html.builder import literal
-
+import itertools
 from ckan import model
 from ckan.plugins import toolkit
+from ckanext.query_dois.lib.stats import DOWNLOAD_ACTION
+from ckanext.query_dois.model import QueryDOI, QueryDOIStat
 
 column_param_mapping = (
     (u'doi', QueryDOIStat.doi),
@@ -36,38 +34,31 @@ def get_query_doi(doi):
     return model.Session.query(QueryDOI).filter(QueryDOI.doi == doi).first()
 
 
-def get_authors(packages, max_length=50):
+def get_authors(packages):
     '''
-    Retrieves all the authors from the given packages, de-duplicates and truncates them (if
-    necessary) and then returns an ordered list of them.
+    Retrieves all the authors from the given packages, de-duplicates them (if necessary) and then
+    returns them as a list.
 
     Note that this function takes a list of packages as it is multi-package and therefore
     multi-resource ready.
 
     :param packages: the packages
-    :param max_length: the maximum length the author string can be without being truncated
-    :return: a list of shortened author(s) HTML strings, each providing the full author(s) text
-             on hover
+    :return: a list of author(s)
     '''
-    authors = set()
+    # use an ordered dict in the absence of a sorted set
+    authors = OrderedDict()
     for package in packages:
         author = package[u'author']
-        if len(author) <= max_length:
-            authors.add(author)
+        # some author values will contain many authors with a separator, perhaps , or ;
+        for separator in (u';', u','):
+            if separator in author:
+                authors.update({a: True for a in author.split(separator)})
+                break
         else:
-            for separator in [u';', u',']:
-                if separator in author:
-                    # use the separator to split the authors, then join only the first 4 back up
-                    shortened = u';'.join(author.split(separator)[:4])
-                    break
-            else:
-                # otherwise use the jinja truncate function (may split author names)
-                shortened = do_truncate(author, length=max_length, end=u'')
+            # if the author value didn't contain a separator then we can just use the value as is
+            authors[author] = True
 
-            authors.add(
-                u'{} <abbr title="{}" style="cursor: pointer;">et al.</abbr>'.format(shortened,
-                                                                                     author))
-    return literal(u', '.join(sorted(authors)))
+    return list(authors.keys())
 
 
 def encode_params(params, version=None, extras=None, for_api=False):
@@ -143,8 +134,7 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     :param rounded_version: the version rounded down to the nearest available on the resource
     :return: a dict of urls
     '''
-    page_url = toolkit.url_for(controller=u'package', action=u'resource_read', id=package[u'name'],
-                       resource_id=resource[u'id'])
+    page_url = toolkit.url_for(u'resource.read', id=package[u'name'], resource_id=resource[u'id'])
     api_url = u'/api/action/datastore_search'
     api_extras = {
         u'resource_id': resource[u'id']
