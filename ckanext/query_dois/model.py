@@ -28,15 +28,6 @@ class JsonType(types.UserDefinedType):
                 return None
         return process
 
-    def result_processor(self, dialect, coltype):
-        def process(value):
-            if value is None:
-                return None
-            else:
-                return json.loads(value)
-
-        return process
-
 
 query_doi_table = Table(
     u'query_doi',
