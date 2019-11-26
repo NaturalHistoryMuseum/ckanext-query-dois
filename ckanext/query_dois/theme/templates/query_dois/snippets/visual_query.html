@@ -10,7 +10,7 @@ Params:
 <div class="visual_query">
     {% if search.q %}
     <div class="query-q">
-        <i class="icon-search icon-large query-icon"></i>
+        <i class="fas fa-search fa-lg query-icon"></i>
         <ul class="query-part query-ul">
             {% if search.q is mapping %}
                 {% for field, search_values in search.q.items() %}
@@ -31,7 +31,7 @@ Params:
 
     {% if search.filters %}
     <div class="query-filters">
-        <i class="icon-filter icon-large query-icon"></i>
+        <i class="fas fa-filter fa-lg query-icon"></i>
         <ul class="query-part query-ul">
             {% for field, filter_values in search.filters.items() %}
                 {% for filter_value in filter_values %}
