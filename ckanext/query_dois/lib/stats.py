@@ -8,12 +8,11 @@ import base64
 from datetime import datetime
 
 import bcrypt
-
 from ckanext.query_dois.model import QueryDOIStat
-
 
 # action types
 DOWNLOAD_ACTION = u'download'
+SAVE_ACTION = u'save'
 
 
 def anonymize_email(email_address):

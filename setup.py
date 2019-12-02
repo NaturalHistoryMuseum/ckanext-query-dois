@@ -32,8 +32,9 @@ setup(
     zip_safe=False,
     install_requires=[
         'datacite==1.0.1',
-        'bcrypt==3.1.4'
-        ],
+        'bcrypt==3.1.4',
+        'dicthash==0.0.2',
+    ],
     entry_points= \
         u'''
         [ckan.plugins]

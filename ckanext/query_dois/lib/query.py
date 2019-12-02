@@ -4,7 +4,6 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-import bisect
 import copy
 import hashlib
 import json
