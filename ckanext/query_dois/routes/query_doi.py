@@ -15,7 +15,7 @@ from . import _helpers
 blueprint = Blueprint(name=u'query_doi', import_name=__name__, url_prefix=u'/doi')
 
 
-@blueprint.route('/<data_centre>/<identifier>')
+@blueprint.route(u'/<data_centre>/<identifier>')
 def landing_page(data_centre, identifier):
     '''
     Renders the landing page for the given DOI.
