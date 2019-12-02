@@ -12,8 +12,7 @@ from ckan import model
 from ckan.plugins import toolkit
 from . import _helpers
 
-blueprint = Blueprint(name=u'query_doi', import_name=__name__,
-                      url_prefix='/doi')
+blueprint = Blueprint(name=u'query_doi', import_name=__name__, url_prefix=u'/doi')
 
 
 @blueprint.route('/<data_centre>/<identifier>')
@@ -57,7 +56,7 @@ def landing_page(data_centre, identifier):
     return toolkit.render(u'query_dois/landing_page.html', context)
 
 
-@blueprint.route('/stats')
+@blueprint.route(u'')
 def doi_stats():
     '''
     Returns statistics in JSON format depending on the request parameters. The return will be a
@@ -84,11 +83,11 @@ def doi_stats():
     return jsonify([stat.as_dict() for stat in query])
 
 
-@blueprint.route('/downloads')
-def download_stats():
+@blueprint.route(u'/stats')
+def action_stats():
     '''
-    Returns download statistics in JSON format depending on the request parameters. The return
-    will be a list with a dict representing the QueryDOIStat as each element.
+    Returns action statistics in JSON format depending on the request parameters. The return will be
+    a list with a dict representing the QueryDOIStat as each element.
 
     :return: a JSON stringified list of dicts
     '''

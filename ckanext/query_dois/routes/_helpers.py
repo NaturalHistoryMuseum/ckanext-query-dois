@@ -20,7 +20,7 @@ column_param_mapping = (
     (u'identifier', QueryDOIStat.identifier),
     (u'domain', QueryDOIStat.domain),
     (u'action', QueryDOIStat.action),
-    )
+)
 
 
 def get_query_doi(doi):
