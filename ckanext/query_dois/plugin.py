@@ -7,12 +7,17 @@
 import json
 import logging
 
-from ckanext.query_dois import helpers, routes
-from ckanext.query_dois.lib.doi import mint_doi
-from ckanext.query_dois.lib.query import DatastoreQuery
-from ckanext.query_dois.lib.stats import DOWNLOAD_ACTION, record_stat
-
 from ckan import plugins
+from contextlib2 import suppress
+
+from . import helpers, routes
+from .lib.doi import mint_doi, mint_multisearch_doi
+from .lib.emails import default_download_body
+from .lib.query import DatastoreQuery
+from .lib.stats import DOWNLOAD_ACTION, record_stat
+from .logic import auth, action
+from .logic.utils import extract_resource_ids_and_versions
+
 
 log = logging.getLogger(__name__)
 
@@ -21,17 +26,32 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IBlueprint, inherit=True)
     plugins.implements(plugins.IConfigurer, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
-
+    plugins.implements(plugins.IActions)
+    plugins.implements(plugins.IAuthFunctions)
     # if the ckanpackager is available, we have a hook for it
-    try:
+    with suppress(ImportError):
         from ckanext.ckanpackager.interfaces import ICkanPackager
         plugins.implements(ICkanPackager)
-    except ImportError:
-        pass
+    # if the versioned datastore downloader is available, we have a hook for it
+    with suppress(ImportError):
+        from ckanext.versioned_datastore.interfaces import IVersionedDatastoreDownloads
+        plugins.implements(IVersionedDatastoreDownloads, inherit=True)
 
-    ## IBlueprint
+    # IBlueprint
     def get_blueprint(self):
         return routes.blueprints
+
+    # IAuthFunctions
+    def get_auth_functions(self):
+        return {
+            u'create_doi': auth.create_doi,
+        }
+
+    # IActions
+    def get_actions(self):
+        return {
+            u'create_doi': action.create_doi,
+        }
 
     # IConfigurer
     def update_config(self, config):
@@ -41,6 +61,25 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         plugins.toolkit.add_template_directory(config, u'theme/templates')
         # add the resource groups
         plugins.toolkit.add_resource(u'theme/public', u'ckanext-query-dois')
+
+    # IVersionedDatastoreDownloads
+    def download_add_to_email_body(self, request):
+        try:
+            # check to see if the download is something we can stick a DOI on (this will throw a
+            # validation error if any of the resources aren't valid for DOI-ing
+            extract_resource_ids_and_versions(
+                req_resource_ids_and_versions=request.resource_ids_and_versions)
+
+            # mint the DOI on datacite if necessary
+            created, doi = mint_multisearch_doi(request.query, request.query_version,
+                                                request.resource_ids_and_versions)
+            # record a download stat against the DOI
+            record_stat(doi, DOWNLOAD_ACTION, request.email_address)
+            return default_download_body.format(doi.doi)
+        except:
+            # if anything goes wrong we don't want to stop the download from going ahead, just
+            # log the error and move on
+            log.error(u'Failed to mint/retrieve DOI and/or create stats', exc_info=True)
 
     # ICkanPackager
     def before_package_request(self, resource_id, package_id, packager_url, request_params):
@@ -56,10 +95,10 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         '''
         resource = plugins.toolkit.get_action(u'resource_show')({}, {
             u'id': resource_id
-            })
+        })
         package = plugins.toolkit.get_action(u'package_show')({}, {
             u'id': package_id
-            })
+        })
         # only handle DOIs for resources with data in the datastore and that aren't in private
         # packages
         if resource.get(u'datastore_active', False) and not package.get(u'private', True):
@@ -95,4 +134,6 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             u'get_time_ago_description': helpers.get_time_ago_description,
             u'get_landing_page_url': helpers.get_landing_page_url,
             u'create_citation_text': helpers.create_citation_text,
-            }
+            u'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
+            u'pretty_print_query': helpers.pretty_print_query,
+        }

@@ -1,0 +1,167 @@
+{% extends "page.html" %}
+
+{% block title %}
+  {{ _('DOI') }}: {{ query_doi.doi }}
+{% endblock %}
+
+{%- block meta -%}
+  {{ super() }}
+    <meta name="citation_doi" content="doi:https://doi.org/{{ query_doi.doi }}"/>
+    <meta name="citation_title"
+          content="Data Portal Query on {{ resource_count }} resources, {{ query_doi.count }} records"/>
+    <meta name="citation_author" content="{{ ', '.join(authors) }}"/>
+    <meta name="citation_online_date" content="{{ query_doi.timestamp }}"/>
+    <meta name="citation_publisher" content="{{ publisher }}"/>
+{%- endblock -%}
+
+{% block primary_content %}
+  {% resource 'ckanext-query-dois/main' %}
+    <article class="module">
+        <div class="module-content">
+            <h1 class="page-heading">{{ _('DOI') }}: {{ query_doi.doi }}</h1>
+
+          {% block visual_query %}
+            {% snippet "query_dois/snippets/visual_datastore_multisearch.html", query=query_doi.query %}
+              <br/>
+          {% endblock %}
+
+          {% block citation %}
+              <h3>{{ _('Cite this as') }}</h3>
+              <hr>
+              <div>
+                  <p>
+                    {{ h.create_multisearch_citation_text(query_doi, html=True) | safe }}
+                  </p>
+              </div>
+              <br/>
+          {% endblock %}
+
+          {% block details %}
+              <h3>{{ _('Details') }}</h3>
+              <hr>
+              <div class="qd_details">
+                  <div>
+                      <b>{{ _('Resource count:') }}</b> {{ resource_count }}
+                  </div>
+                  <div>
+                      <b>{{ _('Dataset count:') }}</b> {{ package_count }}
+                  </div>
+                {#            <div>#}
+                {#                <b>{{ _('License:') }}</b> {% snippet "snippets/license.html", pkg_dict=package, text_only=True %}#}
+                {#            </div>#}
+                  <div>
+                      <b>{{ _('Retrieved:') }}</b> {{ query_doi.timestamp }}
+                  </div>
+                  <div>
+                      <b>{{ _('Total records:') }}</b> {{ query_doi.count }}
+                  </div>
+              </div>
+          {% endblock %}
+
+          {% block stats %}
+              <h3>{{ _('Statistics') }}</h3>
+              <hr>
+              <div class="qd_stats">
+                  <div>
+                      <b>{{ _('Total downloads:') }}</b> {{ downloads }}
+                  </div>
+                  <div>
+                      <b>{{ _('Total saves:') }}</b> {{ saves }}
+                  </div>
+                  <div>
+                      <b>{{ _('Last downloaded:') }}</b> {{ last_download_timestamp }}
+                  </div>
+              </div>
+          {% endblock %}
+          {% block resource_breakdown %}
+              <h3>{{ _('Resource breakdown') }}</h3>
+              <hr>
+              <div>
+                  <table class="qd_breakdown">
+                    {% for resource_id, count in sorted_resource_counts %}
+                      {% set resource_info = resources[resource_id] %}
+                      {% set package_info = packages[resource_info['package_id']] %}
+                      {% set resource_url = h.url_for('resource.read', id=package_info['title'], resource_id=resource_id) %}
+                      {% set package_url = h.url_for('dataset.read', id=package_info['title']) %}
+                        <tr>
+                            <td><a href="{{ package_url }}">{{ package_info['title'] }}</a> / <a
+                                    href="{{ resource_url }}">{{ resource_info['name'] }}</a></td>
+                            <td><b>{{ count }} {{ _('records') }}</b></td>
+                        </tr>
+                    {% endfor %}
+                  </table>
+              </div>
+          {% endblock %}
+        </div>
+    </article>
+{% endblock %}
+
+
+{% block secondary_content %}
+    <div class="module module-narrow module-shallow">
+        <h2 class="module-heading">
+            <i class="fas fa-eye fa-lg inline-icon-left"></i>{{ _('View data') }}
+        </h2>
+        <div class="module-content">
+            <a target="_blank" href="/search/{{ original_slug }}">{{ _('Original') }} <i class="fas fa-arrow-circle-right"></i></a>
+            <div class="qd_help_text">
+              {% trans %}
+                  View the data as it looked when the DOI was originally minted.
+              {% endtrans %}
+            </div>
+        </div>
+        <div class="module-content">
+            <a target="_blank" href="/search/{{ current_slug }}">{{ _('Current') }} <i class="fas fa-arrow-circle-right"></i></a>
+            <div class="qd_help_text">
+              {% trans %}
+                  View the data as it looks now. This may result in different results to the DOI's
+                  original data if the data has been modified since it was minted.
+              {% endtrans %}
+            </div>
+        </div>
+    </div>
+
+    <div class="module, module-narrow module-shallow">
+        {% resource 'ckanext-query-dois/multisearch' %}
+        <h2 class="module-heading">
+            <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
+        </h2>
+        <div class="module-content">
+            <p>
+              {% trans %}
+                  Request to download the data associated with this DOI as it looked when the DOI
+                  was minted.
+              {% endtrans %}
+            </p>
+            <div class="form-row">
+                <label for="download-email" class="control-label">Your email</label>
+                <input id="download-email" type="email" placeholder="you@example.com" class="full-width">
+            </div>
+            <div class="form-row">
+                <label for="download-format" class="control-label">File format</label>
+                <select id="download-format" class="full-width">
+                    <option>csv</option>
+                </select>
+            </div>
+            <div class="form-row flex-container flex-wrap flex-between">
+                <div>
+                    <label for="download-sep">One file per resource</label>
+                    <input id="download-sep" type="checkbox" checked>
+                </div>
+                <div>
+                    <label for="download-empty">Skip empty columns</label>
+                    <input id="download-empty" type="checkbox" checked>
+                </div>
+            </div>
+            {% block privacy_warning %}{% endblock %}
+            <div class="text-left">
+                <a id="download-button" href="#" class="btn btn-primary text-right"
+                   data-query='{{ query_doi.query|tojson }}'
+                   data-query-version='{{ query_doi.query_version }}'
+                   data-resources-and-versions='{{ query_doi.resources_and_versions|tojson }}'>
+                    <i class="fas fa-download"></i> Request Download
+                </a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

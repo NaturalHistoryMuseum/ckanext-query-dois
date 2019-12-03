@@ -29,9 +29,13 @@ query_doi_table = Table(
     # the version to check if the query has been run before
     Column(u'query_hash', UnicodeText, nullable=False, index=True),
     # the version initially requested by the user
-    Column(u'requested_version', BigInteger, nullable=False),
+    Column(u'requested_version', BigInteger, nullable=True),
     # record count at time of minting
     Column(u'count', BigInteger, nullable=False),
+    # record the query version
+    Column(u'query_version', UnicodeText, nullable=True),
+    # record the resource counts
+    Column(u'resource_counts', JSONB, nullable=True),
 )
 
 

@@ -142,3 +142,47 @@ def create_citation_text(query_doi, creation_timestamp, resource_name, package_t
                 params[field] = link_to(label=doi_url, url=doi_url, target=u'_blank')
 
     return citation_text.format(**params)
+
+
+def create_multisearch_citation_text(query_doi, html=False):
+    '''
+    Creates the citation text for a multisearch based DOI and returns it, either as a raw string or
+    as a piece of html, if requested.
+
+    :param query_doi: a query doi object
+    :param html: whether to return a basic string or a piece of html
+    :return: the citation text
+    '''
+    publisher = toolkit.config.get(u'ckanext.query_dois.publisher')
+
+    # this is the citation's base form. This form is derived from the recommended RDA citation
+    # format for evolving data when citing with a query. For more information see:
+    # https://github.com/NaturalHistoryMuseum/ckanext-query-dois/issues/2
+    citation_text = u'{publisher} ({year}). Data Portal query on {resource_count} resources ' \
+                    u'created at {creation_datetime} PID {query_doi}'
+
+    # these are the parameters which will be used on the above string
+    params = {
+        u'publisher': publisher,
+        u'year': query_doi.timestamp.year,
+        u'resource_count': len(query_doi.get_resource_ids()),
+        u'creation_datetime': query_doi.timestamp,
+    }
+
+    doi_url = u'https://doi.org/{}'.format(query_doi.doi)
+    if html:
+        params[u'query_doi'] = link_to(label=doi_url, url=doi_url, target=u'_blank')
+    else:
+        params[u'query_doi'] = doi_url
+
+    return citation_text.format(**params)
+
+
+def pretty_print_query(query):
+    '''
+    Does what you'd expect really.
+
+    :param query: a query dict
+    :return: a string of pretty json
+    '''
+    return json.dumps(query, sort_keys=True, indent=2)
