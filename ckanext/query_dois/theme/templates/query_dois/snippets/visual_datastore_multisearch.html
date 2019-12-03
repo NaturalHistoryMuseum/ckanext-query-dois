@@ -8,29 +8,5 @@ Params:
 {% resource 'ckanext-query-dois/visual_query' %}
 
 <div class="visual_query">
-    {% if search.q %}
-    <div class="query-q">
-        <i class="fas fa-search fa-lg query-icon"></i>
-        <ul class="query-part query-ul">
-            <li>
-                <span class="query-value">{{ query.search }}</span>
-            </li>
-        </ul>
-    </div>
-    {% endif %}
-
-{#    {% if query.filters %}#}
-{#    <div class="query-filters">#}
-{#        <i class="fas fa-filter fa-lg query-icon"></i>#}
-{#        <ul class="query-part query-ul">#}
-{#            {% for field, filter_values in search.filters.items() %}#}
-{#                {% for filter_value in filter_values %}#}
-{#                    <li>#}
-{#                        <span class="query-field">{{ field }}</span>: <span class="query-value">{{ h.render_filter_value(field, filter_value) }}</span>#}
-{#                    </li>#}
-{#                {% endfor %}#}
-{#            {% endfor %}#}
-{#        </ul>#}
-{#    </div>#}
-{#    {% endif %}#}
+    <pre>{{ h.pretty_print_query(query) }}</pre>
 </div>

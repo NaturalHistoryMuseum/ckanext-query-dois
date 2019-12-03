@@ -176,3 +176,13 @@ def create_multisearch_citation_text(query_doi, html=False):
         params[u'query_doi'] = doi_url
 
     return citation_text.format(**params)
+
+
+def pretty_print_query(query):
+    '''
+    Does what you'd expect really.
+
+    :param query: a query dict
+    :return: a string of pretty json
+    '''
+    return json.dumps(query, sort_keys=True, indent=2)

@@ -135,4 +135,5 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             u'get_landing_page_url': helpers.get_landing_page_url,
             u'create_citation_text': helpers.create_citation_text,
             u'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
+            u'pretty_print_query': helpers.pretty_print_query,
         }
