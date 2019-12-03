@@ -20,7 +20,7 @@ def get_resource_and_package(resource_id):
     :return: a 2-tuple, containing the resource dict and the package dict
     '''
     resource = toolkit.get_action(u'resource_show')({}, {u'id': resource_id})
-    package = toolkit.get_action(u'package_show')({}, {u'id': resource.get[u'package_id']})
+    package = toolkit.get_action(u'package_show')({}, {u'id': resource[u'package_id']})
     return resource, package
 
 
