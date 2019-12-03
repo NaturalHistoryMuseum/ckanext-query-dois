@@ -286,6 +286,12 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
     record_count = toolkit.get_action(u'datastore_multisearch')({}, search_data_dict)[u'total']
     # find out how many records come from each resource
     resource_counts = get_resource_counts(query, query_version, resource_ids_and_versions)
+    for resource_id, count in resource_counts.items():
+        if count == 0:
+            del resource_ids_and_versions[resource_id]
+
+    if not resource_ids_and_versions:
+        raise toolkit.ValidationError(u'The DOI must be associated with at least one record')
 
     # generate a new DOI to store this query against
     client = get_client()
