@@ -15,7 +15,7 @@ from datacite import DataCiteMDSClient, schema41
 from datacite.errors import DataCiteError, DataCiteNotFoundError
 from paste.deploy.converters import asbool
 
-from .utils import get_resource_and_package, get_authors
+from .utils import get_resource_and_package, get_authors, get_resource_counts
 from ..model import QueryDOI
 
 log = logging.getLogger(__name__)
@@ -179,7 +179,7 @@ def create_doi_on_datacite(client, doi, authors, timestamp, count):
 
 
 def create_database_entry(doi, query, query_hash, resources_and_versions, timestamp, record_count,
-                          requested_version=None, query_version=None):
+                          requested_version=None, query_version=None, resource_counts=None):
     '''
     Inserts the database row for the query DOI.
 
@@ -191,6 +191,7 @@ def create_database_entry(doi, query, query_hash, resources_and_versions, timest
     :param record_count: the number of records contained in the DOI's data
     :param requested_version: the version requested by the user, if provided
     :param query_version: the query version, if provided
+    :param resource_counts: the resource counts, if provided
     :return: the QueryDOI object
     '''
     query_doi = QueryDOI(
@@ -202,6 +203,7 @@ def create_database_entry(doi, query, query_hash, resources_and_versions, timest
         requested_version=requested_version,
         count=record_count,
         query_version=query_version,
+        resource_counts=resource_counts,
     )
     query_doi.save()
     return query_doi
@@ -282,11 +284,14 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
         u'size': 0
     }
     record_count = toolkit.get_action(u'datastore_multisearch')({}, search_data_dict)[u'total']
+    # find out how many records come from each resource
+    resource_counts = get_resource_counts(query, query_version, resource_ids_and_versions)
 
     # generate a new DOI to store this query against
     client = get_client()
     doi = generate_doi(client)
     create_doi_on_datacite(client, doi, authors, timestamp, record_count)
     query_doi = create_database_entry(doi, query, query_hash, resource_ids_and_versions, timestamp,
-                                      record_count, query_version=query_version)
+                                      record_count, query_version=query_version,
+                                      resource_counts=resource_counts)
     return True, query_doi

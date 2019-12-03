@@ -134,4 +134,5 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             u'get_time_ago_description': helpers.get_time_ago_description,
             u'get_landing_page_url': helpers.get_landing_page_url,
             u'create_citation_text': helpers.create_citation_text,
+            u'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
         }

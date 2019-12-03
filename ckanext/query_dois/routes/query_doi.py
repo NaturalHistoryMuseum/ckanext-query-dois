@@ -4,13 +4,13 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-from ckanext.query_dois.lib.utils import get_resource_and_package
-from ckanext.query_dois.model import QueryDOI, QueryDOIStat
-from flask import Blueprint, jsonify
 
 from ckan import model
 from ckan.plugins import toolkit
+from flask import Blueprint, jsonify
+
 from . import _helpers
+from ..model import QueryDOI, QueryDOIStat
 
 blueprint = Blueprint(name=u'query_doi', import_name=__name__, url_prefix=u'/doi')
 
@@ -29,31 +29,10 @@ def landing_page(data_centre, identifier):
     if query_doi is None:
         raise toolkit.abort(404, toolkit._(u'DOI not recognised'))
 
-    # currently we only deal with single resource query DOIs
-    resource_id = query_doi.get_resource_ids()[0]
-    rounded_version = query_doi.get_rounded_versions()[0]
-
-    resource, package = get_resource_and_package(resource_id)
-    downloads, last_download_timestamp = _helpers.get_stats(query_doi)
-    context = {
-        u'query_doi': query_doi,
-        u'doi': doi,
-        u'resource': resource,
-        u'package': package,
-        # this is effectively an integration point with the ckanext-doi extension. If there is
-        # demand we should open this up so that we can support other dois on packages extensions
-        u'package_doi': package[u'doi'] if package.get(u'doi_status', False) else None,
-        u'authors': _helpers.get_authors([package]),
-        u'version': rounded_version,
-        u'reruns': _helpers.generate_rerun_urls(resource, package, query_doi.query,
-                                                rounded_version),
-        u'download_url': _helpers.get_download_url(package, resource, query_doi.query,
-                                                   rounded_version),
-        u'downloads': downloads,
-        u'last_download_timestamp': last_download_timestamp,
-        }
-
-    return toolkit.render(u'query_dois/landing_page.html', context)
+    if query_doi.query_version is not None:
+        return _helpers.render_multisearch_doi_page(query_doi)
+    else:
+        return _helpers.render_datastore_search_doi_page(query_doi)
 
 
 @blueprint.route(u'')

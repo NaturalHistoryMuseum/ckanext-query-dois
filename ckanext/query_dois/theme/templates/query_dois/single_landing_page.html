@@ -20,7 +20,7 @@
         <h1 class="page-heading">{{ _('DOI') }}: {{ doi }}</h1>
 
         {% block visual_query %}
-        {% snippet "query_dois/snippets/visual_query.html", search=query_doi.query %}
+        {% snippet "query_dois/snippets/visual_datastore_search.html", search=query_doi.query %}
         <br />
         {% endblock %}
 

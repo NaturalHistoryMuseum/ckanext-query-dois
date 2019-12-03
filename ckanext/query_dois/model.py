@@ -34,6 +34,8 @@ query_doi_table = Table(
     Column(u'count', BigInteger, nullable=False),
     # record the query version
     Column(u'query_version', UnicodeText, nullable=True),
+    # record the resource counts
+    Column(u'resource_counts', JSONB, nullable=True),
 )
 
 

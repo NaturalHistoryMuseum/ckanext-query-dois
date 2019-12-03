@@ -66,3 +66,27 @@ def get_authors(resource_ids):
         .filter(model.Resource.id.in_(list(resource_ids))) \
         .with_entities(model.Package.author)
     return list(set(itertools.chain.from_iterable(query)))
+
+
+def get_resource_counts(query, query_version, resource_ids_and_versions):
+    '''
+    Given a set of query parameters, figure out how many records are found on each resource.
+
+    :param query: the query dict
+    :param query_version: the query version
+    :param resource_ids_and_versions: the resource ids and their specific versions
+    :return: a dict of resource ids to counts
+    '''
+    counts = {}
+    multisearch_action = partial(toolkit.get_action(u'datastore_multisearch'), {})
+    for resource_id, version in resource_ids_and_versions.items():
+        # find out how many records match the query in the specific resource
+        search_data_dict = {
+            u'query': query,
+            u'query_version': query_version,
+            u'resource_ids': [resource_id],
+            u'version': version,
+            u'size': 0
+        }
+        counts[resource_id] = multisearch_action(search_data_dict)[u'total']
+    return counts

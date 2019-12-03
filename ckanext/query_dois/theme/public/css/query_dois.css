@@ -20,3 +20,11 @@
 .qd_tooltip:hover .qd_tooltiptext {
     visibility: visible;
 }
+
+.qd_breakdown {
+    width: 100%;
+}
+
+.qd_breakdown td {
+    padding-bottom: 2px;
+}
