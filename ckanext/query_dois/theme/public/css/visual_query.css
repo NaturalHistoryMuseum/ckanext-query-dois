@@ -38,3 +38,7 @@
    height: 0;
    clear: both;
 }
+
+.visual_query pre {
+    height: 200px;
+}
