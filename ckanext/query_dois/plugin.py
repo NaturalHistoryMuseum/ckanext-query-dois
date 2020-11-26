@@ -55,12 +55,10 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
 
     # IConfigurer
     def update_config(self, config):
-        # add the public directory
-        plugins.toolkit.add_public_directory(config, u'theme/public')
         # add templates
         plugins.toolkit.add_template_directory(config, u'theme/templates')
         # add the resource groups
-        plugins.toolkit.add_resource(u'theme/public', u'ckanext-query-dois')
+        plugins.toolkit.add_resource(u'theme/assets', u'ckanext-query-dois')
 
     # IVersionedDatastoreDownloads
     def download_add_to_email_body(self, request):

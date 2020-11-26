@@ -1,0 +1,15 @@
+main:
+  output: ckanext-versioned-datastore/%(version)s_main.css
+  contents:
+    - css/query_dois.css
+
+visual_query:
+  output: ckanext-versioned-datastore/%(version)s_visual_query.css
+  contents:
+    - css/visual_query.css
+
+multisearch:
+  output: ckanext-versioned-datastore/%(version)s_multisearch.css
+  filters: rjsmin
+  contents:
+    - scripts/multisearch_download.js
