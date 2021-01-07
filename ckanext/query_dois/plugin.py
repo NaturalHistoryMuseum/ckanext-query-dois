@@ -10,7 +10,7 @@ import logging
 from ckan import plugins
 from contextlib2 import suppress
 
-from . import helpers, routes
+from . import helpers, routes, cli
 from .lib.doi import mint_doi, mint_multisearch_doi
 from .lib.emails import default_download_body
 from .lib.query import DatastoreQuery
@@ -28,6 +28,7 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.ITemplateHelpers)
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.IAuthFunctions)
+    plugins.implements(plugins.IClick)
     # if the ckanpackager is available, we have a hook for it
     with suppress(ImportError):
         from ckanext.ckanpackager.interfaces import ICkanPackager
@@ -40,6 +41,10 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     # IBlueprint
     def get_blueprint(self):
         return routes.blueprints
+
+    # IClick
+    def get_commands(self):
+        return cli.get_commands()
 
     # IAuthFunctions
     def get_auth_functions(self):
