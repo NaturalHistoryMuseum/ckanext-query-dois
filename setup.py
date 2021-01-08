@@ -34,6 +34,7 @@ setup(
         'datacite==1.0.1',
         'bcrypt==3.1.4',
         'dicthash==0.0.2',
+        u'contextlib2>=0.6.0.post1',
     ],
     entry_points= \
         u'''
