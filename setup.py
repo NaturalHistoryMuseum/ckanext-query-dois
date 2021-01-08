@@ -40,9 +40,5 @@ setup(
         u'''
         [ckan.plugins]
             query_dois=ckanext.query_dois.plugin:QueryDOIsPlugin
-
-        [paste.paster_command]
-            initdb=ckanext.query_dois.commands:QueryDOIsInitDBCommand
-
         ''',
     )
