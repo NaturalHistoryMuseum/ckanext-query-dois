@@ -6,7 +6,7 @@
 
 from setuptools import find_packages, setup
 
-__version__ = u'1.0.0-alpha'
+__version__ = u'1.0.1'
 
 with open(u'README.md', u'r') as f:
     __long_description__ = f.read()
@@ -31,6 +31,8 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
+        # required by datacite (well jsonschema) but must be at this version to work on python2
+        'pyrsistent==0.16.1',
         'datacite==1.0.1',
         'bcrypt==3.1.4',
         'dicthash==0.0.2',
