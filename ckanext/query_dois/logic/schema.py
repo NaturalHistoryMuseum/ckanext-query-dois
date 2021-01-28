@@ -8,13 +8,13 @@ from ckan.plugins import toolkit
 from ckanext.datastore.logic.schema import json_validator
 
 # grab all the validator functions upfront
-boolean_validator = toolkit.get_validator(u'boolean_validator')
-ignore_missing = toolkit.get_validator(u'ignore_missing')
-int_validator = toolkit.get_validator(u'int_validator')
-email_validator = toolkit.get_validator(u'email_validator')
+boolean_validator = toolkit.get_validator('boolean_validator')
+ignore_missing = toolkit.get_validator('ignore_missing')
+int_validator = toolkit.get_validator('int_validator')
+email_validator = toolkit.get_validator('email_validator')
 
 
-def list_of_strings(delimiter=u','):
+def list_of_strings(delimiter=','):
     '''
     Creates a converter/validator function which when given a value return a list or raises an error
     if a list can't be created from the value. If the value passed in is a list already it is
@@ -28,19 +28,19 @@ def list_of_strings(delimiter=u','):
     def validator(value):
         if isinstance(value, list):
             return value
-        if isinstance(value, basestring):
+        if isinstance(value, str):
             return value.split(delimiter)
-        raise toolkit.Invalid(u'Invalid list of strings')
+        raise toolkit.Invalid('Invalid list of strings')
 
     return validator
 
 
 def create_doi():
     return {
-        u'email_address': [email_validator],
-        u'query': [ignore_missing, json_validator],
-        u'query_version': [ignore_missing, unicode],
-        u'version': [ignore_missing, int_validator],
-        u'resource_ids': [ignore_missing, list_of_strings()],
-        u'resource_ids_and_versions': [ignore_missing, json_validator],
+        'email_address': [email_validator],
+        'query': [ignore_missing, json_validator],
+        'query_version': [ignore_missing, str],
+        'version': [ignore_missing, int_validator],
+        'resource_ids': [ignore_missing, list_of_strings()],
+        'resource_ids_and_versions': [ignore_missing, json_validator],
     }

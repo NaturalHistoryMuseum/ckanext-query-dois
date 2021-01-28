@@ -6,9 +6,9 @@
 
 import json
 import logging
+from contextlib import suppress
 
 from ckan import plugins
-from contextlib2 import suppress
 
 from . import helpers, routes, cli
 from .lib.doi import mint_doi, mint_multisearch_doi
@@ -17,7 +17,6 @@ from .lib.query import DatastoreQuery
 from .lib.stats import DOWNLOAD_ACTION, record_stat
 from .logic import auth, action
 from .logic.utils import extract_resource_ids_and_versions
-
 
 log = logging.getLogger(__name__)
 
@@ -49,21 +48,21 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     # IAuthFunctions
     def get_auth_functions(self):
         return {
-            u'create_doi': auth.create_doi,
+            'create_doi': auth.create_doi,
         }
 
     # IActions
     def get_actions(self):
         return {
-            u'create_doi': action.create_doi,
+            'create_doi': action.create_doi,
         }
 
     # IConfigurer
     def update_config(self, config):
         # add templates
-        plugins.toolkit.add_template_directory(config, u'theme/templates')
+        plugins.toolkit.add_template_directory(config, 'theme/templates')
         # add the resource groups
-        plugins.toolkit.add_resource(u'theme/assets', u'ckanext-query-dois')
+        plugins.toolkit.add_resource('theme/assets', 'ckanext-query-dois')
 
     # IVersionedDatastoreDownloads
     def download_add_to_email_body(self, request):
@@ -82,7 +81,7 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         except:
             # if anything goes wrong we don't want to stop the download from going ahead, just
             # log the error and move on
-            log.error(u'Failed to mint/retrieve DOI and/or create stats', exc_info=True)
+            log.error('Failed to mint/retrieve DOI and/or create stats', exc_info=True)
 
     # ICkanPackager
     def before_package_request(self, resource_id, package_id, packager_url, request_params):
@@ -96,47 +95,47 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         :param request_params: a dict of parameters that will be sent with the request
         :return: the url and the params as a tuple
         '''
-        resource = plugins.toolkit.get_action(u'resource_show')({}, {
-            u'id': resource_id
+        resource = plugins.toolkit.get_action('resource_show')({}, {
+            'id': resource_id
         })
-        package = plugins.toolkit.get_action(u'package_show')({}, {
-            u'id': package_id
+        package = plugins.toolkit.get_action('package_show')({}, {
+            'id': package_id
         })
         # only handle DOIs for resources with data in the datastore and that aren't in private
         # packages
-        if resource.get(u'datastore_active', False) and not package.get(u'private', True):
+        if resource.get('datastore_active', False) and not package.get('private', True):
             try:
                 # the request_params dict comes through with a lot of other parameters in it beyond
                 # the query params, therefore we need to do some stripping out (otherwise the exact
                 # same query will look different due to a different format choice or email address)
-                allowed_keys = {u'q', u'filters', u'version'}
+                allowed_keys = {'q', 'filters', 'version'}
                 data_dict = {k: v for k, v in request_params.items() if k in allowed_keys}
 
                 # the packager converts the filters dict to JSON so we need to convert it back
-                if u'filters' in data_dict:
-                    data_dict[u'filters'] = json.loads(data_dict[u'filters'])
+                if 'filters' in data_dict:
+                    data_dict['filters'] = json.loads(data_dict['filters'])
 
                 # mint the DOI on datacite if necessary
                 _minted, query_doi = mint_doi([resource_id], DatastoreQuery(data_dict=data_dict))
                 # record a download stat against the DOI
-                record_stat(query_doi, DOWNLOAD_ACTION, request_params[u'email'])
+                record_stat(query_doi, DOWNLOAD_ACTION, request_params['email'])
                 # add the doi to the ckanpackager params so that it can be reported in the email
-                request_params[u'doi'] = query_doi.doi
+                request_params['doi'] = query_doi.doi
             except:
                 # if anything goes wrong we don't want to stop the download from going ahead, just
                 # log the error and move on
-                log.error(u'Failed to mint/retrieve DOI and/or create stats', exc_info=True)
+                log.error('Failed to mint/retrieve DOI and/or create stats', exc_info=True)
 
         return packager_url, request_params
 
     # ITemplateHelpers
     def get_helpers(self):
         return {
-            u'render_filter_value': helpers.render_filter_value,
-            u'get_most_recent_dois': helpers.get_most_recent_dois,
-            u'get_time_ago_description': helpers.get_time_ago_description,
-            u'get_landing_page_url': helpers.get_landing_page_url,
-            u'create_citation_text': helpers.create_citation_text,
-            u'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
-            u'pretty_print_query': helpers.pretty_print_query,
+            'render_filter_value': helpers.render_filter_value,
+            'get_most_recent_dois': helpers.get_most_recent_dois,
+            'get_time_ago_description': helpers.get_time_ago_description,
+            'get_landing_page_url': helpers.get_landing_page_url,
+            'create_citation_text': helpers.create_citation_text,
+            'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
+            'pretty_print_query': helpers.pretty_print_query,
         }

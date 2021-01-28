@@ -10,7 +10,7 @@ import json
 import operator
 from collections import OrderedDict
 from functools import partial
-from urllib import urlencode
+from urllib.parse import urlencode
 
 from ckan import model
 from ckan.plugins import toolkit
@@ -20,10 +20,10 @@ from ..lib.utils import get_resource_and_package
 from ..model import QueryDOI, QueryDOIStat
 
 column_param_mapping = (
-    (u'doi', QueryDOIStat.doi),
-    (u'identifier', QueryDOIStat.identifier),
-    (u'domain', QueryDOIStat.domain),
-    (u'action', QueryDOIStat.action),
+    ('doi', QueryDOIStat.doi),
+    ('identifier', QueryDOIStat.identifier),
+    ('domain', QueryDOIStat.domain),
+    ('action', QueryDOIStat.action),
 )
 
 
@@ -52,9 +52,9 @@ def get_authors(packages):
     # use an ordered dict in the absence of a sorted set
     authors = OrderedDict()
     for package in packages:
-        author = package[u'author']
+        author = package['author']
         # some author values will contain many authors with a separator, perhaps , or ;
-        for separator in (u';', u','):
+        for separator in (';', ','):
             if separator in author:
                 authors.update({a: True for a in author.split(separator)})
                 break
@@ -84,17 +84,17 @@ def encode_params(params, version=None, extras=None, for_api=False):
     # build the query string from the dicts we have first
     for param, value in itertools.chain(params.items(), extras):
         # make sure to ignore all version data in the dicts
-        if param == u'version':
+        if param == 'version':
             continue
-        if param == u'filters':
+        if param == 'filters':
             value = copy.deepcopy(value)
             if version is None:
-                value.pop(u'__version__', None)
+                value.pop('__version__', None)
         query_string[param] = value
 
     # now add the version in if needed
     if version is not None:
-        query_string.setdefault(u'filters', {})[u'__version__'] = version
+        query_string.setdefault('filters', {})['__version__'] = version
 
     # finally format any nested dicts correctly (this is for the filters field basically)
     for param, value in query_string.items():
@@ -109,8 +109,8 @@ def encode_params(params, version=None, extras=None, for_api=False):
                 for sub_key, sub_value in value.items():
                     if not isinstance(sub_value, list):
                         sub_value = [sub_value]
-                    parts.extend(u'{}:{}'.format(sub_key, v) for v in sub_value)
-                value = u'|'.join(parts)
+                    parts.extend('{}:{}'.format(sub_key, v) for v in sub_value)
+                value = '|'.join(parts)
             query_string[param] = value
 
     return urlencode(query_string)
@@ -138,23 +138,23 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     :param rounded_version: the version rounded down to the nearest available on the resource
     :return: a dict of urls
     '''
-    page_url = toolkit.url_for(u'resource.read', id=package[u'name'], resource_id=resource[u'id'])
-    api_url = u'/api/action/datastore_search'
+    page_url = toolkit.url_for('resource.read', id=package['name'], resource_id=resource['id'])
+    api_url = '/api/action/datastore_search'
     api_extras = {
-        u'resource_id': resource[u'id']
-        }
+        'resource_id': resource['id']
+    }
     return {
-        u'page': {
-            u'original': page_url + u'?' + encode_params(query, version=rounded_version),
-            u'current': page_url + u'?' + encode_params(query),
-            },
-        u'api': {
-            u'original': api_url + u'?' + encode_params(query, version=rounded_version,
-                                                        extras=api_extras, for_api=True),
-            u'current': api_url + u'?' + encode_params(query, extras=api_extras,
-                                                       for_api=True),
-            }
+        'page': {
+            'original': page_url + '?' + encode_params(query, version=rounded_version),
+            'current': page_url + '?' + encode_params(query),
+        },
+        'api': {
+            'original': api_url + '?' + encode_params(query, version=rounded_version,
+                                                      extras=api_extras, for_api=True),
+            'current': api_url + '?' + encode_params(query, extras=api_extras,
+                                                     for_api=True),
         }
+    }
 
 
 def get_download_url(package, resource, query, rounded_version):
@@ -171,8 +171,8 @@ def get_download_url(package, resource, query, rounded_version):
     '''
     try:
         from ckanext.ckanpackager.lib.utils import url_for_package_resource
-        url = url_for_package_resource(package[u'id'], resource[u'id'], use_request=False)
-        return url + u'&' + encode_params(query, version=rounded_version)
+        url = url_for_package_resource(package['id'], resource['id'], use_request=False)
+        return url + '&' + encode_params(query, version=rounded_version)
     except ImportError:
         return None
 
@@ -220,22 +220,22 @@ def render_datastore_search_doi_page(query_doi):
     # we ignore the saves count as it will always be 0 for a datastore_search DOI
     downloads, _saves, last_download_timestamp = get_stats(query_doi)
     context = {
-        u'query_doi': query_doi,
-        u'doi': query_doi.doi,
-        u'resource': resource,
-        u'package': package,
+        'query_doi': query_doi,
+        'doi': query_doi.doi,
+        'resource': resource,
+        'package': package,
         # this is effectively an integration point with the ckanext-doi extension. If there is
         # demand we should open this up so that we can support other dois on packages extensions
-        u'package_doi': package[u'doi'] if package.get(u'doi_status', False) else None,
-        u'authors': get_authors([package]),
-        u'version': rounded_version,
-        u'reruns': generate_rerun_urls(resource, package, query_doi.query, rounded_version),
-        u'download_url': get_download_url(package, resource, query_doi.query, rounded_version),
-        u'downloads': downloads,
-        u'last_download_timestamp': last_download_timestamp,
+        'package_doi': package['doi'] if package.get('doi_status', False) else None,
+        'authors': get_authors([package]),
+        'version': rounded_version,
+        'reruns': generate_rerun_urls(resource, package, query_doi.query, rounded_version),
+        'download_url': get_download_url(package, resource, query_doi.query, rounded_version),
+        'downloads': downloads,
+        'last_download_timestamp': last_download_timestamp,
     }
 
-    return toolkit.render(u'query_dois/single_landing_page.html', context)
+    return toolkit.render('query_dois/single_landing_page.html', context)
 
 
 def get_package_and_resource_info(resource_ids):
@@ -245,25 +245,25 @@ def get_package_and_resource_info(resource_ids):
     :param resource_ids: a list of resource ids
     :return: two dicts, one of package info and one of resource info
     '''
-    raction = partial(toolkit.get_action(u'resource_show'), {})
-    paction = partial(toolkit.get_action(u'package_show'), {})
+    raction = partial(toolkit.get_action('resource_show'), {})
+    paction = partial(toolkit.get_action('package_show'), {})
 
     packages = {}
     resources = {}
     for resource_id in resource_ids:
         resource = raction(dict(id=resource_id))
-        package_id = resource[u'package_id']
+        package_id = resource['package_id']
         resources[resource_id] = {
-            u'name': resource[u'name'],
-            u'package_id': package_id,
+            'name': resource['name'],
+            'package_id': package_id,
         }
         if package_id not in packages:
             package = paction(dict(id=package_id))
             packages[package_id] = {
-                u'title': package[u'title'],
-                u'resource_ids': []
+                'title': package['title'],
+                'resource_ids': []
             }
-        packages[package_id][u'resource_ids'].append(resource_id)
+        packages[package_id]['resource_ids'].append(resource_id)
 
     return packages, resources
 
@@ -277,19 +277,19 @@ def create_slugs(query_doi):
     :return: a slug for the original query and a slug for the current query
     '''
     original_slug_data_dict = {
-        u'query': query_doi.query,
-        u'query_version': query_doi.query_version,
-        u'resource_ids_and_versions': query_doi.resources_and_versions,
+        'query': query_doi.query,
+        'query_version': query_doi.query_version,
+        'resource_ids_and_versions': query_doi.resources_and_versions,
     }
-    original_slug = toolkit.get_action(u'datastore_create_slug')({}, original_slug_data_dict)
+    original_slug = toolkit.get_action('datastore_create_slug')({}, original_slug_data_dict)
 
     current_slug_data_dict = {
-        u'query': query_doi.query,
-        u'query_version': query_doi.query_version,
-        u'resource_ids': query_doi.get_resource_ids(),
+        'query': query_doi.query,
+        'query_version': query_doi.query_version,
+        'resource_ids': query_doi.get_resource_ids(),
     }
-    current_slug = toolkit.get_action(u'datastore_create_slug')({}, current_slug_data_dict)
-    return original_slug[u'slug'], current_slug[u'slug']
+    current_slug = toolkit.get_action('datastore_create_slug')({}, current_slug_data_dict)
+    return original_slug['slug'], current_slug['slug']
 
 
 def render_multisearch_doi_page(query_doi):
@@ -307,16 +307,16 @@ def render_multisearch_doi_page(query_doi):
     original_slug, current_slug = create_slugs(query_doi)
 
     context = {
-        u'query_doi': query_doi,
-        u'resource_count': len(resources),
-        u'package_count': len(packages),
-        u'resources': resources,
-        u'packages': packages,
-        u'downloads': downloads,
-        u'saves': saves,
-        u'last_download_timestamp': last_download_timestamp,
-        u'sorted_resource_counts': sorted_resource_counts,
-        u'original_slug': original_slug,
-        u'current_slug': current_slug,
+        'query_doi': query_doi,
+        'resource_count': len(resources),
+        'package_count': len(packages),
+        'resources': resources,
+        'packages': packages,
+        'downloads': downloads,
+        'saves': saves,
+        'last_download_timestamp': last_download_timestamp,
+        'sorted_resource_counts': sorted_resource_counts,
+        'original_slug': original_slug,
+        'current_slug': current_slug,
     }
-    return toolkit.render(u'query_dois/multisearch_landing_page.html', context)
+    return toolkit.render('query_dois/multisearch_landing_page.html', context)

@@ -19,8 +19,8 @@ def get_resource_and_package(resource_id):
     :param resource_id: the resource ID
     :return: a 2-tuple, containing the resource dict and the package dict
     '''
-    resource = toolkit.get_action(u'resource_show')({}, {u'id': resource_id})
-    package = toolkit.get_action(u'package_show')({}, {u'id': resource[u'package_id']})
+    resource = toolkit.get_action('resource_show')({}, {'id': resource_id})
+    package = toolkit.get_action('package_show')({}, {'id': resource['package_id']})
     return resource, package
 
 
@@ -36,8 +36,8 @@ def get_public_datastore_resources(only=None):
     # retrieve all resource ids that are active, in an active package and in a public package
     query = model.Session.query(model.Resource) \
         .join(model.Package) \
-        .filter(model.Resource.state == u'active') \
-        .filter(model.Package.state == u'active') \
+        .filter(model.Resource.state == 'active') \
+        .filter(model.Package.state == 'active') \
         .filter(model.Package.private == false()) \
         .with_entities(model.Resource.id)
     if only:
@@ -46,7 +46,7 @@ def get_public_datastore_resources(only=None):
     public_resource_ids = set()
 
     # cache this action (with context) so that we don't have to retrieve it over and over again
-    is_datastore_resource = partial(toolkit.get_action(u'datastore_is_datastore_resource'), {})
+    is_datastore_resource = partial(toolkit.get_action('datastore_is_datastore_resource'), {})
     for resource_id in query:
         if is_datastore_resource(dict(resource_id=resource_id)):
             public_resource_ids.add(resource_id)
@@ -78,15 +78,15 @@ def get_resource_counts(query, query_version, resource_ids_and_versions):
     :return: a dict of resource ids to counts
     '''
     counts = {}
-    multisearch_action = partial(toolkit.get_action(u'datastore_multisearch'), {})
+    multisearch_action = partial(toolkit.get_action('datastore_multisearch'), {})
     for resource_id, version in resource_ids_and_versions.items():
         # find out how many records match the query in the specific resource
         search_data_dict = {
-            u'query': query,
-            u'query_version': query_version,
-            u'resource_ids': [resource_id],
-            u'version': version,
-            u'size': 0
+            'query': query,
+            'query_version': query_version,
+            'resource_ids': [resource_id],
+            'version': version,
+            'size': 0
         }
-        counts[resource_id] = multisearch_action(search_data_dict)[u'total']
+        counts[resource_id] = multisearch_action(search_data_dict)['total']
     return counts

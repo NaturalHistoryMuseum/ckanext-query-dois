@@ -45,19 +45,19 @@ def create_doi(context, data_dict):
     :type email_sent: bool
     '''
     # validate the data dict first
-    schema = context.get(u'schema', schema_lib.create_doi())
+    schema = context.get('schema', schema_lib.create_doi())
     data_dict, errors = toolkit.navl_validate(data_dict, schema, context)
     if errors:
         raise toolkit.ValidationError(errors)
 
     # then extract the parameters from the data dict, defaulting some things as we go
-    email_address = data_dict[u'email_address']
-    query = data_dict.get(u'query', {})
+    email_address = data_dict['email_address']
+    query = data_dict.get('query', {})
     query_version = data_dict.get(
-        u'query_version', toolkit.get_action(u'datastore_get_latest_query_schema_version')({}, {}))
-    version = data_dict.get(u'version', None)
-    resource_ids = data_dict.get(u'resource_ids', None)
-    resource_ids_and_versions = data_dict.get(u'resource_ids_and_versions', None)
+        'query_version', toolkit.get_action('datastore_get_latest_query_schema_version')({}, {}))
+    version = data_dict.get('version', None)
+    resource_ids = data_dict.get('resource_ids', None)
+    resource_ids_and_versions = data_dict.get('resource_ids_and_versions', None)
 
     # figure out which resources and which versions we're going to be creating a DOI for
     resource_ids_and_versions = extract_resource_ids_and_versions(version, resource_ids,
@@ -71,7 +71,7 @@ def create_doi(context, data_dict):
     email_sent = send_saved_search_email(email_address, doi)
 
     return {
-        u'is_new': created,
-        u'doi': doi.doi,
-        u'email_sent': email_sent,
+        'is_new': created,
+        'doi': doi.doi,
+        'email_sent': email_sent,
     }
