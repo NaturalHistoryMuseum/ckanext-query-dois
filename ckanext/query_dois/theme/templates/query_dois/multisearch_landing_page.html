@@ -81,8 +81,8 @@
                     {% for resource_id, count in sorted_resource_counts %}
                       {% set resource_info = resources[resource_id] %}
                       {% set package_info = packages[resource_info['package_id']] %}
-                      {% set resource_url = h.url_for('resource.read', id=package_info['title'], resource_id=resource_id) %}
-                      {% set package_url = h.url_for('dataset.read', id=package_info['title']) %}
+                      {% set resource_url = h.url_for('resource.read', id=package_info['name'], resource_id=resource_id) %}
+                      {% set package_url = h.url_for('dataset.read', id=package_info['name']) %}
                         <tr>
                             <td><a href="{{ package_url }}">{{ package_info['title'] }}</a> / <a
                                     href="{{ resource_url }}">{{ resource_info['name'] }}</a></td>

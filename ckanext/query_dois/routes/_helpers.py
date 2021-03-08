@@ -261,6 +261,7 @@ def get_package_and_resource_info(resource_ids):
             package = paction(dict(id=package_id))
             packages[package_id] = {
                 'title': package['title'],
+                'name': package['name'],
                 'resource_ids': []
             }
         packages[package_id]['resource_ids'].append(resource_id)
