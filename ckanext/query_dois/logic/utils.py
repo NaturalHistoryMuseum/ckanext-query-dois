@@ -26,8 +26,8 @@ def get_public_datastore_resources(only=None):
     # retrieve all resource ids that are active, in an active package and in a public package
     query = model.Session.query(model.Resource) \
         .join(model.Package) \
-        .filter(model.Resource.state == u'active') \
-        .filter(model.Package.state == u'active') \
+        .filter(model.Resource.state == 'active') \
+        .filter(model.Package.state == 'active') \
         .filter(model.Package.private == false()) \
         .with_entities(model.Resource.id)
     if only:
@@ -36,7 +36,7 @@ def get_public_datastore_resources(only=None):
     public_resource_ids = set()
 
     # cache this action (with context) so that we don't have to retrieve it over and over again
-    is_datastore_resource = partial(toolkit.get_action(u'datastore_is_datastore_resource'), {})
+    is_datastore_resource = partial(toolkit.get_action('datastore_is_datastore_resource'), {})
     for row in query:
         if is_datastore_resource(dict(resource_id=row.id)):
             public_resource_ids.add(row.id)
@@ -66,12 +66,12 @@ def extract_resource_ids_and_versions(req_version=None, req_resource_ids=None,
     bad_resources = req_resource_ids - resource_ids
     if bad_resources:
         # resources were requested, but not all of them were public/active
-        raise toolkit.ValidationError(u'Some of the resources requested are private or not active,'
-                                      u'DOIs can only be created using public, active resources. '
-                                      u'Invalid resources: {}'.format(u', '.format(bad_resources)))
+        raise toolkit.ValidationError(f'Some of the resources requested are private or not active, '
+                                      f'DOIs can only be created using public, active resources. '
+                                      f'Invalid resources: {", ".format(bad_resources)}')
     elif len(resource_ids) == 0:
         # no resources available
-        raise toolkit.ValidationError(u'No public resources are available')
+        raise toolkit.ValidationError('No public resources are available')
 
     version = req_version if req_version is not None else to_timestamp(datetime.now())
     # round all the versions down for each resource
@@ -80,12 +80,12 @@ def extract_resource_ids_and_versions(req_version=None, req_resource_ids=None,
     else:
         iterator = zip(resource_ids, itertools.repeat(version))
 
-    round_version_action = partial(toolkit.get_action(u'datastore_get_rounded_version'), {})
+    round_version_action = partial(toolkit.get_action('datastore_get_rounded_version'), {})
     resource_ids_and_versions = {}
     for resource_id, resource_version in iterator:
         data_dict = {
-            u'resource_id': resource_id,
-            u'version': resource_version
+            'resource_id': resource_id,
+            'version': resource_version
         }
         rounded_version = round_version_action(data_dict)
         # this isn't really something that should happen, but if it does it just means there's no

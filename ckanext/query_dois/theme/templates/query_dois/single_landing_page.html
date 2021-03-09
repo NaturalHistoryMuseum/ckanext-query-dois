@@ -14,7 +14,7 @@
 {%- endblock -%}
 
 {% block primary_content %}
-{% resource 'ckanext-query-dois/main' %}
+{% asset 'ckanext-query-dois/main' %}
 <article class="module">
     <div class="module-content">
         <h1 class="page-heading">{{ _('DOI') }}: {{ doi }}</h1>
@@ -150,7 +150,7 @@
     <h2 class="module-heading">
         <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
     </h2>
-    {% resource 'ckanext-ckanpackager/main' %}
+    {% asset 'ckanext-ckanpackager/main' %}
     <a data-module="ckanpackager-download-link" data-module-resource-id="{{ resource['id'] }}"
        class="packager-link btn btn-primary" href="{{ download_url }}">{{ _('Download') }}</a>
 </div>

@@ -15,7 +15,7 @@
 {%- endblock -%}
 
 {% block primary_content %}
-  {% resource 'ckanext-query-dois/main' %}
+  {% asset 'ckanext-query-dois/main' %}
     <article class="module">
         <div class="module-content">
             <h1 class="page-heading">{{ _('DOI') }}: {{ query_doi.doi }}</h1>
@@ -81,8 +81,8 @@
                     {% for resource_id, count in sorted_resource_counts %}
                       {% set resource_info = resources[resource_id] %}
                       {% set package_info = packages[resource_info['package_id']] %}
-                      {% set resource_url = h.url_for('resource.read', id=package_info['title'], resource_id=resource_id) %}
-                      {% set package_url = h.url_for('dataset.read', id=package_info['title']) %}
+                      {% set resource_url = h.url_for('resource.read', id=package_info['name'], resource_id=resource_id) %}
+                      {% set package_url = h.url_for('dataset.read', id=package_info['name']) %}
                         <tr>
                             <td><a href="{{ package_url }}">{{ package_info['title'] }}</a> / <a
                                     href="{{ resource_url }}">{{ resource_info['name'] }}</a></td>
@@ -122,7 +122,7 @@
     </div>
 
     <div class="module, module-narrow module-shallow">
-        {% resource 'ckanext-query-dois/multisearch' %}
+        {% asset 'ckanext-query-dois/multisearch' %}
         <h2 class="module-heading">
             <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
         </h2>

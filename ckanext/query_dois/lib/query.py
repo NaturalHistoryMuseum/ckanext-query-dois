@@ -41,15 +41,15 @@ class DatastoreQuery(object):
         query = {}
         requested_version = None
         for param, param_value in query_dict.items():
-            if param == u'version':
+            if param == 'version':
                 requested_version = int(param_value)
-            elif param == u'filters':
+            elif param == 'filters':
                 filters = defaultdict(list)
-                for filter_pair in param_value.split(u'|'):
-                    filter_field, filter_value = filter_pair.split(u':', 1)
+                for filter_pair in param_value.split('|'):
+                    filter_field, filter_value = filter_pair.split(':', 1)
                     filters[filter_field].append(filter_value)
                 if requested_version is None:
-                    popped_version = filters.pop(u'__version__', None)
+                    popped_version = filters.pop('__version__', None)
                     if popped_version:
                         requested_version = int(popped_version[0])
                 if filters:
@@ -85,16 +85,16 @@ class DatastoreQuery(object):
         query = {}
         requested_version = None
         for param, param_value in data_dict.items():
-            if param == u'version':
+            if param == 'version':
                 requested_version = int(param_value)
-            elif param == u'filters':
+            elif param == 'filters':
                 filters = {}
                 for filter_field, filter_value in param_value.items():
                     if not isinstance(filter_value, list):
                         filter_value = [filter_value]
                     filters[filter_field] = filter_value
                 if requested_version is None:
-                    popped_version = filters.pop(u'__version__', None)
+                    popped_version = filters.pop('__version__', None)
                     if popped_version:
                         requested_version = int(popped_version[0])
                 if filters:
@@ -133,19 +133,19 @@ class DatastoreQuery(object):
         '''
         query = {}
         for key, value in self.query.items():
-            if key == u'filters':
+            if key == 'filters':
                 filters = {}
                 for filter_field, filter_value in value.items():
                     # to ensure the order doesn't matter we have to convert everything to unicode
                     # and then sort it
-                    filters[unicode(filter_field)] = sorted(map(unicode, filter_value))
-                query[u'filters'] = filters
+                    filters[str(filter_field)] = sorted(map(str, filter_value))
+                query['filters'] = filters
             else:
-                query[unicode(key)] = unicode(value)
+                query[str(key)] = str(value)
 
         # sort_keys=True is used otherwise the key ordering would change between python versions
         # and the hash wouldn't match even if the query was the same
-        dumped_query = json.dumps(query, ensure_ascii=False, sort_keys=True).encode(u'utf8')
+        dumped_query = json.dumps(query, ensure_ascii=False, sort_keys=True).encode('utf8')
         return hashlib.sha1(dumped_query).hexdigest()
 
     def get_rounded_version(self, resource_id):
@@ -157,8 +157,8 @@ class DatastoreQuery(object):
         :return: the rounded version or None if no versions are available for the given resource id
         '''
         # first retrieve the rounded version to use
-        data_dict = {u'resource_id': resource_id, u'version': self.requested_version}
-        return toolkit.get_action(u'datastore_get_rounded_version')({}, data_dict)
+        data_dict = {'resource_id': resource_id, 'version': self.requested_version}
+        return toolkit.get_action('datastore_get_rounded_version')({}, data_dict)
 
     def get_count(self, resource_id):
         '''
@@ -168,11 +168,11 @@ class DatastoreQuery(object):
         '''
         data_dict = copy.deepcopy(self.query)
         data_dict.update({
-            u'resource_id': resource_id,
+            'resource_id': resource_id,
             # use the version parameter cause it's nicer than having to go in and modify the filters
-            u'version': self.get_rounded_version(resource_id),
+            'version': self.get_rounded_version(resource_id),
             # we don't need the results, just the total
-            u'limit': 0,
+            'limit': 0,
         })
-        result = toolkit.get_action(u'datastore_search')({}, data_dict)
-        return result[u'total']
+        result = toolkit.get_action('datastore_search')({}, data_dict)
+        return result['total']

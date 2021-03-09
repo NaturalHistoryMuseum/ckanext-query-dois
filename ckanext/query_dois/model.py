@@ -13,46 +13,46 @@ from sqlalchemy.dialects.postgresql import JSONB
 
 
 query_doi_table = Table(
-    u'query_doi',
+    'query_doi',
     meta.metadata,
-    Column(u'id', BigInteger, primary_key=True),
+    Column('id', BigInteger, primary_key=True),
     # the full doi (prefix/suffix)
-    Column(u'doi', UnicodeText, nullable=False, index=True, unique=True),
+    Column('doi', UnicodeText, nullable=False, index=True, unique=True),
     # json column representing the resources in this query and their rounded versions, it is a
     # straight map from resource_id: version
-    Column(u'resources_and_versions', JSONB, nullable=False),
+    Column('resources_and_versions', JSONB, nullable=False),
     # the timestamp when the doi was created
-    Column(u'timestamp', DateTime, nullable=False),
+    Column('timestamp', DateTime, nullable=False),
     # the query dict that produces the data for this doi
-    Column(u'query', JSONB, nullable=False),
+    Column('query', JSONB, nullable=False),
     # the hash for the query that produces the data for this doi - this is used in conjunction with
     # the version to check if the query has been run before
-    Column(u'query_hash', UnicodeText, nullable=False, index=True),
+    Column('query_hash', UnicodeText, nullable=False, index=True),
     # the version initially requested by the user
-    Column(u'requested_version', BigInteger, nullable=True),
+    Column('requested_version', BigInteger, nullable=True),
     # record count at time of minting
-    Column(u'count', BigInteger, nullable=False),
+    Column('count', BigInteger, nullable=False),
     # record the query version
-    Column(u'query_version', UnicodeText, nullable=True),
+    Column('query_version', UnicodeText, nullable=True),
     # record the resource counts
-    Column(u'resource_counts', JSONB, nullable=True),
+    Column('resource_counts', JSONB, nullable=True),
 )
 
 
 query_doi_stat_table = Table(
-    u'query_doi_stat',
+    'query_doi_stat',
     meta.metadata,
-    Column(u'id', BigInteger, primary_key=True),
+    Column('id', BigInteger, primary_key=True),
     # the doi this stat relates to
-    Column(u'doi', UnicodeText, nullable=False, index=True),
+    Column('doi', UnicodeText, nullable=False, index=True),
     # record the action that produced this stat entry (for example, search or download)
-    Column(u'action', UnicodeText),
+    Column('action', UnicodeText),
     # the domain from the email address of the user using the doi
-    Column(u'domain', UnicodeText),
+    Column('domain', UnicodeText),
     # the encrypted identifier from the email address of the user using the doi
-    Column(u'identifier', UnicodeText),
+    Column('identifier', UnicodeText),
     # timestamp of the stat
-    Column(u'timestamp', DateTime, nullable=False),
+    Column('timestamp', DateTime, nullable=False),
 )
 
 
@@ -90,12 +90,12 @@ class QueryDOIStat(DomainObject):
         :return: a dict
         '''
         return {
-            u'id': self.id,
-            u'doi': self.doi,
-            u'action': self.action,
-            u'domain': self.domain,
-            u'identifier': self.identifier,
-            u'timestamp': unicode(self.timestamp),
+            'id': self.id,
+            'doi': self.doi,
+            'action': self.action,
+            'domain': self.domain,
+            'identifier': self.identifier,
+            'timestamp': unicode(self.timestamp),
         }
 
 

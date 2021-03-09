@@ -21,7 +21,7 @@ from ..model import QueryDOI
 log = logging.getLogger(__name__)
 
 # this is a test prefix available for all minters to use for testing purposes
-TEST_PREFIX = u'10.5072'
+TEST_PREFIX = '10.5072'
 
 
 def is_test_mode():
@@ -30,7 +30,7 @@ def is_test_mode():
 
     :return: True if we should, False if not. Defaults to True.
     '''
-    return asbool(toolkit.config.get(u'ckanext.query_dois.test_mode', True))
+    return asbool(toolkit.config.get('ckanext.query_dois.test_mode', True))
 
 
 def get_prefix():
@@ -39,15 +39,14 @@ def get_prefix():
 
     :return: the prefix to use for the new DOIs
     '''
-    prefix = toolkit.config.get(u'ckanext.query_dois.prefix')
+    prefix = toolkit.config.get('ckanext.query_dois.prefix')
 
     if prefix is None:
-        raise TypeError(u'You must set the ckanext.query_dois.prefix config value')
+        raise TypeError('You must set the ckanext.query_dois.prefix config value')
 
     if prefix == TEST_PREFIX:
-        raise ValueError(
-            u'The test prefix ' + TEST_PREFIX + u' has been retired, use a prefix defined in your '
-                                                u'datacite test account')
+        raise ValueError(f'The test prefix {TEST_PREFIX} has been retired, use a prefix defined in '
+                         f'your datacite test account')
 
     return prefix
 
@@ -58,13 +57,13 @@ def get_client():
 
     :return: a DataCite client object
     '''
-    kwargs = dict(username=toolkit.config.get(u'ckanext.query_dois.datacite_username'),
-                  password=toolkit.config.get(u'ckanext.query_dois.datacite_password'),
+    kwargs = dict(username=toolkit.config.get('ckanext.query_dois.datacite_username'),
+                  password=toolkit.config.get('ckanext.query_dois.datacite_password'),
                   prefix=get_prefix(),
                   test_mode=is_test_mode())
     # datacite 1.0.1 isn't updated for the test prefix deprecation yet so this is a temp fix
     if is_test_mode():
-        kwargs.update({u'url': u'https://mds.test.datacite.org'})
+        kwargs.update({'url': 'https://mds.test.datacite.org'})
     return DataCiteMDSClient(**kwargs)
 
 
@@ -87,9 +86,9 @@ def generate_doi(client):
     while attempts > 0:
         # generate a random 8 character identifier and prepend qd. to make it easier to identify
         # DOIs from this extension
-        identifier = u'qd.{}'.format(u''.join(random.choice(valid_characters) for _ in range(8)))
+        identifier = f'qd.{"".join(random.choice(valid_characters) for _ in range(8))}'
         # form the doi using the prefix
-        doi = u'{}/{}'.format(get_prefix(), identifier)
+        doi = f'{get_prefix()}/{identifier}'
 
         # check this doi doesn't exist in the table
         if model.Session.query(QueryDOI).filter(QueryDOI.doi == doi).count():
@@ -104,15 +103,14 @@ def generate_doi(client):
             # if no doi is found, we're good!
             pass
         except DataCiteError as e:
-            log.warn(u'Error whilst checking new DOIs with DataCite. DOI: {}, error: {}'
-                     .format(doi, e.message))
+            log.warning(f'Error whilst checking new DOIs with DataCite. DOI: {doi}, error: {e}')
             attempts -= 1
             continue
 
         # if we've made it this far the doi isn't in the database and it's not in datacite already
         return doi
     else:
-        raise Exception(u'Failed to generate a DOI')
+        raise Exception('Failed to generate a DOI')
 
 
 def find_existing_doi(resources_and_versions, query_hash, query_version=None):
@@ -143,20 +141,20 @@ def create_doi_on_datacite(client, doi, authors, timestamp, count):
     '''
     # create the data for datacite
     data = {
-        u'identifier': {
-            u'identifier': doi,
-            u'identifierType': u'DOI',
+        'identifier': {
+            'identifier': doi,
+            'identifierType': 'DOI',
         },
-        u'creators': [{u'creatorName': author} for author in authors],
-        u'titles': [
+        'creators': [{'creatorName': author} for author in authors],
+        'titles': [
             {
-                u'title': toolkit.config.get(u'ckanext.query_dois.doi_title').format(count=count)
+                'title': toolkit.config.get('ckanext.query_dois.doi_title').format(count=count)
             }
         ],
-        u'publisher': toolkit.config.get(u'ckanext.query_dois.publisher'),
-        u'publicationYear': unicode(timestamp.year),
-        u'resourceType': {
-            u'resourceTypeGeneral': u'Dataset'
+        'publisher': toolkit.config.get('ckanext.query_dois.publisher'),
+        'publicationYear': str(timestamp.year),
+        'resourceType': {
+            'resourceTypeGeneral': 'Dataset'
         }
     }
 
@@ -168,11 +166,11 @@ def create_doi_on_datacite(client, doi, authors, timestamp, count):
     client.metadata_post(schema41.tostring(data))
 
     # create the URL the DOI will point to, i.e. the landing page
-    data_centre, identifier = doi.split(u'/')
-    landing_page_url = toolkit.url_for(u'query_doi.landing_page', data_centre=data_centre,
+    data_centre, identifier = doi.split('/')
+    landing_page_url = toolkit.url_for('query_doi.landing_page', data_centre=data_centre,
                                        identifier=identifier)
-    site = toolkit.config.get(u'ckan.site_url')
-    if site[-1] == u'/':
+    site = toolkit.config.get('ckan.site_url')
+    if site[-1] == '/':
         site = site[:-1]
     # mint the DOI
     client.doi_post(doi, site + landing_page_url)
@@ -224,7 +222,7 @@ def mint_doi(resource_ids, datastore_query):
     '''
     # currently we only deal with single resource searches
     if len(resource_ids) != 1:
-        raise NotImplemented(u"This plugin currently doesn't support multi-resource searches")
+        raise NotImplemented("This plugin currently doesn't support multi-resource searches")
     resource_id = resource_ids[0]
     rounded_version = datastore_query.get_rounded_version(resource_id)
     resources_and_versions = {
@@ -243,7 +241,7 @@ def mint_doi(resource_ids, datastore_query):
 
     # generate a new DOI to store this query against
     doi = generate_doi(client)
-    create_doi_on_datacite(client, doi, [package[u'author']], timestamp, record_count)
+    create_doi_on_datacite(client, doi, [package['author']], timestamp, record_count)
     query_doi = create_database_entry(doi, datastore_query.query, datastore_query.query_hash,
                                       resources_and_versions, timestamp, record_count,
                                       requested_version=datastore_query.requested_version)
@@ -266,7 +264,7 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
     '''
     # first off, ask the versioned datastore extension to create a hash of the query
     hash_data_dict = dict(query=query, query_version=query_version)
-    query_hash = toolkit.get_action(u'datastore_hash_query')({}, hash_data_dict)
+    query_hash = toolkit.get_action('datastore_hash_query')({}, hash_data_dict)
 
     # now check if there are any dois already for this query
     existing_doi = find_existing_doi(resource_ids_and_versions, query_hash, query_version)
@@ -278,12 +276,12 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
     authors = get_authors(resource_ids_and_versions.keys())
     # find out how many records match the query
     search_data_dict = {
-        u'query': query,
-        u'query_version': query_version,
-        u'resource_ids_and_versions': resource_ids_and_versions,
-        u'size': 0
+        'query': query,
+        'query_version': query_version,
+        'resource_ids_and_versions': resource_ids_and_versions,
+        'size': 0
     }
-    record_count = toolkit.get_action(u'datastore_multisearch')({}, search_data_dict)[u'total']
+    record_count = toolkit.get_action('datastore_multisearch')({}, search_data_dict)['total']
     # find out how many records come from each resource
     resource_counts = get_resource_counts(query, query_version, resource_ids_and_versions)
     for resource_id in (rid for rid, count in resource_counts.items() if count == 0):
@@ -291,7 +289,7 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
         del resource_counts[resource_id]
 
     if not resource_ids_and_versions:
-        raise toolkit.ValidationError(u'The DOI must be associated with at least one record')
+        raise toolkit.ValidationError('The DOI must be associated with at least one record')
 
     # generate a new DOI to store this query against
     client = get_client()

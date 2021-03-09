@@ -11,8 +11,8 @@ import bcrypt
 from ckanext.query_dois.model import QueryDOIStat
 
 # action types
-DOWNLOAD_ACTION = u'download'
-SAVE_ACTION = u'save'
+DOWNLOAD_ACTION = 'download'
+SAVE_ACTION = 'save'
 
 
 def anonymize_email(email_address):
@@ -30,7 +30,7 @@ def anonymize_email(email_address):
     email_address = email_address.lower()
     # figure out the domain from the email address
     try:
-        domain = email_address[email_address.index(u'@') + 1:]
+        domain = email_address[email_address.index('@') + 1:]
     except ValueError:
         # no @ found, just use the whole string
         domain = email_address
@@ -40,8 +40,8 @@ def anonymize_email(email_address):
     # domain with dots to ensure it's at least 18 characters in length. This is necessary as we need
     # to ensure that the base64 encode result is at least 22 characters long and 18 is the minimum
     # input length necessary to create a base64 encoding result of at least 22 characters.
-    salt = u'$2b$12$' + base64.b64encode(domain.zfill(18))[:22]
-    return bcrypt.hashpw(email_address.encode(u'utf-8'), salt.encode(u'utf-8')), domain
+    salt = b'$2b$12$' + base64.b64encode(domain.zfill(18).encode('utf-8'))[:22]
+    return bcrypt.hashpw(email_address.encode('utf-8'), salt), domain
 
 
 def record_stat(query_doi, action, email_address):
