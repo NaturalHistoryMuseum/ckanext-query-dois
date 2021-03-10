@@ -10,7 +10,6 @@ from functools import partial
 
 from ckan import model
 from ckan.plugins import toolkit
-from eevee.utils import to_timestamp
 from sqlalchemy import false
 
 
@@ -93,3 +92,15 @@ def extract_resource_ids_and_versions(req_version=None, req_resource_ids=None,
         if rounded_version is not None:
             resource_ids_and_versions[resource_id] = rounded_version
     return resource_ids_and_versions
+
+
+def to_timestamp(moment: datetime) -> int:
+    '''
+    Converts the given moment to a UNIX epoch in milliseconds.
+
+    :param moment: a datetime object
+    :return: integer UNIX epoch in milliseconds
+    '''
+    ts = moment.timestamp()
+    # multiply by 1000 to get the time in milliseconds and use int to remove any decimal places
+    return int(ts * 1000)
