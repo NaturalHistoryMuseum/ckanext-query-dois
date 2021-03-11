@@ -12,7 +12,6 @@ from ckan import plugins
 
 from . import helpers, routes, cli
 from .lib.doi import mint_doi, mint_multisearch_doi
-from .lib.emails import default_download_body
 from .lib.query import DatastoreQuery
 from .lib.stats import DOWNLOAD_ACTION, record_stat
 from .logic import auth, action
@@ -65,7 +64,7 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         plugins.toolkit.add_resource('theme/assets', 'ckanext-query-dois')
 
     # IVersionedDatastoreDownloads
-    def download_add_to_email_body(self, request):
+    def download_modify_email_template_context(self, request, context):
         try:
             # check to see if the download is something we can stick a DOI on (this will throw a
             # validation error if any of the resources aren't valid for DOI-ing
@@ -75,13 +74,19 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             # mint the DOI on datacite if necessary
             created, doi = mint_multisearch_doi(request.query, request.query_version,
                                                 request.resource_ids_and_versions)
+
+            # update the context with the doi
+            context['doi'] = doi.doi
+
             # record a download stat against the DOI
             record_stat(doi, DOWNLOAD_ACTION, request.email_address)
-            return default_download_body.format(doi.doi)
         except:
             # if anything goes wrong we don't want to stop the download from going ahead, just
             # log the error and move on
             log.error('Failed to mint/retrieve DOI and/or create stats', exc_info=True)
+
+        # always return the context
+        return context
 
     # ICkanPackager
     def before_package_request(self, resource_id, package_id, packager_url, request_params):

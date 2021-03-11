@@ -2,13 +2,8 @@ import socket
 
 from ckan.lib import mailer
 
-# TODO: put both of these in the config/interface so that they can be overridden
-default_download_body = '''
-A DOI has been created for this data: https://doi.org/{} (this may take a few hours to be active).
-Please ensure you reference this DOI when citing this data.
-For more information, follow the DOI link.
-'''.strip()
-
+# TODO: put this in the config/interface so that it can be overridden
+# TODO: add html version of the body
 default_save_body = '''
 Hello,
 
