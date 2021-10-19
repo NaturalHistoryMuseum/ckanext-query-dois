@@ -150,7 +150,8 @@
     <h2 class="module-heading">
         <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
     </h2>
-    {% asset 'ckanext-ckanpackager/main' %}
+    {% asset 'ckanext-ckanpackager/main-css' %}
+    {% asset 'ckanext-ckanpackager/main-js' %}
     <a data-module="ckanpackager-download-link" data-module-resource-id="{{ resource['id'] }}"
        class="packager-link btn btn-primary" href="{{ download_url }}">{{ _('Download') }}</a>
 </div>
