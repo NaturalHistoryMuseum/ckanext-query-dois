@@ -6,7 +6,7 @@
 
 from setuptools import find_packages, setup
 
-__version__ = '2.0.2'
+__version__ = '2.0.3'
 
 with open('README.md', 'r') as f:
     __long_description__ = f.read()
@@ -35,7 +35,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=[
-        'datacite==1.0.1',
+        'datacite==1.1.2',
         'bcrypt==3.1.4',
         'dicthash==0.0.2',
     ],
