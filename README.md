@@ -63,7 +63,7 @@ Path variables used below:
 6. Initialise database tables
 
   ```bash
-  paster --plugin=ckanext-query-dois initdb -c $CONFIG_FILE
+  ckan -c $CONFIG_FILE query-dois initdb
   ```
 
 # Configuration
@@ -99,9 +99,9 @@ This extension will only work if you have signed up for an account with [DataCit
 ### `initdb`
 Initialises the database table.
 
-1.
+1. `initdb`: initialise the database model
     ```bash
-    paster --plugin=ckanext-query-dois initdb -c $CONFIG_FILE
+    ckan -c $CONFIG_FILE query-dois initdb
     ```
 
 
