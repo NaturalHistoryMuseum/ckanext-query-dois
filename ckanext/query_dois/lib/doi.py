@@ -7,13 +7,12 @@
 import logging
 import random
 import string
-from datetime import datetime
-
 from ckan import model
+from ckan.common import asbool
 from ckan.plugins import toolkit
 from datacite import DataCiteMDSClient, schema41
 from datacite.errors import DataCiteError, DataCiteNotFoundError
-from paste.deploy.converters import asbool
+from datetime import datetime
 
 from .utils import get_resource_and_package, get_authors, get_resource_counts
 from ..model import QueryDOI
