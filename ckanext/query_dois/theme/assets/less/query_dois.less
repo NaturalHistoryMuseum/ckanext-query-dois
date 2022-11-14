@@ -1,9 +1,8 @@
 .qd_tooltip {
-    position: relative;
-    display: inline-block;
-}
+  position: relative;
+  display: inline-block;
 
-.qd_tooltip .qd_tooltiptext {
+  .qd_tooltiptext {
     visibility: hidden;
     display: block;
     width: 350px;
@@ -15,16 +14,19 @@
     padding: 5px;
     position: absolute;
     z-index: 1;
-}
+  }
 
-.qd_tooltip:hover .qd_tooltiptext {
-    visibility: visible;
+  &:hover {
+    .qd_tooltiptext {
+      visibility: visible;
+    }
+  }
 }
 
 .qd_breakdown {
-    width: 100%;
-}
+  width: 100%;
 
-.qd_breakdown td {
+  td {
     padding-bottom: 2px;
+  }
 }
