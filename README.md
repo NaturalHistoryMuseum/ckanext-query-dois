@@ -2,10 +2,11 @@
 
 # ckanext-query-dois
 
-[![Tests](https://github.com/NaturalHistoryMuseum/ckanext-query-dois/actions/workflows/main.yml/badge.svg)](https://github.com/NaturalHistoryMuseum/ckanext-query-dois/actions/workflows/main.yml)
-[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-query-dois/master.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-query-dois)
+[![Tests](https://img.shields.io/github/workflow/status/NaturalHistoryMuseum/ckanext-query-dois/Tests?style=flat-square)](https://github.com/NaturalHistoryMuseum/ckanext-query-dois/actions/workflows/main.yml)
+[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-query-dois/main?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-query-dois)
 [![CKAN](https://img.shields.io/badge/ckan-2.9.1-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 [![Python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg?style=flat-square)](https://www.python.org/)
+[![Docs](https://img.shields.io/readthedocs/ckanext-query-dois?style=flat-square)](https://ckanext-query-dois.readthedocs.io)
 
 _A CKAN extension that creates DOIs for queries on resources._
 
@@ -106,10 +107,8 @@ Initialises the database table.
 
 
 # Testing
-_Test coverage is currently extremely limited._
 
-To run the tests in this extension, there is a Docker compose configuration available in this
-repository to make it easy.
+There is a Docker compose configuration available in this repository to make it easier to run tests.
 
 To run the tests against ckan 2.9.x on Python3:
 
@@ -126,4 +125,4 @@ docker-compose build
 docker-compose run ckan
 ```
 
-The ckan image uses the Dockerfile in the `docker/` folder which is based on `openknowledge/ckan-dev:2.9`.
+The ckan image uses the Dockerfile in the `docker/` folder.

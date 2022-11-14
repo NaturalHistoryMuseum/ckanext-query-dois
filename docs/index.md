@@ -1,0 +1,1 @@
+# ckanext-query-dois documentation
