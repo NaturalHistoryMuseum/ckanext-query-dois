@@ -21,8 +21,12 @@ The NHM Data Portal Bot
 def send_saved_search_email(email_address, doi):
     # send the DOI to the user in an email
     try:
-        mailer.mail_recipient(recipient_email=email_address, recipient_name='DOI Requester',
-                              subject='Query DOI created', body=default_save_body.format(doi.doi))
+        mailer.mail_recipient(
+            recipient_email=email_address,
+            recipient_name='DOI Requester',
+            subject='Query DOI created',
+            body=default_save_body.format(doi.doi),
+        )
         return True
     except (mailer.MailerException, socket.error):
         # the error will be logged automatically by CKAN's mailing functions
