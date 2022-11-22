@@ -14,9 +14,10 @@ from ckan.plugins import toolkit
 
 
 class DatastoreQuery(object):
-    '''
-    This models datastore queries passed to datastore_search, not the DOIs created from them.
-    '''
+    """
+    This models datastore queries passed to datastore_search, not the DOIs created from
+    them.
+    """
 
     @staticmethod
     def _parse_from_query_dict(query_dict):
@@ -104,13 +105,13 @@ class DatastoreQuery(object):
         return query, requested_version
 
     def __init__(self, query_dict=None, data_dict=None):
-        '''
+        """
         Provide one of the 3 parameters depending on the format you have the query in.
 
         :param query_dict: a dict of query string parameters in the CKAN URL format - i.e. the
                            filters are split with colons and pipes etc
         :param data_dict: a dict of data dict parameters - i.e. the typical action data_dict format
-        '''
+        """
         if query_dict is not None:
             self.query, self.requested_version = self._parse_from_query_dict(query_dict)
         elif data_dict is not None:
@@ -125,12 +126,13 @@ class DatastoreQuery(object):
         self.query_hash = self._generate_query_hash()
 
     def _generate_query_hash(self):
-        '''
-        Create a unique hash for this query. To do this we have to ensure that the features like the
-        order of filters is ignored to ensure that the meaning of the query is what we're capturing.
+        """
+        Create a unique hash for this query. To do this we have to ensure that the
+        features like the order of filters is ignored to ensure that the meaning of the
+        query is what we're capturing.
 
         :return: a unique hash of the query
-        '''
+        """
         query = {}
         for key, value in self.query.items():
             if key == 'filters':
@@ -145,34 +147,40 @@ class DatastoreQuery(object):
 
         # sort_keys=True is used otherwise the key ordering would change between python versions
         # and the hash wouldn't match even if the query was the same
-        dumped_query = json.dumps(query, ensure_ascii=False, sort_keys=True).encode('utf8')
+        dumped_query = json.dumps(query, ensure_ascii=False, sort_keys=True).encode(
+            'utf8'
+        )
         return hashlib.sha1(dumped_query).hexdigest()
 
     def get_rounded_version(self, resource_id):
-        '''
-        Round the requested version of this query down to the nearest actual version of the
-        resource. See the versioned-search plugin for more details.
+        """
+        Round the requested version of this query down to the nearest actual version of
+        the resource. See the versioned-search plugin for more details.
 
         :param resource_id: the id of the resource being searched
         :return: the rounded version or None if no versions are available for the given resource id
-        '''
+        """
         # first retrieve the rounded version to use
         data_dict = {'resource_id': resource_id, 'version': self.requested_version}
         return toolkit.get_action('datastore_get_rounded_version')({}, data_dict)
 
     def get_count(self, resource_id):
-        '''
-        Retrieve the number of records matched by this query, resource id and version combination.
+        """
+        Retrieve the number of records matched by this query, resource id and version
+        combination.
+
         :param resource_id: the resource id
         :return: an integer value
-        '''
+        """
         data_dict = copy.deepcopy(self.query)
-        data_dict.update({
-            'resource_id': resource_id,
-            # use the version parameter cause it's nicer than having to go in and modify the filters
-            'version': self.get_rounded_version(resource_id),
-            # we don't need the results, just the total
-            'limit': 0,
-        })
+        data_dict.update(
+            {
+                'resource_id': resource_id,
+                # use the version parameter cause it's nicer than having to go in and modify the filters
+                'version': self.get_rounded_version(resource_id),
+                # we don't need the results, just the total
+                'limit': 0,
+            }
+        )
         result = toolkit.get_action('datastore_search')({}, data_dict)
         return result['total']

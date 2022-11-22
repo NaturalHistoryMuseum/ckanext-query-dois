@@ -16,21 +16,21 @@ SAVE_ACTION = 'save'
 
 
 def anonymize_email(email_address):
-    '''
-    Split the email address into it's identity and domain parts, then return the secure hash of the
-    identity and the domain. Bcrypt is used to securely hash the identity, using the domain as the
-    salt.
+    """
+    Split the email address into it's identity and domain parts, then return the secure
+    hash of the identity and the domain. Bcrypt is used to securely hash the identity,
+    using the domain as the salt.
 
     :param email_address: the email address
     :return: a 2-tuple of the email address and the domain
-    '''
+    """
     if email_address is None:
         return None, None
 
     email_address = email_address.lower()
     # figure out the domain from the email address
     try:
-        domain = email_address[email_address.index('@') + 1:]
+        domain = email_address[email_address.index('@') + 1 :]
     except ValueError:
         # no @ found, just use the whole string
         domain = email_address
@@ -45,14 +45,14 @@ def anonymize_email(email_address):
 
 
 def record_stat(query_doi, action, email_address):
-    '''
+    """
     Creates a new QueryDOIStat object and saves it to the database.
 
     :param query_doi: the QueryDOI object against which the stat should be stored
     :param action: the action that occurred to trigger this stat (for example: "download")
     :param email_address: the email address of the user performing the action
     :return: a new QueryDOIStat object
-    '''
+    """
     identifier, domain = anonymize_email(email_address)
     stat = QueryDOIStat(
         doi=query_doi.doi,

@@ -17,13 +17,13 @@ blueprint = Blueprint(name='query_doi', import_name=__name__, url_prefix='/doi')
 
 @blueprint.route('/<data_centre>/<identifier>')
 def landing_page(data_centre, identifier):
-    '''
+    """
     Renders the landing page for the given DOI.
 
     :param data_centre: the data centre prefix
     :param identifier: the DOI identifier
     :return: the rendered landing page
-    '''
+    """
     doi = '{}/{}'.format(data_centre, identifier)
     query_doi = _helpers.get_query_doi(doi)
     if query_doi is None:
@@ -37,14 +37,14 @@ def landing_page(data_centre, identifier):
 
 @blueprint.route('')
 def doi_stats():
-    '''
-    Returns statistics in JSON format depending on the request parameters. The return will be a
-    list with a dict representing the QueryDOI as each element.
+    """
+    Returns statistics in JSON format depending on the request parameters. The return
+    will be a list with a dict representing the QueryDOI as each element.
 
     This endpoint currently only supports filtering on the resource_id.
 
     :return: a JSON stringified list of dicts
-    '''
+    """
     query = model.Session.query(QueryDOI)
 
     # by default order by id desc to get the latest first
@@ -64,12 +64,12 @@ def doi_stats():
 
 @blueprint.route('/stats')
 def action_stats():
-    '''
-    Returns action statistics in JSON format depending on the request parameters. The return will be
-    a list with a dict representing the QueryDOIStat as each element.
+    """
+    Returns action statistics in JSON format depending on the request parameters. The
+    return will be a list with a dict representing the QueryDOIStat as each element.
 
     :return: a JSON stringified list of dicts
-    '''
+    """
     query = model.Session.query(QueryDOIStat)
 
     # by default order by id desc to get the latest first
@@ -83,9 +83,9 @@ def action_stats():
 
     resource_id = toolkit.request.params.get('resource_id', None)
     if resource_id:
-        query = query \
-            .join(QueryDOI, QueryDOI.doi == QueryDOIStat.doi) \
-            .filter(QueryDOI.on_resource(resource_id))
+        query = query.join(QueryDOI, QueryDOI.doi == QueryDOIStat.doi).filter(
+            QueryDOI.on_resource(resource_id)
+        )
 
     # apply the offset and limit, with sensible defaults
     query = query.offset(toolkit.request.params.get('offset', 0))
