@@ -1,17 +1,21 @@
+<!--header-start-->
 <img src=".github/nhm-logo.svg" align="left" width="150px" height="100px" hspace="40"/>
 
 # ckanext-query-dois
 
-[![Travis](https://img.shields.io/travis/NaturalHistoryMuseum/ckanext-query-dois/master.svg?style=flat-square)](https://travis-ci.org/NaturalHistoryMuseum/ckanext-query-dois)
-[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-query-dois/master.svg?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-query-dois)
+[![Tests](https://img.shields.io/github/workflow/status/NaturalHistoryMuseum/ckanext-query-dois/Tests?style=flat-square)](https://github.com/NaturalHistoryMuseum/ckanext-query-dois/actions/workflows/main.yml)
+[![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-query-dois/main?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-query-dois)
 [![CKAN](https://img.shields.io/badge/ckan-2.9.1-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 [![Python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg?style=flat-square)](https://www.python.org/)
+[![Docs](https://img.shields.io/readthedocs/ckanext-query-dois?style=flat-square)](https://ckanext-query-dois.readthedocs.io)
 
 _A CKAN extension that creates DOIs for queries on resources._
 
+<!--header-end-->
 
 # Overview
 
+<!--overview-start-->
 This extension creates (mints) digital object identifiers (DOIs) for queries on resources. By recording the query parameters used and the exact version of the data at the time of the query, this allows precise retrieval of the data as it looked when the DOI was minted.
 
 **Must be used in conjunction with the [ckanext-versioned-datastore](https://github.com/NaturalHistoryMuseum/ckanext-versioned-datastore).**
@@ -20,9 +24,11 @@ _Optionally:_ [ckanext-ckanpackager](https://github.com/NaturalHistoryMuseum/cka
 
 You will need an account with a DataCite DOI service provider to use this extension.
 
+<!--overview-end-->
 
 # Installation
 
+<!--installation-start-->
 Path variables used below:
 - `$INSTALL_FOLDER` (i.e. where CKAN is installed), e.g. `/usr/lib/ckan/default`
 - `$CONFIG_FILE`, e.g. `/etc/ckan/default/development.ini`
@@ -66,8 +72,15 @@ Path variables used below:
   ckan -c $CONFIG_FILE query-dois initdb
   ```
 
+## Further setup
+
+You need to sign up for an account with [DataCite](https://datacite.org) and provide the credentials in your configuration.
+
+<!--installation-end-->
+
 # Configuration
 
+<!--configuration-start-->
 These are the options that can be specified in your .ini config file.
 
 ## **[REQUIRED]**
@@ -86,14 +99,11 @@ Name|Description|Options|Default
 --|--|--|--
 `ckanext.query_dois.test_mode`|Enable/disable using test DOIs (i.e. not creating real DOIs)|True/False|True
 
-
-# Further Setup
-
-This extension will only work if you have signed up for an account with [DataCite](https://datacite.org).
-
+<!--configuration-end-->
 
 # Usage
 
+<!--usage-start-->
 ## Commands
 
 ### `initdb`
@@ -104,12 +114,12 @@ Initialises the database table.
     ckan -c $CONFIG_FILE query-dois initdb
     ```
 
+<!--usage-end-->
 
 # Testing
-_Test coverage is currently extremely limited._
 
-To run the tests in this extension, there is a Docker compose configuration available in this
-repository to make it easy.
+<!--testing-start-->
+There is a Docker compose configuration available in this repository to make it easier to run tests.
 
 To run the tests against ckan 2.9.x on Python3:
 
@@ -126,4 +136,6 @@ docker-compose build
 docker-compose run ckan
 ```
 
-The ckan image uses the Dockerfile in the `docker/` folder which is based on `openknowledge/ckan-dev:2.9`.
+The ckan image uses the Dockerfile in the `docker/` folder.
+
+<!--testing-end-->

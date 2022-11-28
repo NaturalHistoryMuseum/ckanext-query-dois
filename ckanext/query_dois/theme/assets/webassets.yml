@@ -1,15 +1,21 @@
 main:
-  output: ckanext-versioned-datastore/%(version)s_main.css
+  output: ckanext-query-dois/%(version)s_main.css
+  filters: less
+  config:
+    LESS_BIN: ../../../../../node_modules/less/bin/lessc
   contents:
-    - css/query_dois.css
+    - less/query_dois.less
 
 visual_query:
-  output: ckanext-versioned-datastore/%(version)s_visual_query.css
+  output: ckanext-query-dois/%(version)s_visual_query.css
+  filters: less
+  config:
+    LESS_BIN: ../../../../../node_modules/less/bin/lessc
   contents:
-    - css/visual_query.css
+    - less/visual_query.less
 
 multisearch:
-  output: ckanext-versioned-datastore/%(version)s_multisearch.css
+  output: ckanext-query-dois/%(version)s_multisearch.js
   filters: rjsmin
   contents:
     - scripts/multisearch_download.js

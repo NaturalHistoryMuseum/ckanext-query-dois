@@ -57,9 +57,9 @@ query_doi_stat_table = Table(
 
 
 class QueryDOI(DomainObject):
-    '''
+    """
     Object for holding query DOIs.
-    '''
+    """
 
     def get_resource_ids(self):
         return list(self.resources_and_versions.keys())
@@ -69,26 +69,26 @@ class QueryDOI(DomainObject):
 
     @staticmethod
     def on_resource(resource_id):
-        '''
+        """
         A convenience method to filter by a specific resource id.
 
         :param resource_id: the resource id
         :return: an sqlalchemy boolean expression
-        '''
+        """
         return QueryDOI.resources_and_versions.has_key(resource_id)
 
 
 class QueryDOIStat(DomainObject):
-    '''
+    """
     Object for holding query DOIs stats.
-    '''
+    """
 
     def to_dict(self):
-        '''
+        """
         Returns the object as a dict for the stats API response.
 
         :return: a dict
-        '''
+        """
         return {
             'id': self.id,
             'doi': self.doi,

@@ -15,15 +15,16 @@ email_validator = toolkit.get_validator('email_validator')
 
 
 def list_of_strings(delimiter=','):
-    '''
-    Creates a converter/validator function which when given a value return a list or raises an error
-    if a list can't be created from the value. If the value passed in is a list already it is
-    returned with no modifications, if it's a string then the delimiter is used to split the string
-    and the result is returned. If the value is neither a list or a string then an error is raised.
+    """
+    Creates a converter/validator function which when given a value return a list or
+    raises an error if a list can't be created from the value. If the value passed in is
+    a list already it is returned with no modifications, if it's a string then the
+    delimiter is used to split the string and the result is returned. If the value is
+    neither a list or a string then an error is raised.
 
     :param delimiter: the string to delimit the value on, if it's a string. Defaults to a comma
     :return: a list
-    '''
+    """
 
     def validator(value):
         if isinstance(value, list):

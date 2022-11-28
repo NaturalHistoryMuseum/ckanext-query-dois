@@ -15,14 +15,14 @@ from ckanext.query_dois.model import QueryDOI
 
 
 def render_filter_value(field, filter_value):
-    '''
-    Renders the given filter value for the given field. This should be called for each filter value
-    rather than by passing a list or filter values.
+    """
+    Renders the given filter value for the given field. This should be called for each
+    filter value rather than by passing a list or filter values.
 
     :param field: the field name
     :param filter_value: the filter value for the field
     :return: the value to display
-    '''
+    """
     if field == '__geo__':
         return json.loads(filter_value)['type']
     else:
@@ -30,23 +30,24 @@ def render_filter_value(field, filter_value):
 
 
 def get_most_recent_dois(package_id, number):
-    '''
-    Retrieve the most recent DOIs that have been minted on queries against the resources in the
-    given package.
+    """
+    Retrieve the most recent DOIs that have been minted on queries against the resources
+    in the given package.
 
     :param package_id: the package's ID
     :param number: the number of DOIs to return
     :return: a list of QueryDOI objects
-    '''
-    package = toolkit.get_action('package_show')({}, {
-        'id': package_id
-    })
+    """
+    package = toolkit.get_action('package_show')({}, {'id': package_id})
     ors = [QueryDOI.on_resource(resource['id']) for resource in package['resources']]
     if not ors:
         return []
-    return list(model.Session.query(QueryDOI)
-                .filter(or_(*ors))
-                .order_by(QueryDOI.id.desc()).limit(number))
+    return list(
+        model.Session.query(QueryDOI)
+        .filter(or_(*ors))
+        .order_by(QueryDOI.id.desc())
+        .limit(number)
+    )
 
 
 # a tuple describing various ways of informing the user something happened a certain number of time
@@ -63,13 +64,13 @@ time_resolutions = (
 
 
 def get_time_ago_description(query_doi):
-    '''
-    Given a QueryDOI object, return a short description of how long ago it was minted. The
-    resolutions are described above in the time_resolutions tuple.
+    """
+    Given a QueryDOI object, return a short description of how long ago it was minted.
+    The resolutions are described above in the time_resolutions tuple.
 
     :param query_doi: the QueryDOI object
     :return: a unicode string describing how long ago the DOI was minted
-    '''
+    """
     seconds = (datetime.now() - query_doi.timestamp).total_seconds()
     for limit, unit, divisor in time_resolutions:
         if seconds < limit:
@@ -79,21 +80,30 @@ def get_time_ago_description(query_doi):
 
 
 def get_landing_page_url(query_doi):
-    '''
+    """
     Given a QueryDOI object, return the landing URL for it.
 
     :param query_doi: a QueryDOI object
     :return: the landing page URL
-    '''
+    """
     data_centre, identifier = query_doi.doi.split('/')
-    return toolkit.url_for('query_doi.landing_page', data_centre=data_centre,
-                           identifier=identifier)
+    return toolkit.url_for(
+        'query_doi.landing_page', data_centre=data_centre, identifier=identifier
+    )
 
 
-def create_citation_text(query_doi, creation_timestamp, resource_name, package_title,
-                         package_doi=None, publisher=None, html=False):
-    '''
-    Creates the citation text for the given query doi and the given additional related arguments.
+def create_citation_text(
+    query_doi,
+    creation_timestamp,
+    resource_name,
+    package_title,
+    package_doi=None,
+    publisher=None,
+    html=False,
+):
+    """
+    Creates the citation text for the given query doi and the given additional related
+    arguments.
 
     :param query_doi: the query's DOI, this should just be the prefix/suffix, e.g. 10.xxxx/xxxxxx,
                       not the full URL
@@ -106,7 +116,7 @@ def create_citation_text(query_doi, creation_timestamp, resource_name, package_t
     :param html: whether to include a tags around URLs in the returned string. Defaults to False
                  which does not add a tags and therefore the returned string is just pure text
     :return: a citation string for the given query DOI and associated data
-    '''
+    """
     # default the publisher's value if needed
     if publisher is None:
         publisher = toolkit.config.get('ckanext.query_dois.publisher')
@@ -114,8 +124,10 @@ def create_citation_text(query_doi, creation_timestamp, resource_name, package_t
     # this is the citation's base form. This form is derived from the recommended RDA citation
     # format for evolving data when citing with a query. For more information see:
     # https://github.com/NaturalHistoryMuseum/ckanext-query-dois/issues/2
-    citation_text = '{publisher} ({year}). Data Portal Query on "{resource_name}" created at ' \
-                    '{creation_datetime} PID {query_doi}. Subset of "{dataset_name}" (dataset)'
+    citation_text = (
+        '{publisher} ({year}). Data Portal Query on "{resource_name}" created at '
+        '{creation_datetime} PID {query_doi}. Subset of "{dataset_name}" (dataset)'
+    )
 
     # these are the parameters which will be used on the above string
     params = {
@@ -144,21 +156,23 @@ def create_citation_text(query_doi, creation_timestamp, resource_name, package_t
 
 
 def create_multisearch_citation_text(query_doi, html=False):
-    '''
-    Creates the citation text for a multisearch based DOI and returns it, either as a raw string or
-    as a piece of html, if requested.
+    """
+    Creates the citation text for a multisearch based DOI and returns it, either as a
+    raw string or as a piece of html, if requested.
 
     :param query_doi: a query doi object
     :param html: whether to return a basic string or a piece of html
     :return: the citation text
-    '''
+    """
     publisher = toolkit.config.get('ckanext.query_dois.publisher')
 
     # this is the citation's base form. This form is derived from the recommended RDA citation
     # format for evolving data when citing with a query. For more information see:
     # https://github.com/NaturalHistoryMuseum/ckanext-query-dois/issues/2
-    citation_text = '{publisher} ({year}). Data Portal query on {resource_count} resources ' \
-                    'created at {creation_datetime} PID {query_doi}'
+    citation_text = (
+        '{publisher} ({year}). Data Portal query on {resource_count} resources '
+        'created at {creation_datetime} PID {query_doi}'
+    )
 
     # these are the parameters which will be used on the above string
     params = {
@@ -178,10 +192,10 @@ def create_multisearch_citation_text(query_doi, html=False):
 
 
 def pretty_print_query(query):
-    '''
+    """
     Does what you'd expect really.
 
     :param query: a query dict
     :return: a string of pretty json
-    '''
+    """
     return json.dumps(query, sort_keys=True, indent=2)
