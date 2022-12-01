@@ -84,19 +84,19 @@ These are the options that can be specified in your .ini config file.
 
 ## **[REQUIRED]**
 
-Name|Description|Options
---|--|--
-`ckanext.query_dois.prefix`|Prefix to use for the new DOIs|
-`ckanext.query_dois.datacite_username`|Datacite account username|
-`ckanext.query_dois.datacite_password`|Datacite account password|
-`ckanext.query_dois.doi_title`|Template string for the DOI title: takes `count` as a format argument|
-`ckanext.query_dois.publisher`|DOI publisher name|
+| Name                                   | Description                                                           | Options |
+|----------------------------------------|-----------------------------------------------------------------------|---------|
+| `ckanext.query_dois.prefix`            | Prefix to use for the new DOIs                                        |         |
+| `ckanext.query_dois.datacite_username` | Datacite account username                                             |         |
+| `ckanext.query_dois.datacite_password` | Datacite account password                                             |         |
+| `ckanext.query_dois.doi_title`         | Template string for the DOI title: takes `count` as a format argument |         |
+| `ckanext.query_dois.publisher`         | DOI publisher name                                                    |         |
 
 ## Other options
 
-Name|Description|Options|Default
---|--|--|--
-`ckanext.query_dois.test_mode`|Enable/disable using test DOIs (i.e. not creating real DOIs)|True/False|True
+| Name                           | Description                                                  | Options    | Default |
+|--------------------------------|--------------------------------------------------------------|------------|---------|
+| `ckanext.query_dois.test_mode` | Enable/disable using test DOIs (i.e. not creating real DOIs) | True/False | True    |
 
 <!--configuration-end-->
 
