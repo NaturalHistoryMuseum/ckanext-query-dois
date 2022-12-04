@@ -75,9 +75,7 @@ class TestGetDOICount:
 
 @pytest.mark.usefixtures("clean_db", "setup_db")
 class TestGetMostRecentDOIs:
-    @pytest.mark.skip
     def test_no_package(self):
-        # TODO: this currently doesn't work, hence the skip
         assert len(get_most_recent_dois("efiownfwe", 5)) == 0
 
     def test_no_resources(self):
