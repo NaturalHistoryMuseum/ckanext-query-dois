@@ -59,16 +59,10 @@ def get_most_recent_dois(package_id, number):
     :param number: the number of DOIs to return
     :return: a list of QueryDOI objects
     """
-    package = toolkit.get_action('package_show')({}, {'id': package_id})
-    ors = [QueryDOI.on_resource(resource['id']) for resource in package['resources']]
-    if not ors:
+    query = _make_all_resource_query(package_id)
+    if query is None:
         return []
-    return list(
-        model.Session.query(QueryDOI)
-        .filter(or_(*ors))
-        .order_by(QueryDOI.id.desc())
-        .limit(number)
-    )
+    return list(query.order_by(QueryDOI.id.desc()).limit(number))
 
 
 def get_doi_count(package_id: str) -> int:
