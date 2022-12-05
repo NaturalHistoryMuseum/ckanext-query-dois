@@ -167,4 +167,5 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             'create_citation_text': helpers.create_citation_text,
             'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
             'pretty_print_query': helpers.pretty_print_query,
+            'get_doi_count': helpers.get_doi_count,
         }
