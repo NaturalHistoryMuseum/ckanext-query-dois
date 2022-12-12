@@ -68,12 +68,17 @@ Installing from a `pyproject.toml` in editable mode (i.e. `pip install -e`) requ
    ckan.plugins = ... query_dois
    ```
 
-2. Initialise database tables:
+2. Install `lessc` globally:
+   ```shell
+   npm install -g "less@~4.1"
+   ```
+
+3. Initialise database tables:
    ```shell
    ckan -c $CONFIG_FILE query-dois initdb
    ```
 
-3. Sign up for an account with [DataCite](https://datacite.org) and provide the credentials in your configuration.
+4. Sign up for an account with [DataCite](https://datacite.org) and provide the credentials in your configuration.
 
 <!--installation-end-->
 
