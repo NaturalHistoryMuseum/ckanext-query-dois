@@ -1,16 +1,12 @@
 main:
   output: ckanext-query-dois/%(version)s_main.css
   filters: less
-  config:
-    LESS_BIN: ../../../../../node_modules/less/bin/lessc
   contents:
     - less/query_dois.less
 
 visual_query:
   output: ckanext-query-dois/%(version)s_visual_query.css
   filters: less
-  config:
-    LESS_BIN: ../../../../../node_modules/less/bin/lessc
   contents:
     - less/visual_query.less
 
