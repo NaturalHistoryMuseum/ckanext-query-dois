@@ -19,10 +19,10 @@ classifiers = [
     "Programming Language :: Python :: 3.8"
 ]
 dependencies = [
-    "ckantools>=0.3.0",
     "datacite==1.1.2",
     "dicthash==0.0.2",
-    "bcrypt==3.1.4"
+    "bcrypt==3.1.4",
+    "ckantools>=0.3.0"
 ]
 
 [project.optional-dependencies]
@@ -54,8 +54,7 @@ zip-safe = false
 exclude = ["tests", "docs"]
 
 [tool.setuptools.package-data]
-"ckanext.query_dois" = ["package.json"]
-"ckanext.query_dois.theme" = ["**/*"]
+"ckanext.query_dois.theme" = ["*", "**/*"]
 
 [tool.commitizen]
 name = "cz_nhm"
@@ -64,7 +63,6 @@ tag_format = "v$version"
 update_changelog_on_bump = true
 changelog_incremental = true
 version_files = [
-    "package.json",
     "pyproject.toml:version"
 ]
 
