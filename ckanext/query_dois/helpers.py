@@ -3,6 +3,7 @@
 #
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
+from typing import Optional
 
 import json
 from datetime import datetime
@@ -12,6 +13,7 @@ from ckan.plugins import toolkit
 from sqlalchemy import or_
 from ckan.lib.helpers import link_to
 from ckanext.query_dois.model import QueryDOI
+from sqlalchemy.orm import Query
 
 
 def render_filter_value(field, filter_value):
@@ -29,6 +31,25 @@ def render_filter_value(field, filter_value):
         return filter_value
 
 
+def _make_all_resource_query(package_id: str) -> Optional[Query]:
+    """
+    Creates an SQL Alchemy query that can get all the QueryDOI entities associated with
+    the resources of the given package.
+
+    :param package_id:
+    :return: None if the package doesn't exist or if the package has no resources,
+             otherwise, returns an SQL Alchemy Query object
+    """
+    try:
+        package = toolkit.get_action('package_show')({}, {'id': package_id})
+    except toolkit.ObjectNotFound:
+        return None
+    ors = [QueryDOI.on_resource(resource['id']) for resource in package['resources']]
+    if not ors:
+        return None
+    return model.Session.query(QueryDOI).filter(or_(*ors))
+
+
 def get_most_recent_dois(package_id, number):
     """
     Retrieve the most recent DOIs that have been minted on queries against the resources
@@ -38,16 +59,22 @@ def get_most_recent_dois(package_id, number):
     :param number: the number of DOIs to return
     :return: a list of QueryDOI objects
     """
-    package = toolkit.get_action('package_show')({}, {'id': package_id})
-    ors = [QueryDOI.on_resource(resource['id']) for resource in package['resources']]
-    if not ors:
+    query = _make_all_resource_query(package_id)
+    if query is None:
         return []
-    return list(
-        model.Session.query(QueryDOI)
-        .filter(or_(*ors))
-        .order_by(QueryDOI.id.desc())
-        .limit(number)
-    )
+    return list(query.order_by(QueryDOI.id.desc()).limit(number))
+
+
+def get_doi_count(package_id: str) -> int:
+    """
+    Return the total count of DOIs created against the resources within the given
+    package.
+
+    :param package_id: the ID of the package
+    :return: a number
+    """
+    query = _make_all_resource_query(package_id)
+    return 0 if query is None else query.count()
 
 
 # a tuple describing various ways of informing the user something happened a certain number of time
