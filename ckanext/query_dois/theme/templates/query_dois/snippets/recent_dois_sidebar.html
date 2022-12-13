@@ -9,9 +9,13 @@ Example usage:
     {% snippet "query_dois/snippets/recent_dois.html", package_id=package.id, number=5 %}
 #}
 
+{% asset 'ckanext-query-dois/main' %}
+
 <section class="module module-narrow">
 <div class="flex-container flex-between flex-stretch-first nav-simple-heading">
-    <h2 class="module-heading"><i class="fas fa-clock inline-icon-left"></i>{{ _('Recent query DOIs') }}</h2>
+    <h2 class="module-heading"><i class="fas fa-clock inline-icon-left"></i>
+        {{ _('Recent query DOIs') }}
+    </h2>
     <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
             data-target="#nav-query-dois" aria-expanded="false">
         <span class="sr-only">expand</span>
@@ -19,9 +23,34 @@ Example usage:
 </div>
 
     <div>
+        {% set query_doi_count = h.get_doi_count(package_id) %}
         <ul class="nav nav-simple navbar-collapse collapse" id="nav-query-dois">
+        {% if query_doi_count == 0 %}
+            <li class="nav-item">
+                <p>
+                    <i class="fas fa-unlink inline-icon-left"></i>
+                    {{ _('No recent DOIs') }}
+                </p>
+            </li>
+            {% else %}
             {% set query_dois = h.get_most_recent_dois(package_id, number) %}
-            {% if query_dois %}
+                <li class="nav-item qd_sidebar_recent_help">
+                    <p>
+                        When users download data from the resources in this dataset (or
+                        make a request to cite the data) they get a DOI that
+                        persistently identifies it.
+                        This DOI can specify a subset or the whole resource.
+                    </p>
+                    <p>
+                        This DOI is the preferred way of citing the data when it is used
+                        in publications and papers.
+                        This list shows the most recent DOIs created for the resources
+                        in this dataset.
+                    </p>
+                    <p class="qd_sidebar_total">
+                        Total DOIs: {{ query_doi_count }}
+                    </p>
+                </li>
                 {% for query_doi in query_dois %}
                 <li class="nav-item">
                     <a href="{{ h.get_landing_page_url(query_doi) }}" title="{{ h.get_time_ago_description(query_doi) }}">
@@ -30,13 +59,6 @@ Example usage:
                     </a>
                 </li>
                 {% endfor %}
-            {% else %}
-                <li class="nav-item">
-                    <p>
-                        <i class="fas fa-unlink inline-icon-left"></i>
-                        {{ _('No recent DOIs') }}
-                    </p>
-                </li>
             {% endif %}
         </ul>
     </div>
