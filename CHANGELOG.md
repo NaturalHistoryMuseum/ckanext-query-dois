@@ -1,5 +1,29 @@
 # Changelog
 
+## v2.3.0 (2022-12-13)
+
+### Feature
+
+- add the total dois to the query doi sidebar
+- add the new get_doi_count helper to the plugin helpers list
+- add a new helper that returns the DOI count for a package
+
+### Refactor
+
+- changes existing function to use common util function
+
+### Tests
+
+- move unit tests into a unit subdir
+- remove skip mark on broken test
+- add tests for get_most_recent_dois before refactor
+- add test for new doi count helper
+
+### Chores/Misc
+
+- reword the recent DOI explainer text
+- add conftest to setup database model as fixture
+
 ## v2.2.2 (2022-12-12)
 
 ### Docs
