@@ -66,20 +66,21 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         plugins.toolkit.add_resource('theme/assets', 'ckanext-query-dois')
 
     # IVersionedDatastoreDownloads
-    def download_modify_email_template_context(self, request, context):
+    def download_modify_notifier_template_context(self, request, context):
         try:
             # if a DOI can be created it should already have been created in download_before_write
             doi = find_existing_doi(
-                request.resource_ids_and_versions,
-                request.query_hash,
-                request.query_version,
+                request.core_record.resource_ids_and_versions,
+                request.core_record.query_hash,
+                request.core_record.query_version,
             )
 
-            # update the context with the doi
-            context['doi'] = doi.doi
+            if doi:
+                # update the context with the doi
+                context['doi'] = doi.doi
 
-            # record a download stat against the DOI
-            record_stat(doi, DOWNLOAD_ACTION, request.email_address)
+                # record a download stat against the DOI
+                record_stat(doi, DOWNLOAD_ACTION, identifier=request.id)
         except:
             # if anything goes wrong we don't want to stop the download from going ahead, just
             # log the error and move on
@@ -88,25 +89,30 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         # always return the context
         return context
 
-    def download_before_write(self, request):
+    def download_modify_manifest(self, manifest, request):
         try:
-            # check to see if the download is something we can stick a DOI on (this will throw a
-            # validation error if any of the resources aren't valid for DOI-ing
+            # check to see if the download is something we can stick a DOI on (this will
+            # throw a validation error if any of the resources aren't valid for DOI-ing
             extract_resource_ids_and_versions(
-                req_resource_ids_and_versions=request.resource_ids_and_versions
+                req_resource_ids_and_versions=request.core_record.resource_ids_and_versions
             )
 
             # mint the DOI on datacite if necessary
             created, doi = mint_multisearch_doi(
-                request.query, request.query_version, request.resource_ids_and_versions
+                request.core_record.query,
+                request.core_record.query_version,
+                request.core_record.resource_ids_and_versions,
             )
+
+            # add the doi to the manifest
+            manifest['query-doi'] = doi.doi
         except:
             # if anything goes wrong we don't want to stop the download from going ahead, just
             # log the error and move on
             log.error('Failed to mint/retrieve DOI', exc_info=True)
 
-        # always return the request
-        return request
+        # always return the manifest
+        return manifest
 
     # ICkanPackager
     def before_package_request(
