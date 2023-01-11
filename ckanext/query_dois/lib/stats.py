@@ -9,6 +9,7 @@ from datetime import datetime
 
 import bcrypt
 from ckanext.query_dois.model import QueryDOIStat
+import uuid
 
 # action types
 DOWNLOAD_ACTION = 'download'
@@ -44,16 +45,23 @@ def anonymize_email(email_address):
     return bcrypt.hashpw(email_address.encode('utf-8'), salt), domain
 
 
-def record_stat(query_doi, action, email_address):
+def record_stat(query_doi, action, email_address=None, domain=None, identifier=None):
     """
     Creates a new QueryDOIStat object and saves it to the database.
 
     :param query_doi: the QueryDOI object against which the stat should be stored
     :param action: the action that occurred to trigger this stat (for example: "download")
     :param email_address: the email address of the user performing the action
+    :param domain: an alternate domain name if email not specified
+    :param identifier: an alternate identifier if email not specified
     :return: a new QueryDOIStat object
     """
-    identifier, domain = anonymize_email(email_address)
+    if email_address:
+        identifier, domain = anonymize_email(email_address)
+    if identifier is None:
+        # just a random uuid if nothing else is specified, so we don't end up grouping
+        # many unrelated users together under the identifier of "None"
+        identifier = uuid.uuid4().hex
     stat = QueryDOIStat(
         doi=query_doi.doi,
         action=action,
