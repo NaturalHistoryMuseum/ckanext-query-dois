@@ -43,6 +43,9 @@ $(document).ready(function () {
             if (json.success) {
                 $('.flash-messages')
                     .append(`<div class="alert alert-success">Download queued. Check the <a href="/status/download/${ json.result.download_id }">status page</a> to follow its progress.</div>`);
+                $('#download-button')
+                    .replaceWith(`<a id="download-button" href="/status/download/${ json.result.download_id }" class="btn btn-primary text-right">
+                    <i class="fas fa-arrow-circle-right"></i> Download status</a>`);
             } else {
                 $('.flash-messages')
                     .append('<div class="alert alert-error">Something went wrong, try again later</div>');
