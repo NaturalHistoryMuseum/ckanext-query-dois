@@ -78,12 +78,9 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             if doi:
                 # update the context with the doi
                 context['doi'] = doi.doi
-
-                # record a download stat against the DOI
-                record_stat(doi, DOWNLOAD_ACTION, identifier=request.id)
         except:
-            # if anything goes wrong we don't want to stop the download from going ahead, just
-            # log the error and move on
+            # if anything goes wrong we don't want to stop the download; just log the
+            # error and move on
             log.error('Failed to retrieve DOI and/or create stats', exc_info=True)
 
         # always return the context
@@ -107,12 +104,29 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             # add the doi to the manifest
             manifest['query-doi'] = doi.doi
         except:
-            # if anything goes wrong we don't want to stop the download from going ahead, just
-            # log the error and move on
+            # if anything goes wrong we don't want to stop the download from completing;
+            # just log the error and move on
             log.error('Failed to mint/retrieve DOI', exc_info=True)
 
         # always return the manifest
         return manifest
+
+    def download_after_run(self, request):
+        try:
+            # if a DOI can be created it should already have been created in
+            # download_modify_manifest
+            doi = find_existing_doi(
+                request.core_record.resource_ids_and_versions,
+                request.core_record.query_hash,
+                request.core_record.query_version,
+            )
+
+            if doi and request.state == 'complete':
+                # record a download stat against the DOI
+                record_stat(doi, DOWNLOAD_ACTION, identifier=request.id)
+        except:
+            # just log the error and move on
+            log.error('Failed to retrieve DOI and/or create stats', exc_info=True)
 
     # ICkanPackager
     def before_package_request(
