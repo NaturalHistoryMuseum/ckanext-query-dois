@@ -37,7 +37,7 @@ class TestIntegrationWithIVersionedDatastoreDownloads:
         with patch(
             'ckanext.query_dois.plugin.find_existing_doi', find_existing_doi_mock
         ):
-            ret_context = plugin.download_modify_notifer_template_context(
+            ret_context = plugin.download_modify_notifier_template_context(
                 request, context
             )
 
