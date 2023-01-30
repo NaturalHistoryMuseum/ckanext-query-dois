@@ -11,39 +11,45 @@ $(document).ready(function () {
 
     downloadButton.on('click', function () {
         // pull out the form data
-        const email = $('#download-email').val();
         const format = $('#download-format').val();
-        const separate = $('#download-sep').is(":checked");
-        const empty = $('#download-empty').is(":checked");
+        const separate = $('#download-sep').is(':checked');
+        const empty = $('#download-empty').is(':checked');
 
-        if (!email) {
-            // this one is required so show an error if they haven't given us what we need
-            $('.flash-messages').append('<div class="alert alert-error">Please enter an email address</div>');
-        } else {
-            const payload = {
-                'email_address': email,
+
+        const payload = {
+            'file': {
                 'format': format,
                 'separate_files': separate,
-                'ignore_empty_files': empty,
+                'ignore_empty_fields': empty,
+            },
+            'query': {
                 'query': query,
                 'query_version': queryVersion,
                 'resource_ids_and_versions': resourceIdsAndVersions,
-            };
-            fetch('/api/3/action/datastore_queue_download', {
-                method: 'POST',
-                body: JSON.stringify(payload),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then(function (response) {
-                return response.json();
-            }).then(function (json) {
-                if (json.success) {
-                    $('.flash-messages').append('<div class="alert alert-success">Download queued, you will be emailed once the data is ready</div>');
-                } else {
-                    $('.flash-messages').append('<div class="alert alert-error">Something went wrong, try again later</div>');
-                }
-            });
-        }
+            },
+            'notifier': {
+                'type': 'none'
+            }
+        };
+        fetch('/api/3/action/datastore_queue_download', {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        }).then(function (response) {
+            return response.json();
+        }).then(function (json) {
+            if (json.success) {
+                $('.flash-messages')
+                    .append(`<div class="alert alert-success">Download queued. Check the <a href="/status/download/${ json.result.download_id }">status page</a> to follow its progress.</div>`);
+                $('#download-button')
+                    .replaceWith(`<a id="download-button" href="/status/download/${ json.result.download_id }" class="btn btn-primary text-right">
+                    <i class="fas fa-arrow-circle-right"></i> Download status</a>`);
+            } else {
+                $('.flash-messages')
+                    .append('<div class="alert alert-error">Something went wrong, try again later</div>');
+            }
+        });
     });
 });

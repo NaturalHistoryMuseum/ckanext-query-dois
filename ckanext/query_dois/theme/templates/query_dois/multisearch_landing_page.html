@@ -133,28 +133,33 @@
                   was minted.
               {% endtrans %}
             </p>
-            <div class="form-row">
-                <label for="download-email" class="control-label">Your email</label>
-                <input id="download-email" type="email" placeholder="you@example.com" class="full-width">
-            </div>
-            <div class="form-row">
-                <label for="download-format" class="control-label">File format</label>
-                <select id="download-format" class="full-width">
-                    <option>csv</option>
-                    <option>dwc</option>
-                    <option>xlsx</option>
-                </select>
-            </div>
-            <div class="form-row flex-container flex-wrap flex-between">
-                <div>
-                    <label for="download-sep">One file per resource</label>
-                    <input id="download-sep" type="checkbox" checked>
+            <div class="form-group">
+                <div class="form-row">
+                    <label for="download-format">File format</label>
+                    <select id="download-format"
+                            class="full-width">
+                        <option value="csv">CSV/TSV</option>
+                        <option value="dwc">Darwin Core</option>
+                        <option value="xlsx">Excel (XLSX)</option>
+                        <option value="json">JSON</option>
+                    </select>
                 </div>
-                <div>
-                    <label for="download-empty">Skip empty columns</label>
-                    <input id="download-empty" type="checkbox" checked>
+                <div class="form-row flex-container flex-wrap flex-between">
+                    <div class="no-pad-h">
+                        <label for="download-sep">One file per resource</label>
+                        <input
+                            id="download-sep"
+                            type="checkbox" checked>
+                    </div>
+                    <div class="no-pad-h">
+                        <label for="download-empty">Skip empty columns</label>
+                        <input id="download-empty"
+                               type="checkbox" checked>
+                    </div>
                 </div>
+                <small>View this query on the <a target="_blank" href="/search/{{ original_slug }}">search page</a> for more advanced download options, including email notifications.</small>
             </div>
+
             {% block privacy_warning %}{% endblock %}
             <div class="text-left">
                 <a id="download-button" href="#" class="btn btn-primary text-right"
