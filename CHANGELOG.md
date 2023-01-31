@@ -1,5 +1,38 @@
 # Changelog
 
+## v3.0.0 (2023-01-31)
+
+### Breaking Changes
+
+- now requires version 4 or later of ckanext-versioned-datastore
+
+### Feature
+
+- replace download button with link to status when download queued
+- record stat in new download_after_run hook
+
+### Fix
+
+- update the multisearch landing page with new download options
+- update vds hooks
+
+### Refactor
+
+- **stats**: allow saving stats without email addresses
+
+### Tests
+
+- spell notifier correctly
+- change references to old interface method
+
+### Build System(s)
+
+- **docker**: use 'latest' tag for test docker image
+
+### Chores/Misc
+
+- remove references to v2.4.0
+
 ## v2.3.0 (2022-12-13)
 
 ### Feature
