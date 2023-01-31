@@ -3,7 +3,7 @@
 
 # ckanext-query-dois
 
-[![Tests](https://img.shields.io/github/workflow/status/NaturalHistoryMuseum/ckanext-query-dois/Tests?style=flat-square)](https://github.com/NaturalHistoryMuseum/ckanext-query-dois/actions/workflows/main.yml)
+[![Tests](https://img.shields.io/github/actions/workflow/status/NaturalHistoryMuseum/ckanext-query-dois/main.yml?style=flat-square)](https://github.com/NaturalHistoryMuseum/ckanext-query-dois/actions/workflows/main.yml)
 [![Coveralls](https://img.shields.io/coveralls/github/NaturalHistoryMuseum/ckanext-query-dois/main?style=flat-square)](https://coveralls.io/github/NaturalHistoryMuseum/ckanext-query-dois)
 [![CKAN](https://img.shields.io/badge/ckan-2.9.7-orange.svg?style=flat-square)](https://github.com/ckan/ckan)
 [![Python](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8-blue.svg?style=flat-square)](https://www.python.org/)
@@ -16,7 +16,6 @@ _A CKAN extension that creates DOIs for queries on resources._
 # Overview
 
 <!--overview-start-->
-
 This extension creates (mints) digital object identifiers (DOIs) for queries on resources. By recording the query parameters used and the exact version of the data at the time of the query, this allows precise retrieval of the data as it looked when the DOI was minted.
 
 **Must be used in conjunction with v4+ of the [ckanext-versioned-datastore](https://github.com/NaturalHistoryMuseum/ckanext-versioned-datastore).**
