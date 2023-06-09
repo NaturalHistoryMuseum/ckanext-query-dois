@@ -272,6 +272,8 @@ def mint_doi(resource_ids, datastore_query):
         timestamp,
         record_count,
         requested_version=datastore_query.requested_version,
+        query_version='v0',
+        resource_counts={resource_id: record_count},
     )
     return True, query_doi
 
