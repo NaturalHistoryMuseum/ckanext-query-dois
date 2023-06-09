@@ -150,9 +150,11 @@
     <h2 class="module-heading">
         <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
     </h2>
-    {% asset 'ckanext-ckanpackager/main-css' %}
-    {% asset 'ckanext-ckanpackager/main-js' %}
-    <a data-module="ckanpackager-download-link" data-module-resource-id="{{ resource['id'] }}"
-       class="packager-link btn btn-primary" href="{{ download_url }}">{{ _('Download') }}</a>
+    <div class="module-content">
+        {% snippet 'versioned_datastore/snippets/download_button.html',
+            slug_or_doi=query_doi.doi,
+            icon_class="fas fa-download",
+            label=_('Download') %}
+    </div>
 </div>
 {% endblock %}
