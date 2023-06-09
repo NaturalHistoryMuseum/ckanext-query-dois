@@ -27,11 +27,6 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IActions)
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IClick)
-    # if the ckanpackager is available, we have a hook for it
-    with suppress(ImportError):
-        from ckanext.ckanpackager.interfaces import ICkanPackager
-
-        plugins.implements(ICkanPackager)
     # if the versioned datastore downloader is available, we have a hook for it
     with suppress(ImportError):
         from ckanext.versioned_datastore.interfaces import IVersionedDatastoreDownloads
@@ -127,55 +122,6 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         except:
             # just log the error and move on
             log.error('Failed to retrieve DOI and/or create stats', exc_info=True)
-
-    # ICkanPackager
-    def before_package_request(
-        self, resource_id, package_id, packager_url, request_params
-    ):
-        """
-        This is called prior to the ckanpackager plugin starting it's creation of a
-        download, therefore we can use it to mint DOIs and record a stat.
-
-        :param resource_id: the resource id of the resource that is about to be packaged
-        :param package_id: the package id of the resource that is about to be packaged
-        :param packager_url: the target url for this packaging request
-        :param request_params: a dict of parameters that will be sent with the request
-        :return: the url and the params as a tuple
-        """
-        resource = plugins.toolkit.get_action('resource_show')({}, {'id': resource_id})
-        package = plugins.toolkit.get_action('package_show')({}, {'id': package_id})
-        # only handle DOIs for resources with data in the datastore and that aren't in private
-        # packages
-        if resource.get('datastore_active', False) and not package.get('private', True):
-            try:
-                # the request_params dict comes through with a lot of other parameters in it beyond
-                # the query params, therefore we need to do some stripping out (otherwise the exact
-                # same query will look different due to a different format choice or email address)
-                allowed_keys = {'q', 'filters', 'version'}
-                data_dict = {
-                    k: v for k, v in request_params.items() if k in allowed_keys
-                }
-
-                # the packager converts the filters dict to JSON so we need to convert it back
-                if 'filters' in data_dict:
-                    data_dict['filters'] = json.loads(data_dict['filters'])
-
-                # mint the DOI on datacite if necessary
-                _minted, query_doi = mint_doi(
-                    [resource_id], DatastoreQuery(data_dict=data_dict)
-                )
-                # record a download stat against the DOI
-                record_stat(query_doi, DOWNLOAD_ACTION, request_params['email'])
-                # add the doi to the ckanpackager params so that it can be reported in the email
-                request_params['doi'] = query_doi.doi
-            except:
-                # if anything goes wrong we don't want to stop the download from going ahead, just
-                # log the error and move on
-                log.error(
-                    'Failed to mint/retrieve DOI and/or create stats', exc_info=True
-                )
-
-        return packager_url, request_params
 
     # ITemplateHelpers
     def get_helpers(self):
