@@ -17,6 +17,7 @@ from .lib.stats import DOWNLOAD_ACTION, record_stat
 from .logic import auth, action
 from .logic.utils import extract_resource_ids_and_versions
 
+
 log = logging.getLogger(__name__)
 
 
@@ -28,10 +29,13 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IAuthFunctions)
     plugins.implements(plugins.IClick)
     # if the versioned datastore downloader is available, we have a hook for it
-    with suppress(ImportError):
+    try:
         from ckanext.versioned_datastore.interfaces import IVersionedDatastoreDownloads
 
         plugins.implements(IVersionedDatastoreDownloads, inherit=True)
+        versioned_datastore_available = True
+    except ImportError:
+        versioned_datastore_available = False
 
     # IBlueprint
     def get_blueprint(self):
@@ -134,4 +138,5 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
             'pretty_print_query': helpers.pretty_print_query,
             'get_doi_count': helpers.get_doi_count,
+            'versioned_datastore_available': self.versioned_datastore_available,
         }

@@ -146,6 +146,7 @@
     </div>
 </div>
 
+{% if h.versioned_datastore_available %}
 <div class="module, module-narrow module-shallow">
     <h2 class="module-heading">
         <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
@@ -157,4 +158,5 @@
             label=_('Download') %}
     </div>
 </div>
+{% endif %}
 {% endblock %}
