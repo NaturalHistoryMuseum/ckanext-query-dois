@@ -1,5 +1,33 @@
 # Changelog
 
+## v4.0.0 (2023-07-18)
+
+### Breaking Changes
+
+- remove support for ckanpackager
+
+### Feature
+
+- use versioned_datastore download button snippet
+- set query_version for old queries to v0, add resource_counts
+
+### Fix
+
+- don't load the download button if vds not available
+- old query versions should now be v0
+
+### Refactor
+
+- **dependencies**: remove support for ckanpackager
+
+### Docs
+
+- update version of vds in readme and clarify statement
+
+### Chores/Misc
+
+- add migration to set the default query version to v0
+
 ## v3.0.5 (2023-07-17)
 
 ### Docs
