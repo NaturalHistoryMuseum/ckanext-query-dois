@@ -121,54 +121,17 @@
         </div>
     </div>
 
+    {% if h.versioned_datastore_available %}
     <div class="module, module-narrow module-shallow">
-        {% asset 'ckanext-query-dois/multisearch' %}
         <h2 class="module-heading">
             <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
         </h2>
         <div class="module-content">
-            <p>
-              {% trans %}
-                  Request to download the data associated with this DOI as it looked when the DOI
-                  was minted.
-              {% endtrans %}
-            </p>
-            <div class="form-group">
-                <div class="form-row">
-                    <label for="download-format">File format</label>
-                    <select id="download-format"
-                            class="full-width">
-                        <option value="csv">CSV/TSV</option>
-                        <option value="dwc">Darwin Core</option>
-                        <option value="xlsx">Excel (XLSX)</option>
-                        <option value="json">JSON</option>
-                    </select>
-                </div>
-                <div class="form-row flex-container flex-wrap flex-between">
-                    <div class="no-pad-h">
-                        <label for="download-sep">One file per resource</label>
-                        <input
-                            id="download-sep"
-                            type="checkbox" checked>
-                    </div>
-                    <div class="no-pad-h">
-                        <label for="download-empty">Skip empty columns</label>
-                        <input id="download-empty"
-                               type="checkbox" checked>
-                    </div>
-                </div>
-                <small>View this query on the <a target="_blank" href="/search/{{ original_slug }}">search page</a> for more advanced download options, including email notifications.</small>
-            </div>
-
-            {% block privacy_warning %}{% endblock %}
-            <div class="text-left">
-                <a id="download-button" href="#" class="btn btn-primary text-right"
-                   data-query='{{ query_doi.query|tojson }}'
-                   data-query-version='{{ query_doi.query_version }}'
-                   data-resources-and-versions='{{ query_doi.resources_and_versions|tojson }}'>
-                    <i class="fas fa-download"></i> Request Download
-                </a>
-            </div>
+            {% snippet 'versioned_datastore/snippets/download_button.html',
+            slug_or_doi=query_doi.doi,
+            icon_class="fas fa-download",
+            label=_('Download') %}
         </div>
     </div>
+    {% endif %}
 {% endblock %}

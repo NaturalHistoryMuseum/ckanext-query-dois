@@ -161,27 +161,6 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     }
 
 
-def get_download_url(package, resource, query, rounded_version):
-    """
-    Returns the URL for the CKANPackager's download endpoint, or None if the
-    CKANPackager is not in use.
-
-    :param package: the package dict
-    :param resource: the resource dict
-    :param query: the query dict
-    :param rounded_version: the version rounded down to the nearest available on the resource
-    :return: the URL for packaging the resource up with the CKANPackager or None if the
-             CKANPackager is not installed
-    """
-    try:
-        from ckanext.ckanpackager.lib.utils import url_for_package_resource
-
-        url = url_for_package_resource(package['id'], resource['id'], use_request=False)
-        return url + '&' + encode_params(query, version=rounded_version)
-    except ImportError:
-        return None
-
-
 def get_stats(query_doi):
     '''
     Retrieve some simple stats about the query DOI - this includes the total downloads and the
@@ -242,9 +221,6 @@ def render_datastore_search_doi_page(query_doi):
         'version': rounded_version,
         'reruns': generate_rerun_urls(
             resource, package, query_doi.query, rounded_version
-        ),
-        'download_url': get_download_url(
-            package, resource, query_doi.query, rounded_version
         ),
         'downloads': downloads,
         'last_download_timestamp': last_download_timestamp,

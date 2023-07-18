@@ -29,7 +29,7 @@ def landing_page(data_centre, identifier):
     if query_doi is None:
         raise toolkit.abort(404, toolkit._('DOI not recognised'))
 
-    if query_doi.query_version is not None:
+    if query_doi.query_version is not None and query_doi.query_version != 'v0':
         return _helpers.render_multisearch_doi_page(query_doi)
     else:
         return _helpers.render_datastore_search_doi_page(query_doi)
