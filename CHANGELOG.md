@@ -1,5 +1,24 @@
 # Changelog
 
+## v4.0.1 (2023-10-05)
+
+### Fix
+
+- generate doi in download init, not manifest generation
+
+### Docs
+
+- specify vds version 5.2+ in the README
+
+### Chores/Misc
+
+- add regex for version line in citation file
+- add citation.cff to list of files with version
+- add contributing guidelines
+- add code of conduct
+- add citation file
+- update support.md links
+
 ## v4.0.0 (2023-07-18)
 
 ### Breaking Changes
