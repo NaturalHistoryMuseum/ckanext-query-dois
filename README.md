@@ -18,7 +18,7 @@ _A CKAN extension that creates DOIs for queries on resources._
 <!--overview-start-->
 This extension creates (mints) digital object identifiers (DOIs) for queries on resources. By recording the query parameters used and the exact version of the data at the time of the query, this allows precise retrieval of the data as it looked when the DOI was minted.
 
-Can be used in conjunction with **v5+** of [ckanext-versioned-datastore](https://github.com/NaturalHistoryMuseum/ckanext-versioned-datastore).
+Can be used in conjunction with **v5.2+** of [ckanext-versioned-datastore](https://github.com/NaturalHistoryMuseum/ckanext-versioned-datastore).
 
 You will need an account with a DataCite DOI service provider to use this extension.
 
