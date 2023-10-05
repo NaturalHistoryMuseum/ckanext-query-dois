@@ -65,27 +65,7 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
         plugins.toolkit.add_resource('theme/assets', 'ckanext-query-dois')
 
     # IVersionedDatastoreDownloads
-    def download_modify_notifier_template_context(self, request, context):
-        try:
-            # if a DOI can be created it should already have been created in download_before_write
-            doi = find_existing_doi(
-                request.core_record.resource_ids_and_versions,
-                request.core_record.query_hash,
-                request.core_record.query_version,
-            )
-
-            if doi:
-                # update the context with the doi
-                context['doi'] = doi.doi
-        except:
-            # if anything goes wrong we don't want to stop the download; just log the
-            # error and move on
-            log.error('Failed to retrieve DOI and/or create stats', exc_info=True)
-
-        # always return the context
-        return context
-
-    def download_modify_manifest(self, manifest, request):
+    def download_after_init(self, request):
         try:
             # check to see if the download is something we can stick a DOI on (this will
             # throw a validation error if any of the resources aren't valid for DOI-ing
@@ -99,13 +79,47 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
                 request.core_record.query_version,
                 request.core_record.resource_ids_and_versions,
             )
-
-            # add the doi to the manifest
-            manifest['query-doi'] = doi.doi
         except:
             # if anything goes wrong we don't want to stop the download from completing;
             # just log the error and move on
             log.error('Failed to mint/retrieve DOI', exc_info=True)
+
+    def download_modify_notifier_template_context(self, request, context):
+        try:
+            # if a DOI can be created it should already have been created in download_after_init
+            doi = find_existing_doi(
+                request.core_record.resource_ids_and_versions,
+                request.core_record.query_hash,
+                request.core_record.query_version,
+            )
+
+            if doi:
+                # update the context with the doi
+                context['doi'] = doi.doi
+        except:
+            # if anything goes wrong we don't want to stop the download; just log the
+            # error and move on
+            log.error('Failed to retrieve DOI', exc_info=True)
+
+        # always return the context
+        return context
+
+    def download_modify_manifest(self, manifest, request):
+        try:
+            # if a DOI can be created it should already have been created in download_after_init
+            doi = find_existing_doi(
+                request.core_record.resource_ids_and_versions,
+                request.core_record.query_hash,
+                request.core_record.query_version,
+            )
+
+            if doi:
+                # add the doi to the manifest
+                manifest['query-doi'] = doi.doi
+        except:
+            # if anything goes wrong we don't want to stop the download from completing;
+            # just log the error and move on
+            log.error('Failed to retrieve DOI', exc_info=True)
 
         # always return the manifest
         return manifest
