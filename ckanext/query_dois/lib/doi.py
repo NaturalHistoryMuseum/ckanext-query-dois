@@ -307,22 +307,14 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
     # collect up some details we're going to need to mint the DOI
     timestamp = datetime.now()
     authors = get_authors(resource_ids_and_versions.keys())
-    # find out how many records match the query
-    search_data_dict = {
-        'query': query,
-        'query_version': query_version,
-        'resource_ids_and_versions': resource_ids_and_versions,
-        'size': 0,
-    }
-    record_count = toolkit.get_action('datastore_multisearch')({}, search_data_dict)[
-        'total'
-    ]
     # find out how many records come from each resource
     resource_counts = get_resource_counts(
         query, query_version, resource_ids_and_versions
     )
-    # the list call is used here so that we can modify the resource_ids_and_versions dict as we
-    # iterate over it without causing an error
+    # sum the count from each resource to work out the total hits
+    record_count = sum(resource_counts.values())
+    # the list call is used here so that we can modify the resource_ids_and_versions
+    # dict as we iterate over it without causing an error
     for resource_id in list(resource_ids_and_versions.keys()):
         if resource_counts[resource_id] == 0:
             del resource_ids_and_versions[resource_id]
