@@ -6,6 +6,7 @@
 
 import itertools
 from functools import partial
+from typing import Dict
 
 from ckan import model
 from ckan.plugins import toolkit
@@ -75,7 +76,9 @@ def get_authors(resource_ids):
     return list(set(itertools.chain.from_iterable(query)))
 
 
-def get_resource_counts(query, query_version, resource_ids_and_versions):
+def get_resource_counts(
+    query, query_version, resource_ids_and_versions
+) -> Dict[str, int]:
     """
     Given a set of query parameters, figure out how many records are found on each
     resource.
@@ -85,16 +88,9 @@ def get_resource_counts(query, query_version, resource_ids_and_versions):
     :param resource_ids_and_versions: the resource ids and their specific versions
     :return: a dict of resource ids to counts
     """
-    counts = {}
-    multisearch_action = partial(toolkit.get_action('datastore_multisearch'), {})
-    for resource_id, version in resource_ids_and_versions.items():
-        # find out how many records match the query in the specific resource
-        search_data_dict = {
-            'query': query,
-            'query_version': query_version,
-            'resource_ids': [resource_id],
-            'version': version,
-            'size': 0,
-        }
-        counts[resource_id] = multisearch_action(search_data_dict)['total']
-    return counts
+    data_dict = {
+        "query": query,
+        "query_version": query_version,
+        "resource_ids_and_versions": resource_ids_and_versions,
+    }
+    return toolkit.get_action("datastore_multisearch_counts")({}, data_dict)
