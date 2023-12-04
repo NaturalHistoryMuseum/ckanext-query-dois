@@ -1,5 +1,15 @@
 # Changelog
 
+## v4.1.0 (2023-12-04)
+
+### Feature
+
+- use the new datastore_multisearch_counts action to speed up resource hits counting
+
+### Refactor
+
+- remove a datastore_multisearch call by summing the individual resource counts
+
 ## v4.0.1 (2023-10-05)
 
 ### Fix
