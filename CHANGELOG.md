@@ -1,5 +1,11 @@
 # Changelog
 
+## v4.1.1 (2024-08-20)
+
+### Chores/Misc
+
+- add build section to read the docs config
+
 ## v4.1.0 (2023-12-04)
 
 ### Feature
