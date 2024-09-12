@@ -7,15 +7,17 @@
 import logging
 import random
 import string
+from datetime import datetime
+from typing import Tuple, Optional
+
+from datacite import DataCiteMDSClient, schema41
+from datacite.errors import DataCiteError, DataCiteNotFoundError
+
 from ckan import model
 from ckan.common import asbool
 from ckan.plugins import toolkit
-from datacite import DataCiteMDSClient, schema41
-from datacite.errors import DataCiteError, DataCiteNotFoundError
-from datetime import datetime
-
-from .utils import get_resource_and_package, get_authors, get_resource_counts
-from ..model import QueryDOI
+from ckanext.query_dois.lib.query import Query
+from ckanext.query_dois.model import QueryDOI
 
 log = logging.getLogger(__name__)
 
@@ -118,37 +120,35 @@ def generate_doi(client):
         raise Exception('Failed to generate a DOI')
 
 
-def find_existing_doi(resources_and_versions, query_hash, query_version=None):
+def find_existing_doi(query: Query) -> Optional[QueryDOI]:
     """
-    Returns a QueryDOI object representing the same search, or returns None if one
-    doesn't exist.
+    Returns a QueryDOI object representing the query, or returns None if one doesn't
+    exist.
 
-    :param resources_and_versions: the resource ids being queried mapped to the versions they're
-                                   being queried at
-    :param query_hash: the hash of the query
-    :param query_version: the query version
+    :param query: a Query object
     :return: a QueryDOI object or None
     """
     return (
         model.Session.query(QueryDOI)
         .filter(
-            QueryDOI.resources_and_versions == resources_and_versions,
-            QueryDOI.query_hash == query_hash,
-            QueryDOI.query_version == query_version,
+            QueryDOI.query_hash == query.query_hash,
+            QueryDOI.query_version == query.query_version,
+            QueryDOI.resources_and_versions == query.resources_and_versions,
         )
         .first()
     )
 
 
-def create_doi_on_datacite(client, doi, authors, timestamp, count):
+def create_doi_on_datacite(
+    client: DataCiteMDSClient, doi: str, timestamp: datetime, query: Query
+):
     """
     Mints the given DOI on datacite using the client.
 
     :param client: the MDS datacite client
     :param doi: the doi (full, prefix and suffix)
-    :param authors: the authors to associate with the DOI
     :param timestamp: the datetime when the DOI was created
-    :param count: the number of records contained in the DOI's data
+    :param query: a Query object
     """
     # create the data for datacite
     data = {
@@ -189,96 +189,34 @@ def create_doi_on_datacite(client, doi, authors, timestamp, count):
 
 
 def create_database_entry(
-    doi,
-    query,
-    query_hash,
-    resources_and_versions,
-    timestamp,
-    record_count,
-    requested_version=None,
-    query_version=None,
-    resource_counts=None,
+    doi: str,
+    query: Query,
+    timestamp: datetime,
 ):
     """
     Inserts the database row for the query DOI.
 
     :param doi: the doi (full, prefix and suffix)
-    :param query: the query dict
-    :param query_hash: the query hash
-    :param resources_and_versions: the resource ids mapped to their rounded versions (as a dict)
+    :param query: the query
     :param timestamp: the datetime the DOI was created
-    :param record_count: the number of records contained in the DOI's data
-    :param requested_version: the version requested by the user, if provided
-    :param query_version: the query version, if provided
-    :param resource_counts: the resource counts, if provided
     :return: the QueryDOI object
     """
     query_doi = QueryDOI(
         doi=doi,
-        resources_and_versions=resources_and_versions,
         timestamp=timestamp,
-        query=query,
-        query_hash=query_hash,
-        requested_version=requested_version,
-        count=record_count,
-        query_version=query_version,
-        resource_counts=resource_counts,
+        resources_and_versions=query.resources_and_versions,
+        requested_version=query.version,
+        query=query.query,
+        query_version=query.query_version,
+        query_hash=query.query_hash,
+        count=query.count,
+        resource_counts=query.counts,
     )
     query_doi.save()
     return query_doi
 
 
-def mint_doi(resource_ids, datastore_query):
-    """
-    Mint a DOI on datacite using their API and create a new QueryDOI object, saving it
-    to the database. If we already have a query which would produce identical data to
-    the one passed then we return the existing QueryDOI object and don't mint or insert
-    anything.
-
-    :param resource_ids: a list or resource ids against which the query should be run. Note that as
-                         this extension doesn't support multi-resource search yet an exception will
-                         be thrown if the length of this list isn't 1.
-    :param datastore_query: the DatastoreQuery object containing the query information
-    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object representing
-             the query's DOI
-    """
-    # currently we only deal with single resource searches
-    if len(resource_ids) != 1:
-        raise NotImplemented(
-            "This plugin currently doesn't support multi-resource searches"
-        )
-    resource_id = resource_ids[0]
-    rounded_version = datastore_query.get_rounded_version(resource_id)
-    resources_and_versions = {resource_id: rounded_version}
-
-    existing_doi = find_existing_doi(resources_and_versions, datastore_query.query_hash)
-    if existing_doi is not None:
-        return False, existing_doi
-
-    # collect up some details we're going to need to mint the DOI
-    timestamp = datetime.now()
-    resource, package = get_resource_and_package(resource_id)
-    record_count = datastore_query.get_count(resource_id)
-    client = get_client()
-
-    # generate a new DOI to store this query against
-    doi = generate_doi(client)
-    create_doi_on_datacite(client, doi, [package['author']], timestamp, record_count)
-    query_doi = create_database_entry(
-        doi,
-        datastore_query.query,
-        datastore_query.query_hash,
-        resources_and_versions,
-        timestamp,
-        record_count,
-        requested_version=datastore_query.requested_version,
-        query_version='v0',
-        resource_counts={resource_id: record_count},
-    )
-    return True, query_doi
-
-
-def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
+def mint_multisearch_doi(query: Query) -> Tuple[bool, QueryDOI]:
     """
     Mint a DOI on datacite using their API and create a new QueryDOI object, saving it
     to the database. If we already have a query which would produce identical data to
@@ -287,56 +225,19 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
 
     This function handles DOIs created for the versioned datastore's multisearch action.
 
-    :param query: the query dict
-    :param query_version: the query schema version
-    :param resource_ids_and_versions: a dict of resource ids -> versions
-    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object representing
-             the query's DOI
+    :param query: the query
+    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object
+             representing the query's DOI
     """
-    # first off, ask the versioned datastore extension to create a hash of the query
-    hash_data_dict = dict(query=query, query_version=query_version)
-    query_hash = toolkit.get_action('datastore_hash_query')({}, hash_data_dict)
-
-    # now check if there are any dois already for this query
-    existing_doi = find_existing_doi(
-        resource_ids_and_versions, query_hash, query_version
-    )
+    # check if there are any dois already for this query
+    existing_doi = find_existing_doi(query)
     if existing_doi is not None:
         return False, existing_doi
 
-    # collect up some details we're going to need to mint the DOI
-    timestamp = datetime.now()
-    authors = get_authors(resource_ids_and_versions.keys())
-    # find out how many records come from each resource
-    resource_counts = get_resource_counts(
-        query, query_version, resource_ids_and_versions
-    )
-    # sum the count from each resource to work out the total hits
-    record_count = sum(resource_counts.values())
-    # the list call is used here so that we can modify the resource_ids_and_versions
-    # dict as we iterate over it without causing an error
-    for resource_id in list(resource_ids_and_versions.keys()):
-        if resource_counts[resource_id] == 0:
-            del resource_ids_and_versions[resource_id]
-            del resource_counts[resource_id]
-
-    if not resource_ids_and_versions:
-        raise toolkit.ValidationError(
-            'The DOI must be associated with at least one record'
-        )
-
     # generate a new DOI to store this query against
+    timestamp = datetime.now()
     client = get_client()
     doi = generate_doi(client)
-    create_doi_on_datacite(client, doi, authors, timestamp, record_count)
-    query_doi = create_database_entry(
-        doi,
-        query,
-        query_hash,
-        resource_ids_and_versions,
-        timestamp,
-        record_count,
-        query_version=query_version,
-        resource_counts=resource_counts,
-    )
+    create_doi_on_datacite(client, doi, timestamp, query)
+    query_doi = create_database_entry(doi, query, timestamp)
     return True, query_doi

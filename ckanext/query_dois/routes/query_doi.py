@@ -5,10 +5,10 @@
 # Created by the Natural History Museum in London, UK
 
 
-from ckan import model
-from ckan.plugins import toolkit
 from flask import Blueprint, jsonify
 
+from ckan import model
+from ckan.plugins import toolkit
 from . import _helpers
 from ..model import QueryDOI, QueryDOIStat
 
