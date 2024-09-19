@@ -156,11 +156,11 @@ def create_doi_on_datacite(
             'identifier': doi,
             'identifierType': 'DOI',
         },
-        'creators': [{'creatorName': author} for author in authors],
+        'creators': [{'creatorName': author} for author in query.authors],
         'titles': [
             {
                 'title': toolkit.config.get('ckanext.query_dois.doi_title').format(
-                    count=count
+                    count=query.count
                 )
             }
         ],
