@@ -7,15 +7,16 @@
 import logging
 import random
 import string
+from datetime import datetime
+
 from ckan import model
 from ckan.common import asbool
 from ckan.plugins import toolkit
 from datacite import DataCiteMDSClient, schema41
 from datacite.errors import DataCiteError, DataCiteNotFoundError
-from datetime import datetime
 
-from .utils import get_resource_and_package, get_authors, get_resource_counts
 from ..model import QueryDOI
+from .utils import get_authors, get_resource_and_package, get_resource_counts
 
 log = logging.getLogger(__name__)
 
@@ -123,8 +124,8 @@ def find_existing_doi(resources_and_versions, query_hash, query_version=None):
     Returns a QueryDOI object representing the same search, or returns None if one
     doesn't exist.
 
-    :param resources_and_versions: the resource ids being queried mapped to the versions they're
-                                   being queried at
+    :param resources_and_versions: the resource ids being queried mapped to the versions
+        they're being queried at
     :param query_hash: the hash of the query
     :param query_version: the query version
     :return: a QueryDOI object or None
@@ -205,7 +206,8 @@ def create_database_entry(
     :param doi: the doi (full, prefix and suffix)
     :param query: the query dict
     :param query_hash: the query hash
-    :param resources_and_versions: the resource ids mapped to their rounded versions (as a dict)
+    :param resources_and_versions: the resource ids mapped to their rounded versions (as
+        a dict)
     :param timestamp: the datetime the DOI was created
     :param record_count: the number of records contained in the DOI's data
     :param requested_version: the version requested by the user, if provided
@@ -235,12 +237,12 @@ def mint_doi(resource_ids, datastore_query):
     the one passed then we return the existing QueryDOI object and don't mint or insert
     anything.
 
-    :param resource_ids: a list or resource ids against which the query should be run. Note that as
-                         this extension doesn't support multi-resource search yet an exception will
-                         be thrown if the length of this list isn't 1.
+    :param resource_ids: a list or resource ids against which the query should be run.
+        Note that as this extension doesn't support multi-resource search yet an
+        exception will be thrown if the length of this list isn't 1.
     :param datastore_query: the DatastoreQuery object containing the query information
-    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object representing
-             the query's DOI
+    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object
+        representing the query's DOI
     """
     # currently we only deal with single resource searches
     if len(resource_ids) != 1:
@@ -290,8 +292,8 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
     :param query: the query dict
     :param query_version: the query schema version
     :param resource_ids_and_versions: a dict of resource ids -> versions
-    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object representing
-             the query's DOI
+    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object
+        representing the query's DOI
     """
     # first off, ask the versioned datastore extension to create a hash of the query
     hash_data_dict = dict(query=query, query_version=query_version)

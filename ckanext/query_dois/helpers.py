@@ -3,17 +3,17 @@
 #
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
-from typing import Optional
-
 import json
 from datetime import datetime
+from typing import Optional
 
 from ckan import model
+from ckan.lib.helpers import link_to
 from ckan.plugins import toolkit
 from sqlalchemy import or_
-from ckan.lib.helpers import link_to
-from ckanext.query_dois.model import QueryDOI
 from sqlalchemy.orm import Query
+
+from ckanext.query_dois.model import QueryDOI
 
 
 def render_filter_value(field, filter_value):
@@ -38,7 +38,7 @@ def _make_all_resource_query(package_id: str) -> Optional[Query]:
 
     :param package_id:
     :return: None if the package doesn't exist or if the package has no resources,
-             otherwise, returns an SQL Alchemy Query object
+        otherwise, returns an SQL Alchemy Query object
     """
     try:
         package = toolkit.get_action('package_show')({}, {'id': package_id})
@@ -132,16 +132,18 @@ def create_citation_text(
     Creates the citation text for the given query doi and the given additional related
     arguments.
 
-    :param query_doi: the query's DOI, this should just be the prefix/suffix, e.g. 10.xxxx/xxxxxx,
-                      not the full URL
-    :param creation_timestamp: a datetime object representing the exact moment the DOI was created
+    :param query_doi: the query's DOI, this should just be the prefix/suffix, e.g.
+        10.xxxx/xxxxxx, not the full URL
+    :param creation_timestamp: a datetime object representing the exact moment the DOI
+        was created
     :param resource_name: the name of the resource the DOI references
     :param package_title: the title of the package the resource the DOI references is in
     :param package_doi: the DOI of the package, if there is one (defaults to None)
-    :param publisher: the publisher to use in the citation (defaults to None in which case the
-                      ckanext.query_dois.publisher config value is used
-    :param html: whether to include a tags around URLs in the returned string. Defaults to False
-                 which does not add a tags and therefore the returned string is just pure text
+    :param publisher: the publisher to use in the citation (defaults to None in which
+        case the ckanext.query_dois.publisher config value is used
+    :param html: whether to include a tags around URLs in the returned string. Defaults
+        to False which does not add a tags and therefore the returned string is just
+        pure text
     :return: a citation string for the given query DOI and associated data
     """
     # default the publisher's value if needed

@@ -6,11 +6,11 @@
 
 from ckan.plugins import toolkit
 
-from . import schema as schema_lib
-from .utils import extract_resource_ids_and_versions
 from ..lib.doi import mint_multisearch_doi
 from ..lib.emails import send_saved_search_email
 from ..lib.stats import SAVE_ACTION, record_stat
+from . import schema as schema_lib
+from .utils import extract_resource_ids_and_versions
 
 
 def create_doi(context, data_dict):

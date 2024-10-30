@@ -9,8 +9,8 @@ from ckan import model
 from ckan.plugins import toolkit
 from flask import Blueprint, jsonify
 
-from . import _helpers
 from ..model import QueryDOI, QueryDOIStat
+from . import _helpers
 
 blueprint = Blueprint(name='query_doi', import_name=__name__, url_prefix='/doi')
 

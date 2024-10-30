@@ -21,7 +21,7 @@ class DatastoreQuery(object):
 
     @staticmethod
     def _parse_from_query_dict(query_dict):
-        '''
+        """
         Parse a dict of query string parameters which represents the data dict for the
         datastore_search action in the URL format used by CKAN. The query_dict parameter is expected
         to look something like this (for example):
@@ -38,7 +38,7 @@ class DatastoreQuery(object):
         :param query_dict: the query string dict
         :return: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
                  the requested version (defaults to None, if not provided in the query_dict)
-        '''
+        """
         query = {}
         requested_version = None
         for param, param_value in query_dict.items():
@@ -61,7 +61,7 @@ class DatastoreQuery(object):
 
     @staticmethod
     def _parse_from_data_dict(data_dict):
-        '''
+        """
         Parse a dict of query string parameters which represents the data dict for the
         datastore_search action in data dict form it expects. The data_dict parameter is expected to
         look something like this (for example):
@@ -82,7 +82,7 @@ class DatastoreQuery(object):
         :param data_dict: the query string dict
         :return: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
                  the requested version (defaults to None, if not provided in the query_dict)
-        '''
+        """
         query = {}
         requested_version = None
         for param, param_value in data_dict.items():
@@ -158,7 +158,8 @@ class DatastoreQuery(object):
         the resource. See the versioned-search plugin for more details.
 
         :param resource_id: the id of the resource being searched
-        :return: the rounded version or None if no versions are available for the given resource id
+        :return: the rounded version or None if no versions are available for the given
+            resource id
         """
         # first retrieve the rounded version to use
         data_dict = {'resource_id': resource_id, 'version': self.requested_version}

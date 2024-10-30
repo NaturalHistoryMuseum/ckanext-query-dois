@@ -43,8 +43,8 @@ def get_authors(packages):
     Retrieves all the authors from the given packages, de-duplicates them (if necessary)
     and then returns them as a list.
 
-    Note that this function takes a list of packages as it is multi-package and therefore
-    multi-resource ready.
+    Note that this function takes a list of packages as it is multi-package and
+    therefore multi-resource ready.
 
     :param packages: the packages
     :return: a list of author(s)
@@ -72,12 +72,12 @@ def encode_params(params, version=None, extras=None, for_api=False):
 
     :param params: a dict of parameters, such as a DatastoreQuery's query dict
     :param version: the version to add into the query string (default: None)
-    :param extras: an optional dict of extra parameters to add as well as the ones found in the
-                   params dict (default: None)
-    :param for_api: whether the query string is for a CKAN resource view or an API get as it
-                    changes the format (default: False)
-    :return: a query string of the query parameters (no ? at the start but will include & if
-             needed)
+    :param extras: an optional dict of extra parameters to add as well as the ones found
+        in the params dict (default: None)
+    :param for_api: whether the query string is for a CKAN resource view or an API get
+        as it changes the format (default: False)
+    :return: a query string of the query parameters (no ? at the start but will include
+        & if needed)
     """
     query_string = {}
     extras = [] if extras is None else extras.items()
@@ -117,7 +117,7 @@ def encode_params(params, version=None, extras=None, for_api=False):
 
 
 def generate_rerun_urls(resource, package, query, rounded_version):
-    '''
+    """
     Generate a dict containing all the "rerun" URLs needed to allow the user to revisit the data
     either through the website or through the API. The dict returned will look like following:
 
@@ -137,7 +137,7 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     :param query: the query dict
     :param rounded_version: the version rounded down to the nearest available on the resource
     :return: a dict of urls
-    '''
+    """
     page_url = toolkit.url_for(
         'resource.read', id=package['name'], resource_id=resource['id']
     )
@@ -162,14 +162,14 @@ def generate_rerun_urls(resource, package, query, rounded_version):
 
 
 def get_stats(query_doi):
-    '''
+    """
     Retrieve some simple stats about the query DOI - this includes the total downloads and the
     last download timestamp. Note that we are specifically looking for downloads here, no other
     actions are considered.
 
     :param query_doi: the QueryDOI object
     :return: a 3-tuple containing the total downloads, total saves and the last download timestamp
-    '''
+    """
     # count how many download stats we have on this doi
     download_total = (
         model.Session.query(QueryDOIStat)

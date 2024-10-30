@@ -48,11 +48,6 @@ def get_public_datastore_resources(only=None):
 
 
 def get_invalid_resources(resource_ids):
-    '''
-
-    :param resource_ids:
-    :return:
-    '''
     resource_ids = set(resource_ids)
     public_resource_ids = get_public_datastore_resources(only=resource_ids)
     return resource_ids - public_resource_ids

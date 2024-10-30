@@ -1,5 +1,6 @@
-from ckanext.query_dois.plugin import QueryDOIsPlugin
 from unittest.mock import MagicMock, patch
+
+from ckanext.query_dois.plugin import QueryDOIsPlugin
 
 
 class TestIntegrationWithIVersionedDatastoreDownloads:

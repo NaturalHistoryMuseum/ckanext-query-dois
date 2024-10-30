@@ -89,8 +89,8 @@ def get_resource_counts(
     :return: a dict of resource ids to counts
     """
     data_dict = {
-        "query": query,
-        "query_version": query_version,
-        "resource_ids_and_versions": resource_ids_and_versions,
+        'query': query,
+        'query_version': query_version,
+        'resource_ids_and_versions': resource_ids_and_versions,
     }
-    return toolkit.get_action("datastore_multisearch_counts")({}, data_dict)
+    return toolkit.get_action('datastore_multisearch_counts')({}, data_dict)

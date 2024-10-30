@@ -4,19 +4,15 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-import json
 import logging
-from contextlib import suppress
 
 from ckan import plugins
 
-from . import helpers, routes, cli
-from .lib.doi import mint_doi, mint_multisearch_doi, find_existing_doi
-from .lib.query import DatastoreQuery
+from . import cli, helpers, routes
+from .lib.doi import find_existing_doi, mint_multisearch_doi
 from .lib.stats import DOWNLOAD_ACTION, record_stat
-from .logic import auth, action
+from .logic import action, auth
 from .logic.utils import extract_resource_ids_and_versions
-
 
 log = logging.getLogger(__name__)
 
