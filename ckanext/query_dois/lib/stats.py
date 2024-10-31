@@ -24,7 +24,7 @@ def anonymize_email(email_address):
     using the domain as the salt.
 
     :param email_address: the email address
-    :return: a 2-tuple of the email address and the domain
+    :returns: a 2-tuple of the email address and the domain
     """
     if email_address is None:
         return None, None
@@ -56,7 +56,7 @@ def record_stat(query_doi, action, email_address=None, domain=None, identifier=N
     :param email_address: the email address of the user performing the action
     :param domain: an alternate domain name if email not specified
     :param identifier: an alternate identifier if email not specified
-    :return: a new QueryDOIStat object
+    :returns: a new QueryDOIStat object
     """
     if email_address:
         identifier, domain = anonymize_email(email_address)

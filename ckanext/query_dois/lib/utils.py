@@ -18,7 +18,7 @@ def get_resource_and_package(resource_id):
     Given a resource ID, returns the resource's dict and the parent package's dict too.
 
     :param resource_id: the resource ID
-    :return: a 2-tuple, containing the resource dict and the package dict
+    :returns: a 2-tuple, containing the resource dict and the package dict
     """
     resource = toolkit.get_action('resource_show')({}, {'id': resource_id})
     package = toolkit.get_action('package_show')({}, {'id': resource['package_id']})
@@ -32,7 +32,7 @@ def get_public_datastore_resources(only=None):
     that it only includes those in the only list.
 
     :param only: a list/set/whatever of resource ids to include in the returned set
-    :return: a set of public resource ids
+    :returns: a set of public resource ids
     """
     # retrieve all resource ids that are active, in an active package and in a public package
     query = (
@@ -65,7 +65,7 @@ def get_authors(resource_ids):
     associated with them.
 
     :param resource_ids: the resource ids
-    :return: a list of authors
+    :returns: a list of authors
     """
     query = (
         model.Session.query(model.Resource)
@@ -86,7 +86,7 @@ def get_resource_counts(
     :param query: the query dict
     :param query_version: the query version
     :param resource_ids_and_versions: the resource ids and their specific versions
-    :return: a dict of resource ids to counts
+    :returns: a dict of resource ids to counts
     """
     data_dict = {
         'query': query,

@@ -36,7 +36,7 @@ class DatastoreQuery(object):
         is extracted with preference given to the version parameter if both are provided.
 
         :param query_dict: the query string dict
-        :return: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
+        :returns: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
                  the requested version (defaults to None, if not provided in the query_dict)
         """
         query = {}
@@ -80,7 +80,7 @@ class DatastoreQuery(object):
         is extracted with preference given to the version parameter if both are provided.
 
         :param data_dict: the query string dict
-        :return: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
+        :returns: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
                  the requested version (defaults to None, if not provided in the query_dict)
         """
         query = {}
@@ -131,7 +131,7 @@ class DatastoreQuery(object):
         features like the order of filters is ignored to ensure that the meaning of the
         query is what we're capturing.
 
-        :return: a unique hash of the query
+        :returns: a unique hash of the query
         """
         query = {}
         for key, value in self.query.items():
@@ -158,7 +158,7 @@ class DatastoreQuery(object):
         the resource. See the versioned-search plugin for more details.
 
         :param resource_id: the id of the resource being searched
-        :return: the rounded version or None if no versions are available for the given
+        :returns: the rounded version or None if no versions are available for the given
             resource id
         """
         # first retrieve the rounded version to use
@@ -171,7 +171,7 @@ class DatastoreQuery(object):
         combination.
 
         :param resource_id: the resource id
-        :return: an integer value
+        :returns: an integer value
         """
         data_dict = copy.deepcopy(self.query)
         data_dict.update(

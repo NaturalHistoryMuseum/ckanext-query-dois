@@ -20,7 +20,7 @@ def get_public_datastore_resources(only=None):
     that it only includes those in the only list.
 
     :param only: a list/set/whatever of resource ids to include in the returned set
-    :return: a set of public resource ids
+    :returns: a set of public resource ids
     """
     # retrieve all resource ids that are active, in an active package and in a public package
     query = (
@@ -102,7 +102,7 @@ def to_timestamp(moment: datetime) -> int:
     Converts the given moment to a UNIX epoch in milliseconds.
 
     :param moment: a datetime object
-    :return: integer UNIX epoch in milliseconds
+    :returns: integer UNIX epoch in milliseconds
     """
     ts = moment.timestamp()
     # multiply by 1000 to get the time in milliseconds and use int to remove any decimal places

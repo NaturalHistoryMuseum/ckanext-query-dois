@@ -25,7 +25,7 @@ def list_of_strings(delimiter=','):
 
     :param delimiter: the string to delimit the value on, if it's a string. Defaults to
         a comma
-    :return: a list
+    :returns: a list
     """
 
     def validator(value):

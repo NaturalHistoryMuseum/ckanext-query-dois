@@ -28,7 +28,7 @@ def is_test_mode():
     """
     Should we use the test datacite MDS API?
 
-    :return: True if we should, False if not. Defaults to True.
+    :returns: True if we should, False if not. Defaults to True.
     """
     return asbool(toolkit.config.get('ckanext.query_dois.test_mode', True))
 
@@ -37,7 +37,7 @@ def get_prefix():
     """
     Gets the prefix to use for the DOIs we mint.
 
-    :return: the prefix to use for the new DOIs
+    :returns: the prefix to use for the new DOIs
     """
     prefix = toolkit.config.get('ckanext.query_dois.prefix')
 
@@ -57,7 +57,7 @@ def get_client():
     """
     Get a datacite MDS API client, configured for use.
 
-    :return: a DataCite client object
+    :returns: a DataCite client object
     """
     kwargs = dict(
         username=toolkit.config.get('ckanext.query_dois.datacite_username'),
@@ -78,7 +78,7 @@ def generate_doi(client):
     function quickly to avoid double use as this function uses no locking.
 
     :param client: an instance of the DataCiteMDSClient class
-    :return: the full, unique DOI
+    :returns: the full, unique DOI
     """
     # the list of valid characters is larger than just lowercase and the digits but we don't need
     # that many options and URLs with just alphanumeric characters in them are nicer. We just use
@@ -128,7 +128,7 @@ def find_existing_doi(resources_and_versions, query_hash, query_version=None):
         they're being queried at
     :param query_hash: the hash of the query
     :param query_version: the query version
-    :return: a QueryDOI object or None
+    :returns: a QueryDOI object or None
     """
     return (
         model.Session.query(QueryDOI)
@@ -213,7 +213,7 @@ def create_database_entry(
     :param requested_version: the version requested by the user, if provided
     :param query_version: the query version, if provided
     :param resource_counts: the resource counts, if provided
-    :return: the QueryDOI object
+    :returns: the QueryDOI object
     """
     query_doi = QueryDOI(
         doi=doi,
@@ -241,7 +241,7 @@ def mint_doi(resource_ids, datastore_query):
         Note that as this extension doesn't support multi-resource search yet an
         exception will be thrown if the length of this list isn't 1.
     :param datastore_query: the DatastoreQuery object containing the query information
-    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object
+    :returns: a boolean indicating whether a new DOI was minted and the QueryDOI object
         representing the query's DOI
     """
     # currently we only deal with single resource searches
@@ -292,7 +292,7 @@ def mint_multisearch_doi(query, query_version, resource_ids_and_versions):
     :param query: the query dict
     :param query_version: the query schema version
     :param resource_ids_and_versions: a dict of resource ids -> versions
-    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object
+    :returns: a boolean indicating whether a new DOI was minted and the QueryDOI object
         representing the query's DOI
     """
     # first off, ask the versioned datastore extension to create a hash of the query
