@@ -1,23 +1,33 @@
 import random
 import string
+import time
 from datetime import datetime
+from unittest.mock import MagicMock
+from uuid import uuid4
 
 import pytest
 from ckan.tests import factories
-from ckanext.query_dois.lib.doi import create_database_entry
+
 from ckanext.query_dois.helpers import get_doi_count, get_most_recent_dois
+from ckanext.query_dois.lib.doi import create_database_entry
 from ckanext.query_dois.model import QueryDOI
 
 
 def make_doi(resource_id) -> QueryDOI:
     random_str = "".join(random.choice(string.ascii_lowercase) for _ in range(10))
+    version = int(time.time() * 1000)
     return create_database_entry(
         doi=random_str,
-        query={},
-        query_hash=random_str,
-        resources_and_versions={resource_id: 4},
+        query=MagicMock(
+            resources_and_versions={resource_id: version},
+            version=version,
+            query={},
+            query_version="v1.0.0",
+            query_hash=str(uuid4()),
+            count=4,
+            counts={resource_id: 4},
+        ),
         timestamp=datetime.now(),
-        record_count=1,
     )
 
 
