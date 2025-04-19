@@ -1,5 +1,27 @@
 # Changelog
 
+## v5.0.0 (2025-04-19)
+
+### Breaking Changes
+
+- compatibility with vds vNext
+
+### Feature
+
+- compatibility with vds vNext
+
+### Fix
+
+- fix missing query access usage
+
+### Tests
+
+- fix tests after vds compat changes
+
+### Chores/Misc
+
+- update precommit to match new cookiecutter
+
 ## v4.1.1 (2024-08-20)
 
 ### Chores/Misc
