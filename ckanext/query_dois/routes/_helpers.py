@@ -260,35 +260,25 @@ def get_package_and_resource_info(resource_ids):
     return packages, resources
 
 
-def create_slugs(query_doi):
+def create_current_slug(query_doi: QueryDOI) -> str:
     """
-    Create two slugs, one for the original query and one for the query at the current
-    version (to achieve this we just leave out any version information from the slug).
+    Creates a slug for the given query DOI at the current version, this is done with a
+    nav slug which has no version.
 
-    :param query_doi: a query doi object
-    :return: a slug for the original query and a slug for the current query
+    :param query_doi: the QueryDOI
+    :return: a slug
     """
-    original_slug_data_dict = {
-        'query': query_doi.query,
-        'query_version': query_doi.query_version,
-        'resource_ids_and_versions': query_doi.resources_and_versions,
+    slug_data_dict = {
+        "query": query_doi.query,
+        "query_version": query_doi.query_version,
+        "resource_ids": query_doi.get_resource_ids(),
+        "nav_slug": True,
     }
-    original_slug = toolkit.get_action('datastore_create_slug')(
-        {}, original_slug_data_dict
-    )
-
-    current_slug_data_dict = {
-        'query': query_doi.query,
-        'query_version': query_doi.query_version,
-        'resource_ids': query_doi.get_resource_ids(),
-    }
-    current_slug = toolkit.get_action('datastore_create_slug')(
-        {}, current_slug_data_dict
-    )
-    return original_slug['slug'], current_slug['slug']
+    current_slug = toolkit.get_action("vds_slug_create")({}, slug_data_dict)
+    return current_slug["slug"]
 
 
-def render_multisearch_doi_page(query_doi):
+def render_multisearch_doi_page(query_doi: QueryDOI):
     """
     Renders a DOI landing page for a datastore_multisearch based query DOI.
 
@@ -301,7 +291,7 @@ def render_multisearch_doi_page(query_doi):
     sorted_resource_counts = sorted(
         query_doi.resource_counts.items(), key=operator.itemgetter(1), reverse=True
     )
-    original_slug, current_slug = create_slugs(query_doi)
+    current_slug = create_current_slug(query_doi)
 
     context = {
         'query_doi': query_doi,
@@ -313,7 +303,7 @@ def render_multisearch_doi_page(query_doi):
         'saves': saves,
         'last_download_timestamp': last_download_timestamp,
         'sorted_resource_counts': sorted_resource_counts,
-        'original_slug': original_slug,
+        'original_slug': query_doi.doi,
         'current_slug': current_slug,
     }
     return toolkit.render('query_dois/multisearch_landing_page.html', context)

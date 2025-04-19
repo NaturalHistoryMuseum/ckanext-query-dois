@@ -95,7 +95,7 @@ class QueryDOIStat(DomainObject):
             'action': self.action,
             'domain': self.domain,
             'identifier': self.identifier,
-            'timestamp': unicode(self.timestamp),
+            'timestamp': str(self.timestamp),
         }
 
 

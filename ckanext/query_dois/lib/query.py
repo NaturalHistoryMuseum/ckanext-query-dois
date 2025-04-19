@@ -4,183 +4,183 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-import copy
-import hashlib
-import json
-import time
-from collections import defaultdict
+from dataclasses import dataclass
+from functools import partial, cached_property
+from typing import List, Optional, Dict
 
+import itertools
+import time
+from sqlalchemy import false
+
+from ckan import model
 from ckan.plugins import toolkit
 
 
-class DatastoreQuery(object):
+def find_invalid_resources(resource_ids: List[str]) -> List[str]:
     """
-    This models datastore queries passed to datastore_search, not the DOIs created from
-    them.
+    Given a list of resource IDs, return a list of resource IDs which are invalid.
+    Resources are invalid if they are any of the following:
+
+        - not datastore active resources (checked with vds_resource_check)
+        - not active
+        - not in an active package
+        - not in a public package
+
+    :param resource_ids: the resource IDs to check
+    :return: a list of resource IDs which failed the tests
+    """
+    invalid_resource_ids = set()
+
+    # cache this action (with context) so that we don't have to retrieve it over and
+    # over again
+    is_datastore_resource = partial(toolkit.get_action("vds_resource_check"), {})
+
+    # retrieve all resource ids passed to this function that are also active, in an
+    # active package and in a public package
+    query = (
+        model.Session.query(model.Resource)
+        .join(model.Package)
+        .filter(model.Resource.id.in_(list(resource_ids)))
+        .filter(model.Resource.state == "active")
+        .filter(model.Package.state == "active")
+        .filter(model.Package.private == false())
+        .with_entities(model.Resource.id)
+    )
+    # go through each resource ID we found and check if they are datastore resources
+    for row in query:
+        if not is_datastore_resource(dict(resource_id=row.id)):
+            invalid_resource_ids.add(row.id)
+
+    return sorted(invalid_resource_ids)
+
+
+@dataclass(frozen=True)
+class Query:
+    """
+    Class representing a query against the versioned datastore.
     """
 
-    @staticmethod
-    def _parse_from_query_dict(query_dict):
-        '''
-        Parse a dict of query string parameters which represents the data dict for the
-        datastore_search action in the URL format used by CKAN. The query_dict parameter is expected
-        to look something like this (for example):
+    resource_ids: List[str]
+    version: int
+    query: dict
+    query_version: str
 
-            {
-                "q": "banana",
-                "filters": "colour:yellow|length:200|colour:brown|type:tasty",
-                etc
-            }
-
-        If a version is present, either as the version parameter or as the __version__ filter, it
-        is extracted with preference given to the version parameter if both are provided.
-
-        :param query_dict: the query string dict
-        :return: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
-                 the requested version (defaults to None, if not provided in the query_dict)
-        '''
-        query = {}
-        requested_version = None
-        for param, param_value in query_dict.items():
-            if param == 'version':
-                requested_version = int(param_value)
-            elif param == 'filters':
-                filters = defaultdict(list)
-                for filter_pair in param_value.split('|'):
-                    filter_field, filter_value = filter_pair.split(':', 1)
-                    filters[filter_field].append(filter_value)
-                if requested_version is None:
-                    popped_version = filters.pop('__version__', None)
-                    if popped_version:
-                        requested_version = int(popped_version[0])
-                if filters:
-                    query[param] = filters
-            else:
-                query[param] = param_value
-        return query, requested_version
-
-    @staticmethod
-    def _parse_from_data_dict(data_dict):
-        '''
-        Parse a dict of query string parameters which represents the data dict for the
-        datastore_search action in data dict form it expects. The data_dict parameter is expected to
-        look something like this (for example):
-
-            {
-                "q": "banana",
-                "filters": {
-                    "colour": ["yellow", "brown"],
-                    "length": "200",
-                    "type": ["tasty"],
-                }
-                etc
-            }
-
-        If a version is present, either as the version parameter or as the __version__ filter, it
-        is extracted with preference given to the version parameter if both are provided.
-
-        :param data_dict: the query string dict
-        :return: the query dict (defaults to {} if nothing can be extracted from the query_dict) and
-                 the requested version (defaults to None, if not provided in the query_dict)
-        '''
-        query = {}
-        requested_version = None
-        for param, param_value in data_dict.items():
-            if param == 'version':
-                requested_version = int(param_value)
-            elif param == 'filters':
-                filters = {}
-                for filter_field, filter_value in param_value.items():
-                    if not isinstance(filter_value, list):
-                        filter_value = [filter_value]
-                    filters[filter_field] = filter_value
-                if requested_version is None:
-                    popped_version = filters.pop('__version__', None)
-                    if popped_version:
-                        requested_version = int(popped_version[0])
-                if filters:
-                    query[param] = filters
-            else:
-                query[param] = param_value
-        return query, requested_version
-
-    def __init__(self, query_dict=None, data_dict=None):
+    @cached_property
+    def query_hash(self) -> str:
         """
-        Provide one of the 3 parameters depending on the format you have the query in.
-
-        :param query_dict: a dict of query string parameters in the CKAN URL format - i.e. the
-                           filters are split with colons and pipes etc
-        :param data_dict: a dict of data dict parameters - i.e. the typical action data_dict format
+        :return: a unique hash made from the query and query version
         """
-        if query_dict is not None:
-            self.query, self.requested_version = self._parse_from_query_dict(query_dict)
-        elif data_dict is not None:
-            self.query, self.requested_version = self._parse_from_data_dict(data_dict)
-        else:
-            self.query = {}
-            self.requested_version = None
-
-        if self.requested_version is None:
-            # default the requested time to now
-            self.requested_version = int(time.time() * 1000)
-        self.query_hash = self._generate_query_hash()
-
-    def _generate_query_hash(self):
-        """
-        Create a unique hash for this query. To do this we have to ensure that the
-        features like the order of filters is ignored to ensure that the meaning of the
-        query is what we're capturing.
-
-        :return: a unique hash of the query
-        """
-        query = {}
-        for key, value in self.query.items():
-            if key == 'filters':
-                filters = {}
-                for filter_field, filter_value in value.items():
-                    # to ensure the order doesn't matter we have to convert everything to unicode
-                    # and then sort it
-                    filters[str(filter_field)] = sorted(map(str, filter_value))
-                query['filters'] = filters
-            else:
-                query[str(key)] = str(value)
-
-        # sort_keys=True is used otherwise the key ordering would change between python versions
-        # and the hash wouldn't match even if the query was the same
-        dumped_query = json.dumps(query, ensure_ascii=False, sort_keys=True).encode(
-            'utf8'
+        return toolkit.get_action("vds_multi_hash")(
+            {}, {"query": self.query, "query_version": self.query_version}
         )
-        return hashlib.sha1(dumped_query).hexdigest()
 
-    def get_rounded_version(self, resource_id):
+    @cached_property
+    def authors(self) -> List[str]:
         """
-        Round the requested version of this query down to the nearest actual version of
-        the resource. See the versioned-search plugin for more details.
+        Given some resource ids, return a list of unique authors from the packages
+        associated with them.
 
-        :param resource_id: the id of the resource being searched
-        :return: the rounded version or None if no versions are available for the given resource id
+        :return: a list of authors
         """
-        # first retrieve the rounded version to use
-        data_dict = {'resource_id': resource_id, 'version': self.requested_version}
-        return toolkit.get_action('datastore_get_rounded_version')({}, data_dict)
-
-    def get_count(self, resource_id):
-        """
-        Retrieve the number of records matched by this query, resource id and version
-        combination.
-
-        :param resource_id: the resource id
-        :return: an integer value
-        """
-        data_dict = copy.deepcopy(self.query)
-        data_dict.update(
-            {
-                'resource_id': resource_id,
-                # use the version parameter cause it's nicer than having to go in and modify the filters
-                'version': self.get_rounded_version(resource_id),
-                # we don't need the results, just the total
-                'limit': 0,
-            }
+        query = (
+            model.Session.query(model.Resource)
+            .join(model.Package)
+            .filter(model.Resource.id.in_(self.resource_ids))
+            .with_entities(model.Package.author)
         )
-        result = toolkit.get_action('datastore_search')({}, data_dict)
-        return result['total']
+        return list(set(itertools.chain.from_iterable(query)))
+
+    @cached_property
+    def resources_and_versions(self) -> Dict[str, int]:
+        """
+        Returns a dict containing the resource IDs as keys and their rounded versions as
+        values. The rounded versions are acquired via the vds_version_round action.
+
+        :return: a dict of resource IDs to rounded versions
+        """
+        action = toolkit.get_action("vds_version_round")
+        return {
+            resource_id: action(
+                {}, {"resource_id": resource_id, "version": self.version}
+            )
+            for resource_id in sorted(self.resource_ids)
+        }
+
+    @cached_property
+    def counts(self) -> Dict[str, int]:
+        """
+        Returns a dict containing the resource IDs as keys and the number of records
+        which match this query in the resource as the values.
+
+        :return: a dict of resource ids to counts
+        """
+        data_dict = {
+            "query": self.query,
+            "query_version": self.query_version,
+            "resource_ids": self.resource_ids,
+            "version": self.version,
+        }
+        return toolkit.get_action("vds_multi_count")({}, data_dict)["counts"]
+
+    @cached_property
+    def count(self) -> int:
+        """
+        The total number of records matching this query.
+
+        :return: an integer
+        """
+        return sum(self.counts.values())
+
+    @classmethod
+    def create(
+        cls,
+        resource_ids: List[str],
+        version: Optional[int] = None,
+        query: Optional[dict] = None,
+        query_version: Optional[str] = None,
+    ) -> "Query":
+        """
+        Creates a Query object using the given parameters. The resource_ids are the only
+        required parameters, everything else is optional and will be defaulted to
+        sensible values if needed.
+
+        :param resource_ids: the resource IDs
+        :param version: the version to query at (if missing, defaults to now)
+        :param query: the query to run (if missing, defaults to any empty query)
+        :param query_version: the version of the query (if missing, defaults to the
+                              latest query schema version)
+        :return: a Query object
+        """
+        invalid_resource_ids = find_invalid_resources(resource_ids)
+        if invalid_resource_ids:
+            # not all of them were public/active
+            raise toolkit.ValidationError(
+                f"Some of the resources requested are private or not active, DOIs can "
+                f"only be created using public, active resources. Invalid resources: "
+                f"{', '.format(invalid_resource_ids)}"
+            )
+
+        # sort them to ensure comparisons work consistently
+        resource_ids = sorted(resource_ids)
+        # default the version to now if not provided
+        version = version if version is not None else int(time.time() * 1000)
+        query = query or {}
+        query_version = query_version or toolkit.get_action("vds_schema_latest")({}, {})
+
+        return cls(resource_ids, version, query, query_version)
+
+    @classmethod
+    def create_from_download_request(cls, download_request):
+        """
+        Given a download request from the vds, turn it into our representation of a
+        query.
+
+        :param download_request: a DownloadRequest object from vds
+        :return:
+        """
+        return Query.create(
+            download_request.core_record.resource_ids_and_versions,
+            download_request.core_record.get_version(),
+            download_request.core_record.query,
+            download_request.core_record.query_version,
+        )

@@ -7,9 +7,6 @@ $(document).ready(function () {
   // this data is added in the template, extract it and parse the JSON data
   const query = JSON.parse(downloadButton.attr('data-query'));
   const queryVersion = downloadButton.attr('data-query-version');
-  const resourceIdsAndVersions = JSON.parse(
-    downloadButton.attr('data-resources-and-versions'),
-  );
 
   downloadButton.on('click', function () {
     // pull out the form data
@@ -26,13 +23,12 @@ $(document).ready(function () {
       query: {
         query: query,
         query_version: queryVersion,
-        resource_ids_and_versions: resourceIdsAndVersions,
       },
       notifier: {
         type: 'none',
       },
     };
-    fetch('/api/3/action/datastore_queue_download', {
+    fetch('/api/3/action/vds_download_queue', {
       method: 'POST',
       body: JSON.stringify(payload),
       headers: {

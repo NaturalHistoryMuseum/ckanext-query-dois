@@ -38,10 +38,9 @@ def list_of_strings(delimiter=','):
 
 def create_doi():
     return {
+        'resource_ids': [list_of_strings()],
         'email_address': [email_validator],
         'query': [ignore_missing, json_validator],
         'query_version': [ignore_missing, str],
         'version': [ignore_missing, int_validator],
-        'resource_ids': [ignore_missing, list_of_strings()],
-        'resource_ids_and_versions': [ignore_missing, json_validator],
     }
