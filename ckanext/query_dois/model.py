@@ -4,13 +4,10 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-import json
 
-from sqlalchemy import Column, UnicodeText, DateTime, Table, BigInteger, types
-
-from ckan.model import meta, DomainObject
+from ckan.model import DomainObject, meta
+from sqlalchemy import BigInteger, Column, DateTime, Table, UnicodeText
 from sqlalchemy.dialects.postgresql import JSONB
-
 
 query_doi_table = Table(
     'query_doi',

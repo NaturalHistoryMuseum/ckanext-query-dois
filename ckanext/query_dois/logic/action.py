@@ -5,6 +5,7 @@
 # Created by the Natural History Museum in London, UK
 
 from ckan.plugins import toolkit
+
 from ckanext.query_dois.lib.doi import mint_multisearch_doi
 from ckanext.query_dois.lib.emails import send_saved_search_email
 from ckanext.query_dois.lib.query import Query
@@ -46,12 +47,12 @@ def create_doi(context, data_dict):
     if errors:
         raise toolkit.ValidationError(errors)
 
-    email_address = data_dict["email_address"]
+    email_address = data_dict['email_address']
     query = Query.create(
-        data_dict["resource_ids"],
-        data_dict.get("version"),
-        data_dict.get("query"),
-        data_dict.get("query_version"),
+        data_dict['resource_ids'],
+        data_dict.get('version'),
+        data_dict.get('query'),
+        data_dict.get('query_version'),
     )
 
     # create a new DOI or retrieve an existing one
@@ -61,4 +62,4 @@ def create_doi(context, data_dict):
     # send the email to the requesting user
     email_sent = send_saved_search_email(email_address, doi)
 
-    return {"is_new": created, "doi": doi.doi, "email_sent": email_sent}
+    return {'is_new': created, 'doi': doi.doi, 'email_sent': email_sent}

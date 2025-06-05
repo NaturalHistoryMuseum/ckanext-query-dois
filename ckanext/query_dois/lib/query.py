@@ -4,16 +4,15 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-from dataclasses import dataclass
-from functools import partial, cached_property
-from typing import List, Optional, Dict
-
 import itertools
 import time
-from sqlalchemy import false
+from dataclasses import dataclass
+from functools import cached_property, partial
+from typing import Dict, List, Optional
 
 from ckan import model
 from ckan.plugins import toolkit
+from sqlalchemy import false
 
 
 def find_invalid_resources(resource_ids: List[str]) -> List[str]:
@@ -33,7 +32,7 @@ def find_invalid_resources(resource_ids: List[str]) -> List[str]:
 
     # cache this action (with context) so that we don't have to retrieve it over and
     # over again
-    is_datastore_resource = partial(toolkit.get_action("vds_resource_check"), {})
+    is_datastore_resource = partial(toolkit.get_action('vds_resource_check'), {})
 
     # retrieve all resource ids passed to this function that are also active, in an
     # active package and in a public package
@@ -41,8 +40,8 @@ def find_invalid_resources(resource_ids: List[str]) -> List[str]:
         model.Session.query(model.Resource)
         .join(model.Package)
         .filter(model.Resource.id.in_(list(resource_ids)))
-        .filter(model.Resource.state == "active")
-        .filter(model.Package.state == "active")
+        .filter(model.Resource.state == 'active')
+        .filter(model.Package.state == 'active')
         .filter(model.Package.private == false())
         .with_entities(model.Resource.id)
     )
@@ -70,8 +69,8 @@ class Query:
         """
         :return: a unique hash made from the query and query version
         """
-        return toolkit.get_action("vds_multi_hash")(
-            {}, {"query": self.query, "query_version": self.query_version}
+        return toolkit.get_action('vds_multi_hash')(
+            {}, {'query': self.query, 'query_version': self.query_version}
         )
 
     @cached_property
@@ -98,10 +97,10 @@ class Query:
 
         :return: a dict of resource IDs to rounded versions
         """
-        action = toolkit.get_action("vds_version_round")
+        action = toolkit.get_action('vds_version_round')
         return {
             resource_id: action(
-                {}, {"resource_id": resource_id, "version": self.version}
+                {}, {'resource_id': resource_id, 'version': self.version}
             )
             for resource_id in sorted(self.resource_ids)
         }
@@ -115,12 +114,12 @@ class Query:
         :return: a dict of resource ids to counts
         """
         data_dict = {
-            "query": self.query,
-            "query_version": self.query_version,
-            "resource_ids": self.resource_ids,
-            "version": self.version,
+            'query': self.query,
+            'query_version': self.query_version,
+            'resource_ids': self.resource_ids,
+            'version': self.version,
         }
-        return toolkit.get_action("vds_multi_count")({}, data_dict)["counts"]
+        return toolkit.get_action('vds_multi_count')({}, data_dict)['counts']
 
     @cached_property
     def count(self) -> int:
@@ -138,7 +137,7 @@ class Query:
         version: Optional[int] = None,
         query: Optional[dict] = None,
         query_version: Optional[str] = None,
-    ) -> "Query":
+    ) -> 'Query':
         """
         Creates a Query object using the given parameters. The resource_ids are the only
         required parameters, everything else is optional and will be defaulted to
@@ -155,9 +154,9 @@ class Query:
         if invalid_resource_ids:
             # not all of them were public/active
             raise toolkit.ValidationError(
-                f"Some of the resources requested are private or not active, DOIs can "
-                f"only be created using public, active resources. Invalid resources: "
-                f"{', '.format(invalid_resource_ids)}"
+                f'Some of the resources requested are private or not active, DOIs can '
+                f'only be created using public, active resources. Invalid resources: '
+                f'{", ".format(invalid_resource_ids)}'
             )
 
         # sort them to ensure comparisons work consistently
@@ -165,7 +164,7 @@ class Query:
         # default the version to now if not provided
         version = version if version is not None else int(time.time() * 1000)
         query = query or {}
-        query_version = query_version or toolkit.get_action("vds_schema_latest")({}, {})
+        query_version = query_version or toolkit.get_action('vds_schema_latest')({}, {})
 
         return cls(resource_ids, version, query, query_version)
 

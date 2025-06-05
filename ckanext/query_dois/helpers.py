@@ -3,17 +3,17 @@
 #
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
-from typing import Optional
-
 import json
 from datetime import datetime
+from typing import Optional
 
 from ckan import model
+from ckan.lib.helpers import link_to
 from ckan.plugins import toolkit
 from sqlalchemy import or_
-from ckan.lib.helpers import link_to
-from ckanext.query_dois.model import QueryDOI
 from sqlalchemy.orm import Query
+
+from ckanext.query_dois.model import QueryDOI
 
 
 def render_filter_value(field, filter_value):

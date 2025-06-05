@@ -5,11 +5,12 @@
 # Created by the Natural History Museum in London, UK
 
 import base64
+import uuid
 from datetime import datetime
 
 import bcrypt
+
 from ckanext.query_dois.model import QueryDOIStat
-import uuid
 
 # action types
 DOWNLOAD_ACTION = 'download'

@@ -8,14 +8,14 @@ import logging
 import random
 import string
 from datetime import datetime
-from typing import Tuple, Optional
-
-from datacite import DataCiteMDSClient, schema41
-from datacite.errors import DataCiteError, DataCiteNotFoundError
+from typing import Optional, Tuple
 
 from ckan import model
 from ckan.common import asbool
 from ckan.plugins import toolkit
+from datacite import DataCiteMDSClient, schema41
+from datacite.errors import DataCiteError, DataCiteNotFoundError
+
 from ckanext.query_dois.lib.query import Query
 from ckanext.query_dois.model import QueryDOI
 

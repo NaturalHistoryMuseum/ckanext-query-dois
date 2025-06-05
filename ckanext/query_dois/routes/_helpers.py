@@ -117,7 +117,7 @@ def encode_params(params, version=None, extras=None, for_api=False):
 
 
 def generate_rerun_urls(resource, package, query, rounded_version):
-    '''
+    """
     Generate a dict containing all the "rerun" URLs needed to allow the user to revisit the data
     either through the website or through the API. The dict returned will look like following:
 
@@ -137,7 +137,7 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     :param query: the query dict
     :param rounded_version: the version rounded down to the nearest available on the resource
     :return: a dict of urls
-    '''
+    """
     page_url = toolkit.url_for(
         'resource.read', id=package['name'], resource_id=resource['id']
     )
@@ -162,14 +162,14 @@ def generate_rerun_urls(resource, package, query, rounded_version):
 
 
 def get_stats(query_doi):
-    '''
+    """
     Retrieve some simple stats about the query DOI - this includes the total downloads and the
     last download timestamp. Note that we are specifically looking for downloads here, no other
     actions are considered.
 
     :param query_doi: the QueryDOI object
     :return: a 3-tuple containing the total downloads, total saves and the last download timestamp
-    '''
+    """
     # count how many download stats we have on this doi
     download_total = (
         model.Session.query(QueryDOIStat)
@@ -269,13 +269,13 @@ def create_current_slug(query_doi: QueryDOI) -> str:
     :return: a slug
     """
     slug_data_dict = {
-        "query": query_doi.query,
-        "query_version": query_doi.query_version,
-        "resource_ids": query_doi.get_resource_ids(),
-        "nav_slug": True,
+        'query': query_doi.query,
+        'query_version': query_doi.query_version,
+        'resource_ids': query_doi.get_resource_ids(),
+        'nav_slug': True,
     }
-    current_slug = toolkit.get_action("vds_slug_create")({}, slug_data_dict)
-    return current_slug["slug"]
+    current_slug = toolkit.get_action('vds_slug_create')({}, slug_data_dict)
+    return current_slug['slug']
 
 
 def render_multisearch_doi_page(query_doi: QueryDOI):

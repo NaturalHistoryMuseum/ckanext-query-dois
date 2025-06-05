@@ -8,11 +8,12 @@ import logging
 
 from ckan import plugins
 from ckan.plugins import toolkit
-from . import helpers, routes, cli
-from .lib.doi import mint_multisearch_doi, find_existing_doi
+
+from . import cli, helpers, routes
+from .lib.doi import find_existing_doi, mint_multisearch_doi
 from .lib.query import Query
 from .lib.stats import DOWNLOAD_ACTION, record_stat
-from .logic import auth, action
+from .logic import action, auth
 
 log = logging.getLogger(__name__)
 
@@ -68,12 +69,12 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             mint_multisearch_doi(query)
         except toolkit.ValidationError:
             log.warning(
-                "Could not create DOI for download, it contains private resources"
+                'Could not create DOI for download, it contains private resources'
             )
         except:
             # if anything unexpected goes wrong we don't want to stop the download from
             # completing; just log the error and move on
-            log.error("Failed to mint/retrieve DOI", exc_info=True)
+            log.error('Failed to mint/retrieve DOI', exc_info=True)
 
     def download_modify_notifier_template_context(self, request, context):
         try:
@@ -83,11 +84,11 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             doi = find_existing_doi(query)
             if doi:
                 # update the context with the doi
-                context["doi"] = doi.doi
+                context['doi'] = doi.doi
         except:
             # if anything goes wrong we don't want to stop the download; just log the
             # error and move on
-            log.error("Failed to retrieve DOI", exc_info=True)
+            log.error('Failed to retrieve DOI', exc_info=True)
 
         # always return the context
         return context
@@ -100,11 +101,11 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             doi = find_existing_doi(query)
             if doi:
                 # add the doi to the manifest
-                manifest["query-doi"] = doi.doi
+                manifest['query-doi'] = doi.doi
         except:
             # if anything goes wrong we don't want to stop the download from completing;
             # just log the error and move on
-            log.error("Failed to retrieve DOI", exc_info=True)
+            log.error('Failed to retrieve DOI', exc_info=True)
 
         # always return the manifest
         return manifest
@@ -115,23 +116,23 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
             # if a DOI can be created it should already have been created in
             # download_modify_manifest
             doi = find_existing_doi(query)
-            if doi and request.state == "complete":
+            if doi and request.state == 'complete':
                 # record a download stat against the DOI
                 record_stat(doi, DOWNLOAD_ACTION, identifier=request.id)
         except:
             # just log the error and move on
-            log.error("Failed to retrieve DOI and/or create stats", exc_info=True)
+            log.error('Failed to retrieve DOI and/or create stats', exc_info=True)
 
     # ITemplateHelpers
     def get_helpers(self):
         return {
-            "render_filter_value": helpers.render_filter_value,
-            "get_most_recent_dois": helpers.get_most_recent_dois,
-            "get_time_ago_description": helpers.get_time_ago_description,
-            "get_landing_page_url": helpers.get_landing_page_url,
-            "create_citation_text": helpers.create_citation_text,
-            "create_multisearch_citation_text": helpers.create_multisearch_citation_text,
-            "pretty_print_query": helpers.pretty_print_query,
-            "get_doi_count": helpers.get_doi_count,
-            "versioned_datastore_available": self.versioned_datastore_available,
+            'render_filter_value': helpers.render_filter_value,
+            'get_most_recent_dois': helpers.get_most_recent_dois,
+            'get_time_ago_description': helpers.get_time_ago_description,
+            'get_landing_page_url': helpers.get_landing_page_url,
+            'create_citation_text': helpers.create_citation_text,
+            'create_multisearch_citation_text': helpers.create_multisearch_citation_text,
+            'pretty_print_query': helpers.pretty_print_query,
+            'get_doi_count': helpers.get_doi_count,
+            'versioned_datastore_available': self.versioned_datastore_available,
         }
