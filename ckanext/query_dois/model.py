@@ -70,7 +70,7 @@ class QueryDOI(DomainObject):
         A convenience method to filter by a specific resource id.
 
         :param resource_id: the resource id
-        :return: an sqlalchemy boolean expression
+        :returns: an sqlalchemy boolean expression
         """
         return QueryDOI.resources_and_versions.has_key(resource_id)
 
@@ -84,7 +84,7 @@ class QueryDOIStat(DomainObject):
         """
         Returns the object as a dict for the stats API response.
 
-        :return: a dict
+        :returns: a dict
         """
         return {
             'id': self.id,

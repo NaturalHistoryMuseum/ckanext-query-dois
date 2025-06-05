@@ -33,7 +33,7 @@ def get_query_doi(doi):
     otherwise returns None.
 
     :param doi: the doi (full doi, prefix/suffix)
-    :return: A QueryDOI object or None
+    :returns: A QueryDOI object or None
     """
     return model.Session.query(QueryDOI).filter(QueryDOI.doi == doi).first()
 
@@ -43,11 +43,11 @@ def get_authors(packages):
     Retrieves all the authors from the given packages, de-duplicates them (if necessary)
     and then returns them as a list.
 
-    Note that this function takes a list of packages as it is multi-package and therefore
-    multi-resource ready.
+    Note that this function takes a list of packages as it is multi-package and
+    therefore multi-resource ready.
 
     :param packages: the packages
-    :return: a list of author(s)
+    :returns: a list of author(s)
     """
     # use an ordered dict in the absence of a sorted set
     authors = OrderedDict()
@@ -72,12 +72,12 @@ def encode_params(params, version=None, extras=None, for_api=False):
 
     :param params: a dict of parameters, such as a DatastoreQuery's query dict
     :param version: the version to add into the query string (default: None)
-    :param extras: an optional dict of extra parameters to add as well as the ones found in the
-                   params dict (default: None)
-    :param for_api: whether the query string is for a CKAN resource view or an API get as it
-                    changes the format (default: False)
-    :return: a query string of the query parameters (no ? at the start but will include & if
-             needed)
+    :param extras: an optional dict of extra parameters to add as well as the ones found
+        in the params dict (default: None)
+    :param for_api: whether the query string is for a CKAN resource view or an API get
+        as it changes the format (default: False)
+    :returns: a query string of the query parameters (no ? at the start but will include
+        & if needed)
     """
     query_string = {}
     extras = [] if extras is None else extras.items()
@@ -136,7 +136,7 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     :param package: the package dict
     :param query: the query dict
     :param rounded_version: the version rounded down to the nearest available on the resource
-    :return: a dict of urls
+    :returns: a dict of urls
     """
     page_url = toolkit.url_for(
         'resource.read', id=package['name'], resource_id=resource['id']
@@ -168,7 +168,7 @@ def get_stats(query_doi):
     actions are considered.
 
     :param query_doi: the QueryDOI object
-    :return: a 3-tuple containing the total downloads, total saves and the last download timestamp
+    :returns: a 3-tuple containing the total downloads, total saves and the last download timestamp
     """
     # count how many download stats we have on this doi
     download_total = (
@@ -200,7 +200,7 @@ def render_datastore_search_doi_page(query_doi):
     Renders a DOI landing page for a datastore_search based query DOI.
 
     :param query_doi: the query DOI
-    :return: the rendered page
+    :returns: the rendered page
     """
     # currently we only deal with single resource query DOIs
     resource_id = query_doi.get_resource_ids()[0]
@@ -234,7 +234,7 @@ def get_package_and_resource_info(resource_ids):
     Retrieve basic info about the packages and resources from the list of resource ids.
 
     :param resource_ids: a list of resource ids
-    :return: two dicts, one of package info and one of resource info
+    :returns: two dicts, one of package info and one of resource info
     """
     raction = partial(toolkit.get_action('resource_show'), {})
     paction = partial(toolkit.get_action('package_show'), {})
@@ -266,7 +266,7 @@ def create_current_slug(query_doi: QueryDOI) -> str:
     nav slug which has no version.
 
     :param query_doi: the QueryDOI
-    :return: a slug
+    :returns: a slug
     """
     slug_data_dict = {
         'query': query_doi.query,
@@ -283,7 +283,7 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
     Renders a DOI landing page for a datastore_multisearch based query DOI.
 
     :param query_doi: the query DOI
-    :return: the rendered page
+    :returns: the rendered page
     """
     packages, resources = get_package_and_resource_info(query_doi.get_resource_ids())
     downloads, saves, last_download_timestamp = get_stats(query_doi)

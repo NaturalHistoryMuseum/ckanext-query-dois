@@ -26,7 +26,7 @@ def find_invalid_resources(resource_ids: List[str]) -> List[str]:
         - not in a public package
 
     :param resource_ids: the resource IDs to check
-    :return: a list of resource IDs which failed the tests
+    :returns: a list of resource IDs which failed the tests
     """
     invalid_resource_ids = set()
 
@@ -67,7 +67,7 @@ class Query:
     @cached_property
     def query_hash(self) -> str:
         """
-        :return: a unique hash made from the query and query version
+        :returns: a unique hash made from the query and query version
         """
         return toolkit.get_action('vds_multi_hash')(
             {}, {'query': self.query, 'query_version': self.query_version}
@@ -79,7 +79,7 @@ class Query:
         Given some resource ids, return a list of unique authors from the packages
         associated with them.
 
-        :return: a list of authors
+        :returns: a list of authors
         """
         query = (
             model.Session.query(model.Resource)
@@ -95,7 +95,7 @@ class Query:
         Returns a dict containing the resource IDs as keys and their rounded versions as
         values. The rounded versions are acquired via the vds_version_round action.
 
-        :return: a dict of resource IDs to rounded versions
+        :returns: a dict of resource IDs to rounded versions
         """
         action = toolkit.get_action('vds_version_round')
         return {
@@ -111,7 +111,7 @@ class Query:
         Returns a dict containing the resource IDs as keys and the number of records
         which match this query in the resource as the values.
 
-        :return: a dict of resource ids to counts
+        :returns: a dict of resource ids to counts
         """
         data_dict = {
             'query': self.query,
@@ -126,7 +126,7 @@ class Query:
         """
         The total number of records matching this query.
 
-        :return: an integer
+        :returns: an integer
         """
         return sum(self.counts.values())
 
@@ -147,8 +147,8 @@ class Query:
         :param version: the version to query at (if missing, defaults to now)
         :param query: the query to run (if missing, defaults to any empty query)
         :param query_version: the version of the query (if missing, defaults to the
-                              latest query schema version)
-        :return: a Query object
+            latest query schema version)
+        :returns: a Query object
         """
         invalid_resource_ids = find_invalid_resources(resource_ids)
         if invalid_resource_ids:
@@ -175,7 +175,6 @@ class Query:
         query.
 
         :param download_request: a DownloadRequest object from vds
-        :return:
         """
         return Query.create(
             download_request.core_record.resource_ids_and_versions,

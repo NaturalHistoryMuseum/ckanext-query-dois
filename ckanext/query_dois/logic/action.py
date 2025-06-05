@@ -17,8 +17,6 @@ def create_doi(context, data_dict):
     """
     Creates a DOI using the given parameters and returns it.
 
-    Params:
-
     :param email_address: the email address of the DOI requester
     :type email_address: string
     :param query: the query to associate with the DOI
@@ -29,17 +27,14 @@ def create_doi(context, data_dict):
     :type version: int, number of milliseconds (not seconds!) since UNIX epoch
     :param resource_ids: the resource ids to search
     :type resource_ids: list of strings
-
-    Returns:
-
-    :rtype: dict
     :param doi: the doi that was created (prefix/suffix)
     :type doi: string
-    :param is_new: whether the doi was newly created or whether an existing DOI for the query
-                   parameters already existed
+    :param is_new: whether the doi was newly created or whether an existing DOI for the
+        query parameters already existed
     :type is_new: bool
     :param email_sent: whether the email was sent successfully or not
     :type email_sent: bool
+    :rtype: dict
     """
     # validate the data dict first
     schema = context.get('schema', schema_lib.create_doi())

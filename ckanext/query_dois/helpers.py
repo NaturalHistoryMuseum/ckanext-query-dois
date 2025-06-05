@@ -23,7 +23,7 @@ def render_filter_value(field, filter_value):
 
     :param field: the field name
     :param filter_value: the filter value for the field
-    :return: the value to display
+    :returns: the value to display
     """
     if field == '__geo__':
         return json.loads(filter_value)['type']
@@ -37,8 +37,8 @@ def _make_all_resource_query(package_id: str) -> Optional[Query]:
     the resources of the given package.
 
     :param package_id:
-    :return: None if the package doesn't exist or if the package has no resources,
-             otherwise, returns an SQL Alchemy Query object
+    :returns: None if the package doesn't exist or if the package has no resources,
+        otherwise, returns an SQL Alchemy Query object
     """
     try:
         package = toolkit.get_action('package_show')({}, {'id': package_id})
@@ -57,7 +57,7 @@ def get_most_recent_dois(package_id, number):
 
     :param package_id: the package's ID
     :param number: the number of DOIs to return
-    :return: a list of QueryDOI objects
+    :returns: a list of QueryDOI objects
     """
     query = _make_all_resource_query(package_id)
     if query is None:
@@ -71,7 +71,7 @@ def get_doi_count(package_id: str) -> int:
     package.
 
     :param package_id: the ID of the package
-    :return: a number
+    :returns: a number
     """
     query = _make_all_resource_query(package_id)
     return 0 if query is None else query.count()
@@ -96,7 +96,7 @@ def get_time_ago_description(query_doi):
     The resolutions are described above in the time_resolutions tuple.
 
     :param query_doi: the QueryDOI object
-    :return: a unicode string describing how long ago the DOI was minted
+    :returns: a unicode string describing how long ago the DOI was minted
     """
     seconds = (datetime.now() - query_doi.timestamp).total_seconds()
     for limit, unit, divisor in time_resolutions:
@@ -111,7 +111,7 @@ def get_landing_page_url(query_doi):
     Given a QueryDOI object, return the landing URL for it.
 
     :param query_doi: a QueryDOI object
-    :return: the landing page URL
+    :returns: the landing page URL
     """
     data_centre, identifier = query_doi.doi.split('/')
     return toolkit.url_for(
@@ -132,17 +132,19 @@ def create_citation_text(
     Creates the citation text for the given query doi and the given additional related
     arguments.
 
-    :param query_doi: the query's DOI, this should just be the prefix/suffix, e.g. 10.xxxx/xxxxxx,
-                      not the full URL
-    :param creation_timestamp: a datetime object representing the exact moment the DOI was created
+    :param query_doi: the query's DOI, this should just be the prefix/suffix, e.g.
+        10.xxxx/xxxxxx, not the full URL
+    :param creation_timestamp: a datetime object representing the exact moment the DOI
+        was created
     :param resource_name: the name of the resource the DOI references
     :param package_title: the title of the package the resource the DOI references is in
     :param package_doi: the DOI of the package, if there is one (defaults to None)
-    :param publisher: the publisher to use in the citation (defaults to None in which case the
-                      ckanext.query_dois.publisher config value is used
-    :param html: whether to include a tags around URLs in the returned string. Defaults to False
-                 which does not add a tags and therefore the returned string is just pure text
-    :return: a citation string for the given query DOI and associated data
+    :param publisher: the publisher to use in the citation (defaults to None in which
+        case the ckanext.query_dois.publisher config value is used
+    :param html: whether to include a tags around URLs in the returned string. Defaults
+        to False which does not add a tags and therefore the returned string is just
+        pure text
+    :returns: a citation string for the given query DOI and associated data
     """
     # default the publisher's value if needed
     if publisher is None:
@@ -189,7 +191,7 @@ def create_multisearch_citation_text(query_doi, html=False):
 
     :param query_doi: a query doi object
     :param html: whether to return a basic string or a piece of html
-    :return: the citation text
+    :returns: the citation text
     """
     publisher = toolkit.config.get('ckanext.query_dois.publisher')
 
@@ -223,6 +225,6 @@ def pretty_print_query(query):
     Does what you'd expect really.
 
     :param query: a query dict
-    :return: a string of pretty json
+    :returns: a string of pretty json
     """
     return json.dumps(query, sort_keys=True, indent=2)

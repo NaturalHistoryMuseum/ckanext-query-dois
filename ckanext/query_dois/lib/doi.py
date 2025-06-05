@@ -29,7 +29,7 @@ def is_test_mode():
     """
     Should we use the test datacite MDS API?
 
-    :return: True if we should, False if not. Defaults to True.
+    :returns: True if we should, False if not. Defaults to True.
     """
     return asbool(toolkit.config.get('ckanext.query_dois.test_mode', True))
 
@@ -38,7 +38,7 @@ def get_prefix():
     """
     Gets the prefix to use for the DOIs we mint.
 
-    :return: the prefix to use for the new DOIs
+    :returns: the prefix to use for the new DOIs
     """
     prefix = toolkit.config.get('ckanext.query_dois.prefix')
 
@@ -58,7 +58,7 @@ def get_client():
     """
     Get a datacite MDS API client, configured for use.
 
-    :return: a DataCite client object
+    :returns: a DataCite client object
     """
     kwargs = dict(
         username=toolkit.config.get('ckanext.query_dois.datacite_username'),
@@ -79,7 +79,7 @@ def generate_doi(client):
     function quickly to avoid double use as this function uses no locking.
 
     :param client: an instance of the DataCiteMDSClient class
-    :return: the full, unique DOI
+    :returns: the full, unique DOI
     """
     # the list of valid characters is larger than just lowercase and the digits but we don't need
     # that many options and URLs with just alphanumeric characters in them are nicer. We just use
@@ -126,7 +126,7 @@ def find_existing_doi(query: Query) -> Optional[QueryDOI]:
     exist.
 
     :param query: a Query object
-    :return: a QueryDOI object or None
+    :returns: a QueryDOI object or None
     """
     return (
         model.Session.query(QueryDOI)
@@ -199,7 +199,7 @@ def create_database_entry(
     :param doi: the doi (full, prefix and suffix)
     :param query: the query
     :param timestamp: the datetime the DOI was created
-    :return: the QueryDOI object
+    :returns: the QueryDOI object
     """
     query_doi = QueryDOI(
         doi=doi,
@@ -226,8 +226,8 @@ def mint_multisearch_doi(query: Query) -> Tuple[bool, QueryDOI]:
     This function handles DOIs created for the versioned datastore's multisearch action.
 
     :param query: the query
-    :return: a boolean indicating whether a new DOI was minted and the QueryDOI object
-             representing the query's DOI
+    :returns: a boolean indicating whether a new DOI was minted and the QueryDOI object
+        representing the query's DOI
     """
     # check if there are any dois already for this query
     existing_doi = find_existing_doi(query)
