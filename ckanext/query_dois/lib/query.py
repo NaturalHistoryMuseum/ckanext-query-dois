@@ -4,16 +4,15 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-from dataclasses import dataclass
-from functools import partial, cached_property
-from typing import List, Optional, Dict
-
 import itertools
 import time
-from sqlalchemy import false
+from dataclasses import dataclass
+from functools import cached_property, partial
+from typing import Dict, List, Optional
 
 from ckan import model
 from ckan.plugins import toolkit
+from sqlalchemy import false
 
 
 def find_invalid_resources(resource_ids: List[str]) -> List[str]:
@@ -27,13 +26,13 @@ def find_invalid_resources(resource_ids: List[str]) -> List[str]:
         - not in a public package
 
     :param resource_ids: the resource IDs to check
-    :return: a list of resource IDs which failed the tests
+    :returns: a list of resource IDs which failed the tests
     """
     invalid_resource_ids = set()
 
     # cache this action (with context) so that we don't have to retrieve it over and
     # over again
-    is_datastore_resource = partial(toolkit.get_action("vds_resource_check"), {})
+    is_datastore_resource = partial(toolkit.get_action('vds_resource_check'), {})
 
     # retrieve all resource ids passed to this function that are also active, in an
     # active package and in a public package
@@ -41,8 +40,8 @@ def find_invalid_resources(resource_ids: List[str]) -> List[str]:
         model.Session.query(model.Resource)
         .join(model.Package)
         .filter(model.Resource.id.in_(list(resource_ids)))
-        .filter(model.Resource.state == "active")
-        .filter(model.Package.state == "active")
+        .filter(model.Resource.state == 'active')
+        .filter(model.Package.state == 'active')
         .filter(model.Package.private == false())
         .with_entities(model.Resource.id)
     )
@@ -68,10 +67,10 @@ class Query:
     @cached_property
     def query_hash(self) -> str:
         """
-        :return: a unique hash made from the query and query version
+        :returns: a unique hash made from the query and query version
         """
-        return toolkit.get_action("vds_multi_hash")(
-            {}, {"query": self.query, "query_version": self.query_version}
+        return toolkit.get_action('vds_multi_hash')(
+            {}, {'query': self.query, 'query_version': self.query_version}
         )
 
     @cached_property
@@ -80,7 +79,7 @@ class Query:
         Given some resource ids, return a list of unique authors from the packages
         associated with them.
 
-        :return: a list of authors
+        :returns: a list of authors
         """
         query = (
             model.Session.query(model.Resource)
@@ -96,12 +95,12 @@ class Query:
         Returns a dict containing the resource IDs as keys and their rounded versions as
         values. The rounded versions are acquired via the vds_version_round action.
 
-        :return: a dict of resource IDs to rounded versions
+        :returns: a dict of resource IDs to rounded versions
         """
-        action = toolkit.get_action("vds_version_round")
+        action = toolkit.get_action('vds_version_round')
         return {
             resource_id: action(
-                {}, {"resource_id": resource_id, "version": self.version}
+                {}, {'resource_id': resource_id, 'version': self.version}
             )
             for resource_id in sorted(self.resource_ids)
         }
@@ -112,22 +111,22 @@ class Query:
         Returns a dict containing the resource IDs as keys and the number of records
         which match this query in the resource as the values.
 
-        :return: a dict of resource ids to counts
+        :returns: a dict of resource ids to counts
         """
         data_dict = {
-            "query": self.query,
-            "query_version": self.query_version,
-            "resource_ids": self.resource_ids,
-            "version": self.version,
+            'query': self.query,
+            'query_version': self.query_version,
+            'resource_ids': self.resource_ids,
+            'version': self.version,
         }
-        return toolkit.get_action("vds_multi_count")({}, data_dict)["counts"]
+        return toolkit.get_action('vds_multi_count')({}, data_dict)['counts']
 
     @cached_property
     def count(self) -> int:
         """
         The total number of records matching this query.
 
-        :return: an integer
+        :returns: an integer
         """
         return sum(self.counts.values())
 
@@ -138,7 +137,7 @@ class Query:
         version: Optional[int] = None,
         query: Optional[dict] = None,
         query_version: Optional[str] = None,
-    ) -> "Query":
+    ) -> 'Query':
         """
         Creates a Query object using the given parameters. The resource_ids are the only
         required parameters, everything else is optional and will be defaulted to
@@ -148,16 +147,16 @@ class Query:
         :param version: the version to query at (if missing, defaults to now)
         :param query: the query to run (if missing, defaults to any empty query)
         :param query_version: the version of the query (if missing, defaults to the
-                              latest query schema version)
-        :return: a Query object
+            latest query schema version)
+        :returns: a Query object
         """
         invalid_resource_ids = find_invalid_resources(resource_ids)
         if invalid_resource_ids:
             # not all of them were public/active
             raise toolkit.ValidationError(
-                f"Some of the resources requested are private or not active, DOIs can "
-                f"only be created using public, active resources. Invalid resources: "
-                f"{', '.format(invalid_resource_ids)}"
+                f'Some of the resources requested are private or not active, DOIs can '
+                f'only be created using public, active resources. Invalid resources: '
+                f'{", ".format(invalid_resource_ids)}'
             )
 
         # sort them to ensure comparisons work consistently
@@ -165,7 +164,7 @@ class Query:
         # default the version to now if not provided
         version = version if version is not None else int(time.time() * 1000)
         query = query or {}
-        query_version = query_version or toolkit.get_action("vds_schema_latest")({}, {})
+        query_version = query_version or toolkit.get_action('vds_schema_latest')({}, {})
 
         return cls(resource_ids, version, query, query_version)
 
@@ -176,7 +175,6 @@ class Query:
         query.
 
         :param download_request: a DownloadRequest object from vds
-        :return:
         """
         return Query.create(
             download_request.core_record.resource_ids_and_versions,

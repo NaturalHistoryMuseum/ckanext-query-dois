@@ -6,7 +6,7 @@
 import click
 from ckan import model
 
-from .model import query_doi_table, query_doi_stat_table
+from .model import query_doi_stat_table, query_doi_table
 
 
 def get_commands():

@@ -5,6 +5,7 @@
 # Created by the Natural History Museum in London, UK
 
 from ckan.plugins import toolkit
+
 from ckanext.datastore.logic.schema import json_validator
 
 # grab all the validator functions upfront
@@ -22,8 +23,9 @@ def list_of_strings(delimiter=','):
     delimiter is used to split the string and the result is returned. If the value is
     neither a list or a string then an error is raised.
 
-    :param delimiter: the string to delimit the value on, if it's a string. Defaults to a comma
-    :return: a list
+    :param delimiter: the string to delimit the value on, if it's a string. Defaults to
+        a comma
+    :returns: a list
     """
 
     def validator(value):

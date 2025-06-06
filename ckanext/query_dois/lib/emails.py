@@ -4,7 +4,7 @@ from ckan.lib import mailer
 
 # TODO: put this in the config/interface so that it can be overridden
 # TODO: add html version of the body
-default_save_body = '''
+default_save_body = """
 Hello,
 
 As requested, a DOI has successfully been created for your search.
@@ -15,7 +15,7 @@ details.
 
 Best wishes,
 The NHM Data Portal Bot
-'''.strip()
+""".strip()
 
 
 def send_saved_search_email(email_address, doi):
