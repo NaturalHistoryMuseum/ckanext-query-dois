@@ -1,5 +1,35 @@
 # Changelog
 
+## v5.0.1 (2025-06-09)
+
+### Docs
+
+- docstring tidying
+- use variable logo, update tests badge
+
+### Style
+
+- remove space
+- ruff formatting
+
+### Build System(s)
+
+- remove version from docker compose file version specifier is deprecated
+- update ckantools and switch black to ruff
+
+### CI System(s)
+
+- set ruff target py version, add more ignores - avoid using fixes that don't work for python 3.8 (our current version) - ignore recommended ruff formatter conflicts - ignore more docstring rules
+- remove pylint, add ruff lint rules Primarily the defaults plus pydocstyle and isort.
+- update pre-commit repo versions
+- add pull request validation workflow new workflow to check commit format and code style against pre-commit config
+- update workflow files standardise format, change name of tests file
+
+### Chores/Misc
+
+- add pull request template
+- update tool details in contributing guide
+
 ## v5.0.0 (2025-04-19)
 
 ### Breaking Changes
