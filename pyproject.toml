@@ -22,7 +22,7 @@ dependencies = [
     "datacite==1.1.2",
     "dicthash==0.0.2",
     "bcrypt==3.1.4",
-    "ckantools>=0.3.0"
+    "ckantools>=0.4.2"
 ]
 
 [project.optional-dependencies]
@@ -67,13 +67,34 @@ version_files = [
     "CITATION.cff:^version"
 ]
 
-[tool.black]
-line-length = 88
-skip_string_normalization = true
+[tool.ruff]
+target-version = "py38"
 
-[tool.pylint]
-max-line-length = 88
-disable = ["C0114", "R0903"]
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+select = [
+    "E",
+    "F",
+    "I",
+    "D"
+]
+ignore = [
+    "D100",
+    "D104",
+    "D200",
+    "D202",
+    "D203",
+    "D205",
+    "D206",
+    "D212",
+    "D300",
+    "D401",
+    "E111",
+    "E114",
+    "E117"
+]
 
 [tool.docformatter]
 wrap-summaries = 88

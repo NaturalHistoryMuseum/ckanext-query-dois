@@ -4,13 +4,10 @@
 # This file is part of ckanext-query-dois
 # Created by the Natural History Museum in London, UK
 
-import json
 
-from sqlalchemy import Column, UnicodeText, DateTime, Table, BigInteger, types
-
-from ckan.model import meta, DomainObject
+from ckan.model import DomainObject, meta
+from sqlalchemy import BigInteger, Column, DateTime, Table, UnicodeText
 from sqlalchemy.dialects.postgresql import JSONB
-
 
 query_doi_table = Table(
     'query_doi',
@@ -73,7 +70,7 @@ class QueryDOI(DomainObject):
         A convenience method to filter by a specific resource id.
 
         :param resource_id: the resource id
-        :return: an sqlalchemy boolean expression
+        :returns: an sqlalchemy boolean expression
         """
         return QueryDOI.resources_and_versions.has_key(resource_id)
 
@@ -87,7 +84,7 @@ class QueryDOIStat(DomainObject):
         """
         Returns the object as a dict for the stats API response.
 
-        :return: a dict
+        :returns: a dict
         """
         return {
             'id': self.id,

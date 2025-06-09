@@ -5,12 +5,12 @@
 # Created by the Natural History Museum in London, UK
 
 
-from flask import Blueprint, jsonify
-
 from ckan import model
 from ckan.plugins import toolkit
-from . import _helpers
+from flask import Blueprint, jsonify
+
 from ..model import QueryDOI, QueryDOIStat
+from . import _helpers
 
 blueprint = Blueprint(name='query_doi', import_name=__name__, url_prefix='/doi')
 
@@ -22,7 +22,7 @@ def landing_page(data_centre, identifier):
 
     :param data_centre: the data centre prefix
     :param identifier: the DOI identifier
-    :return: the rendered landing page
+    :returns: the rendered landing page
     """
     doi = '{}/{}'.format(data_centre, identifier)
     query_doi = _helpers.get_query_doi(doi)
@@ -43,7 +43,7 @@ def doi_stats():
 
     This endpoint currently only supports filtering on the resource_id.
 
-    :return: a JSON stringified list of dicts
+    :returns: a JSON stringified list of dicts
     """
     query = model.Session.query(QueryDOI)
 
@@ -68,7 +68,7 @@ def action_stats():
     Returns action statistics in JSON format depending on the request parameters. The
     return will be a list with a dict representing the QueryDOIStat as each element.
 
-    :return: a JSON stringified list of dicts
+    :returns: a JSON stringified list of dicts
     """
     query = model.Session.query(QueryDOIStat)
 
