@@ -209,7 +209,7 @@ def render_datastore_search_doi_page(query_doi):
     try:
         resource, package = get_resource_and_package(resource_id)
         is_inaccessible = False
-    except toolkit.ObjectNotFound:
+    except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
         resource = None
         package = None
         is_inaccessible = True
@@ -277,12 +277,12 @@ def get_package_and_resource_info(resource_ids):
 
     packages = {}
     resources = {}
-    inaccessible_resources = 0
+    inaccessible_resources = []
     for resource_id in resource_ids:
         try:
             resource = raction(dict(id=resource_id))
-        except toolkit.ObjectNotFound:
-            inaccessible_resources += 1
+        except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
+            inaccessible_resources.append(resource_id)
             continue
         package_id = resource['package_id']
         resources[resource_id] = {
@@ -301,18 +301,23 @@ def get_package_and_resource_info(resource_ids):
     return packages, resources, inaccessible_resources
 
 
-def create_current_slug(query_doi: QueryDOI) -> str:
+def create_current_slug(query_doi: QueryDOI, ignore_resources=None) -> str:
     """
     Creates a slug for the given query DOI at the current version, this is done with a
     nav slug which has no version.
 
     :param query_doi: the QueryDOI
+    :param ignore_resources: a list of resource IDs to ignore
     :returns: a slug
     """
+    resource_ids = query_doi.get_resource_ids()
+    if ignore_resources:
+        resource_ids = [r for r in resource_ids if r not in ignore_resources]
+
     slug_data_dict = {
         'query': query_doi.query,
         'query_version': query_doi.query_version,
-        'resource_ids': query_doi.get_resource_ids(),
+        'resource_ids': resource_ids,
         'nav_slug': True,
     }
     current_slug = toolkit.get_action('vds_slug_create')({}, slug_data_dict)
@@ -326,9 +331,10 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
     :param query_doi: the query DOI
     :returns: the rendered page
     """
-    packages, resources, inaccessible_count = get_package_and_resource_info(
+    packages, resources, inaccessible_resources = get_package_and_resource_info(
         query_doi.get_resource_ids()
     )
+    inaccessible_count = len(inaccessible_resources)
 
     # usage stats
     downloads, saves, last_download_timestamp = get_stats(query_doi)
@@ -380,12 +386,14 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
             )
         ]
     else:
-        current_slug = create_current_slug(query_doi)
+        current_slug = create_current_slug(
+            query_doi, ignore_resources=inaccessible_resources
+        )
         if inaccessible_count > 0:
             warnings.append(
                 toolkit._(
-                    'Some resources have been deleted, moved, or are no longer available. '
-                    'Affected resources: '
+                    'Some resources have been deleted, moved, or are no longer '
+                    'available. Affected resources: '
                 )
                 + str(inaccessible_count)
             )
