@@ -9,7 +9,6 @@ import itertools
 import json
 import operator
 from collections import OrderedDict
-from functools import partial
 from urllib.parse import urlencode
 
 from ckan import model
@@ -272,15 +271,15 @@ def get_package_and_resource_info(resource_ids):
     :param resource_ids: a list of resource ids
     :returns: two dicts, one of package info and one of resource info
     """
-    raction = partial(toolkit.get_action('resource_show'), {})
-    paction = partial(toolkit.get_action('package_show'), {})
+    raction = toolkit.get_action('resource_show')
+    paction = toolkit.get_action('package_show')
 
     packages = {}
     resources = {}
     inaccessible_resources = []
     for resource_id in resource_ids:
         try:
-            resource = raction(dict(id=resource_id))
+            resource = raction({}, dict(id=resource_id))
         except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
             inaccessible_resources.append(resource_id)
             continue
@@ -290,7 +289,7 @@ def get_package_and_resource_info(resource_ids):
             'package_id': package_id,
         }
         if package_id not in packages:
-            package = paction(dict(id=package_id))
+            package = paction({}, dict(id=package_id))
             packages[package_id] = {
                 'title': package['title'],
                 'name': package['name'],
