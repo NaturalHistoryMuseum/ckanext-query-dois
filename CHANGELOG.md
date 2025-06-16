@@ -1,5 +1,18 @@
 # Changelog
 
+## v6.0.0 (2025-06-16)
+
+### Breaking Changes
+
+- handle unauthorised access errors
+- filter out inaccessible resources and return count
+
+### Fix
+
+- match single to multisearch landing page style
+- catch errors for v0 dois and show warnings
+-  add warnings and rearrange multisearch helper
+
 ## v5.0.1 (2025-06-09)
 
 ### Docs
