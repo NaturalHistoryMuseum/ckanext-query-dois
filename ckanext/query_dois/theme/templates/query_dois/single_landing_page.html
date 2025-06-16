@@ -37,21 +37,18 @@
         {% block citation %}
         {% if not is_inaccessible %}
         <h3>{{ _('Cite this as') }}</h3>
-        <hr>
-        <div>
+        <div class="qd_block">
             <p>
                 {{ h.create_citation_text(query_doi.doi, query_doi.timestamp, resource['name'],
                                           package['title'], package_doi, html=True) | safe }}
             </p>
         </div>
-        <br />
         {% endif %}
         {% endblock %}
 
         {% block details %}
         <h3>{{ _('Details') }}</h3>
-        <hr>
-        <div class="qd_details">
+        <div class="qd_block qd_details">
             {% if not is_inaccessible %}
             <div>
                 {% set resource_url = h.url_for('resource.read', id=package['name'], resource_id=resource['id']) %}
@@ -76,8 +73,7 @@
 
         {% block stats %}
         <h3>{{ _('Statistics') }}</h3>
-        <hr>
-        <div class="qd_stats">
+        <div class="qd_block qd_stats">
               <div>
                   <b>{{ _('Total downloads:') }}</b> {{ usage_stats['downloads'] }}
               </div>
