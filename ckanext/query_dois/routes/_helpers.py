@@ -206,25 +206,61 @@ def render_datastore_search_doi_page(query_doi):
     resource_id = query_doi.get_resource_ids()[0]
     rounded_version = query_doi.get_rounded_versions()[0]
 
-    resource, package = get_resource_and_package(resource_id)
+    try:
+        resource, package = get_resource_and_package(resource_id)
+        is_inaccessible = False
+    except toolkit.ObjectNotFound:
+        resource = None
+        package = None
+        is_inaccessible = True
+
     # we ignore the saves count as it will always be 0 for a datastore_search DOI
     downloads, _saves, last_download_timestamp = get_stats(query_doi)
+    usage_stats = {
+        'downloads': downloads,
+        'last_download_timestamp': last_download_timestamp,
+    }
+
+    # warnings
+    warnings = []
+    if is_inaccessible:
+        warnings = [
+            toolkit._(
+                'All resources associated with this search have been deleted, moved, '
+                'or are no longer available.'
+            )
+        ]
+
     context = {
         'query_doi': query_doi,
         'doi': query_doi.doi,
         'resource': resource,
         'package': package,
-        # this is effectively an integration point with the ckanext-doi extension. If there is
-        # demand we should open this up so that we can support other dois on packages extensions
-        'package_doi': package['doi'] if package.get('doi_status', False) else None,
-        'authors': get_authors([package]),
         'version': rounded_version,
-        'reruns': generate_rerun_urls(
-            resource, package, query_doi.query, rounded_version
-        ),
-        'downloads': downloads,
-        'last_download_timestamp': last_download_timestamp,
+        'usage_stats': usage_stats,
+        'is_inaccessible': is_inaccessible,
+        'warnings': warnings,
+        # these are defaults for if the resource is inaccessible
+        'package_doi': None,
+        'authors': toolkit._('Unknown'),
+        'reruns': {},
     }
+
+    if not is_inaccessible:
+        context.update(
+            {
+                # this is effectively an integration point with the ckanext-doi
+                # extension. If there is demand we should open this up so that we can
+                # support other dois on packages extensions
+                'package_doi': (
+                    package['doi'] if package.get('doi_status', False) else None
+                ),
+                'authors': get_authors([package]),
+                'reruns': generate_rerun_urls(
+                    resource, package, query_doi.query, rounded_version
+                ),
+            }
+        )
 
     return toolkit.render('query_dois/single_landing_page.html', context)
 
