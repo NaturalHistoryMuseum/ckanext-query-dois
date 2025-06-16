@@ -241,8 +241,13 @@ def get_package_and_resource_info(resource_ids):
 
     packages = {}
     resources = {}
+    inaccessible_resources = 0
     for resource_id in resource_ids:
-        resource = raction(dict(id=resource_id))
+        try:
+            resource = raction(dict(id=resource_id))
+        except toolkit.ObjectNotFound:
+            inaccessible_resources += 1
+            continue
         package_id = resource['package_id']
         resources[resource_id] = {
             'name': resource['name'],
@@ -257,7 +262,7 @@ def get_package_and_resource_info(resource_ids):
             }
         packages[package_id]['resource_ids'].append(resource_id)
 
-    return packages, resources
+    return packages, resources, inaccessible_resources
 
 
 def create_current_slug(query_doi: QueryDOI) -> str:
@@ -285,11 +290,15 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
     :param query_doi: the query DOI
     :returns: the rendered page
     """
-    packages, resources = get_package_and_resource_info(query_doi.get_resource_ids())
+    packages, resources, inaccessible_count = get_package_and_resource_info(
+        query_doi.get_resource_ids()
+    )
     downloads, saves, last_download_timestamp = get_stats(query_doi)
     # order by count
     sorted_resource_counts = sorted(
-        query_doi.resource_counts.items(), key=operator.itemgetter(1), reverse=True
+        [(k, v) for k, v in query_doi.resource_counts.items() if k in resources],
+        key=operator.itemgetter(1),
+        reverse=True,
     )
     current_slug = create_current_slug(query_doi)
 
