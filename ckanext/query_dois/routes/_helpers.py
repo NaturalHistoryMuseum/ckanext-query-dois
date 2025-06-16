@@ -293,26 +293,78 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
     packages, resources, inaccessible_count = get_package_and_resource_info(
         query_doi.get_resource_ids()
     )
+
+    # usage stats
     downloads, saves, last_download_timestamp = get_stats(query_doi)
-    # order by count
+    usage_stats = {
+        'downloads': downloads,
+        'saves': saves,
+        'last_download_timestamp': last_download_timestamp,
+    }
+
+    # current details
     sorted_resource_counts = sorted(
         [(k, v) for k, v in query_doi.resource_counts.items() if k in resources],
         key=operator.itemgetter(1),
         reverse=True,
     )
-    current_slug = create_current_slug(query_doi)
+    current_details = {
+        'resource_count': len(resources),
+        'package_count': len(packages),
+        'sorted_resource_counts': sorted_resource_counts,
+        'record_count': query_doi.count
+        if inaccessible_count == 0
+        else sum([v for k, v in sorted_resource_counts]),
+    }
+
+    # saved details
+    if inaccessible_count == 0:
+        saved_details = {
+            'resource_count': len(resources),
+            'record_count': query_doi.count,
+            'missing_resources': 0,
+            'missing_records': 0,
+        }
+    else:
+        saved_details = {
+            'resource_count': len(query_doi.resource_counts),
+            'record_count': query_doi.count,
+            'missing_resources': inaccessible_count,
+            'missing_records': query_doi.count - current_details['record_count'],
+        }
+
+    # warnings
+    warnings = []
+    if len(resources) == 0:
+        current_slug = None
+        warnings = [
+            toolkit._(
+                'All resources associated with this search have been deleted, moved, '
+                'or are no longer available.'
+            )
+        ]
+    else:
+        current_slug = create_current_slug(query_doi)
+        if inaccessible_count > 0:
+            warnings.append(
+                toolkit._(
+                    'Some resources have been deleted, moved, or are no longer available. '
+                    'Affected resources: '
+                )
+                + str(inaccessible_count)
+            )
 
     context = {
         'query_doi': query_doi,
-        'resource_count': len(resources),
-        'package_count': len(packages),
-        'resources': resources,
-        'packages': packages,
-        'downloads': downloads,
-        'saves': saves,
-        'last_download_timestamp': last_download_timestamp,
-        'sorted_resource_counts': sorted_resource_counts,
         'original_slug': query_doi.doi,
         'current_slug': current_slug,
+        'usage_stats': usage_stats,
+        'resources': resources,
+        'packages': packages,
+        'details': current_details,
+        'saved_details': saved_details,
+        'has_changed': inaccessible_count > 0,
+        'is_inaccessible': len(resources) == 0,
+        'warnings': warnings,
     }
     return toolkit.render('query_dois/multisearch_landing_page.html', context)
