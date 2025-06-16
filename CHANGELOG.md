@@ -1,5 +1,11 @@
 # Changelog
 
+## v6.0.1 (2025-06-16)
+
+### Fix
+
+- use new context for each request
+
 ## v6.0.0 (2025-06-16)
 
 ### Breaking Changes
