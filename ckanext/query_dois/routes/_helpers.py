@@ -206,25 +206,61 @@ def render_datastore_search_doi_page(query_doi):
     resource_id = query_doi.get_resource_ids()[0]
     rounded_version = query_doi.get_rounded_versions()[0]
 
-    resource, package = get_resource_and_package(resource_id)
+    try:
+        resource, package = get_resource_and_package(resource_id)
+        is_inaccessible = False
+    except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
+        resource = None
+        package = None
+        is_inaccessible = True
+
     # we ignore the saves count as it will always be 0 for a datastore_search DOI
     downloads, _saves, last_download_timestamp = get_stats(query_doi)
+    usage_stats = {
+        'downloads': downloads,
+        'last_download_timestamp': last_download_timestamp,
+    }
+
+    # warnings
+    warnings = []
+    if is_inaccessible:
+        warnings = [
+            toolkit._(
+                'All resources associated with this search have been deleted, moved, '
+                'or are no longer available.'
+            )
+        ]
+
     context = {
         'query_doi': query_doi,
         'doi': query_doi.doi,
         'resource': resource,
         'package': package,
-        # this is effectively an integration point with the ckanext-doi extension. If there is
-        # demand we should open this up so that we can support other dois on packages extensions
-        'package_doi': package['doi'] if package.get('doi_status', False) else None,
-        'authors': get_authors([package]),
         'version': rounded_version,
-        'reruns': generate_rerun_urls(
-            resource, package, query_doi.query, rounded_version
-        ),
-        'downloads': downloads,
-        'last_download_timestamp': last_download_timestamp,
+        'usage_stats': usage_stats,
+        'is_inaccessible': is_inaccessible,
+        'warnings': warnings,
+        # these are defaults for if the resource is inaccessible
+        'package_doi': None,
+        'authors': toolkit._('Unknown'),
+        'reruns': {},
     }
+
+    if not is_inaccessible:
+        context.update(
+            {
+                # this is effectively an integration point with the ckanext-doi
+                # extension. If there is demand we should open this up so that we can
+                # support other dois on packages extensions
+                'package_doi': (
+                    package['doi'] if package.get('doi_status', False) else None
+                ),
+                'authors': get_authors([package]),
+                'reruns': generate_rerun_urls(
+                    resource, package, query_doi.query, rounded_version
+                ),
+            }
+        )
 
     return toolkit.render('query_dois/single_landing_page.html', context)
 
@@ -241,8 +277,13 @@ def get_package_and_resource_info(resource_ids):
 
     packages = {}
     resources = {}
+    inaccessible_resources = []
     for resource_id in resource_ids:
-        resource = raction(dict(id=resource_id))
+        try:
+            resource = raction(dict(id=resource_id))
+        except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
+            inaccessible_resources.append(resource_id)
+            continue
         package_id = resource['package_id']
         resources[resource_id] = {
             'name': resource['name'],
@@ -257,21 +298,26 @@ def get_package_and_resource_info(resource_ids):
             }
         packages[package_id]['resource_ids'].append(resource_id)
 
-    return packages, resources
+    return packages, resources, inaccessible_resources
 
 
-def create_current_slug(query_doi: QueryDOI) -> str:
+def create_current_slug(query_doi: QueryDOI, ignore_resources=None) -> str:
     """
     Creates a slug for the given query DOI at the current version, this is done with a
     nav slug which has no version.
 
     :param query_doi: the QueryDOI
+    :param ignore_resources: a list of resource IDs to ignore
     :returns: a slug
     """
+    resource_ids = query_doi.get_resource_ids()
+    if ignore_resources:
+        resource_ids = [r for r in resource_ids if r not in ignore_resources]
+
     slug_data_dict = {
         'query': query_doi.query,
         'query_version': query_doi.query_version,
-        'resource_ids': query_doi.get_resource_ids(),
+        'resource_ids': resource_ids,
         'nav_slug': True,
     }
     current_slug = toolkit.get_action('vds_slug_create')({}, slug_data_dict)
@@ -285,25 +331,84 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
     :param query_doi: the query DOI
     :returns: the rendered page
     """
-    packages, resources = get_package_and_resource_info(query_doi.get_resource_ids())
-    downloads, saves, last_download_timestamp = get_stats(query_doi)
-    # order by count
-    sorted_resource_counts = sorted(
-        query_doi.resource_counts.items(), key=operator.itemgetter(1), reverse=True
+    packages, resources, inaccessible_resources = get_package_and_resource_info(
+        query_doi.get_resource_ids()
     )
-    current_slug = create_current_slug(query_doi)
+    inaccessible_count = len(inaccessible_resources)
 
-    context = {
-        'query_doi': query_doi,
-        'resource_count': len(resources),
-        'package_count': len(packages),
-        'resources': resources,
-        'packages': packages,
+    # usage stats
+    downloads, saves, last_download_timestamp = get_stats(query_doi)
+    usage_stats = {
         'downloads': downloads,
         'saves': saves,
         'last_download_timestamp': last_download_timestamp,
+    }
+
+    # current details
+    sorted_resource_counts = sorted(
+        [(k, v) for k, v in query_doi.resource_counts.items() if k in resources],
+        key=operator.itemgetter(1),
+        reverse=True,
+    )
+    current_details = {
+        'resource_count': len(resources),
+        'package_count': len(packages),
         'sorted_resource_counts': sorted_resource_counts,
+        'record_count': query_doi.count
+        if inaccessible_count == 0
+        else sum([v for k, v in sorted_resource_counts]),
+    }
+
+    # saved details
+    if inaccessible_count == 0:
+        saved_details = {
+            'resource_count': len(resources),
+            'record_count': query_doi.count,
+            'missing_resources': 0,
+            'missing_records': 0,
+        }
+    else:
+        saved_details = {
+            'resource_count': len(query_doi.resource_counts),
+            'record_count': query_doi.count,
+            'missing_resources': inaccessible_count,
+            'missing_records': query_doi.count - current_details['record_count'],
+        }
+
+    # warnings
+    warnings = []
+    if len(resources) == 0:
+        current_slug = None
+        warnings = [
+            toolkit._(
+                'All resources associated with this search have been deleted, moved, '
+                'or are no longer available.'
+            )
+        ]
+    else:
+        current_slug = create_current_slug(
+            query_doi, ignore_resources=inaccessible_resources
+        )
+        if inaccessible_count > 0:
+            warnings.append(
+                toolkit._(
+                    'Some resources have been deleted, moved, or are no longer '
+                    'available. Affected resources: '
+                )
+                + str(inaccessible_count)
+            )
+
+    context = {
+        'query_doi': query_doi,
         'original_slug': query_doi.doi,
         'current_slug': current_slug,
+        'usage_stats': usage_stats,
+        'resources': resources,
+        'packages': packages,
+        'details': current_details,
+        'saved_details': saved_details,
+        'has_changed': inaccessible_count > 0,
+        'is_inaccessible': len(resources) == 0,
+        'warnings': warnings,
     }
     return toolkit.render('query_dois/multisearch_landing_page.html', context)

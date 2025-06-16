@@ -19,27 +19,37 @@
     <div class="module-content">
         <h1 class="page-heading">{{ _('DOI') }}: {{ doi }}</h1>
 
+        {% block doi_warnings %}
+            {% if warnings|length > 0 %}
+            <div class="alert-warning qd_warning_banner">
+                {% for warning in warnings %}
+                <p>{{ warning }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+        {% endblock %}
+
         {% block visual_query %}
         {% snippet "query_dois/snippets/visual_datastore_search.html", search=query_doi.query %}
         <br />
         {% endblock %}
 
         {% block citation %}
+        {% if not is_inaccessible %}
         <h3>{{ _('Cite this as') }}</h3>
-        <hr>
-        <div>
+        <div class="qd_block">
             <p>
                 {{ h.create_citation_text(query_doi.doi, query_doi.timestamp, resource['name'],
                                           package['title'], package_doi, html=True) | safe }}
             </p>
         </div>
-        <br />
+        {% endif %}
         {% endblock %}
 
         {% block details %}
         <h3>{{ _('Details') }}</h3>
-        <hr>
-        <div class="qd_details">
+        <div class="qd_block qd_details">
+            {% if not is_inaccessible %}
             <div>
                 {% set resource_url = h.url_for('resource.read', id=package['name'], resource_id=resource['id']) %}
                 {% set package_url = h.url_for('dataset.read', id=package['name']) %}
@@ -51,6 +61,7 @@
             <div>
                 <b>{{ _('License:') }}</b> {% snippet "snippets/license.html", pkg_dict=package, text_only=True %}
             </div>
+            {% endif %}
             <div>
                 <b>{{ _('Retrieved:') }}</b> {{ query_doi.timestamp }}
             </div>
@@ -62,15 +73,14 @@
 
         {% block stats %}
         <h3>{{ _('Statistics') }}</h3>
-        <hr>
-        <div class="qd_stats">
-            <div>
-                <b>{{ _('Total downloads:') }}</b> {{ downloads }}
-            </div>
-            <div>
-                <b>{{ _('Last downloaded:') }}</b> {{ last_download_timestamp }}
-            </div>
-        </div>
+        <div class="qd_block qd_stats">
+              <div>
+                  <b>{{ _('Total downloads:') }}</b> {{ usage_stats['downloads'] }}
+              </div>
+              <div>
+                  <b>{{ _('Last downloaded:') }}</b> {{ usage_stats['last_download_timestamp'] or _('Never') }}
+              </div>
+          </div>
         {% endblock %}
     </div>
 </article>
@@ -78,6 +88,20 @@
 
 
 {% block secondary_content %}
+{% if is_inaccessible %}
+    <div class="module, module-narrow module-shallow">
+        <h2 class="module-heading">
+            <i class="fas fa-times fa-lg inline-icon-left"></i>{{ _('Data missing') }}
+        </h2>
+        <div class="module-content">
+            <div class="qd_help_text">
+              {% trans %}
+                  All data associated with this DOI have been deleted, moved, or are no longer available.
+              {% endtrans %}
+            </div>
+        </div>
+    </div>
+{% else %}
 <div class="module module-narrow module-shallow">
     <h2 class="module-heading">
         <i class="fas fa-eye fa-lg inline-icon-left"></i>{{ _('View data') }}
@@ -158,5 +182,6 @@
             label=_('Download') %}
     </div>
 </div>
+{% endif %}
 {% endif %}
 {% endblock %}

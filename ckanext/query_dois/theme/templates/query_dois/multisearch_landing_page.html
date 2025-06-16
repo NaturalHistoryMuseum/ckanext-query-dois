@@ -20,6 +20,16 @@
         <div class="module-content">
             <h1 class="page-heading">{{ _('DOI') }}: {{ query_doi.doi }}</h1>
 
+            {% block doi_warnings %}
+            {% if warnings|length > 0 %}
+            <div class="alert-warning qd_warning_banner">
+                {% for warning in warnings %}
+                <p>{{ warning }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+            {% endblock %}
+
           {% block visual_query %}
             {% snippet "query_dois/snippets/visual_datastore_multisearch.html", query=query_doi.query %}
               <br/>
@@ -27,58 +37,65 @@
 
           {% block citation %}
               <h3>{{ _('Cite this as') }}</h3>
-              <hr>
-              <div>
+              <div class="qd_block">
                   <p>
                     {{ h.create_multisearch_citation_text(query_doi, html=True) | safe }}
                   </p>
               </div>
-              <br/>
           {% endblock %}
 
           {% block details %}
               <h3>{{ _('Details') }}</h3>
-              <hr>
-              <div class="qd_details">
+              <div class="qd_block qd_details">
                   <div>
-                      <b>{{ _('Resource count:') }}</b> {{ resource_count }}
+                      <b>{{ _('Resource count:') }}</b> {{ details['resource_count'] }}
                   </div>
                   <div>
-                      <b>{{ _('Dataset count:') }}</b> {{ package_count }}
+                      <b>{{ _('Dataset count:') }}</b> {{ details['package_count'] }}
                   </div>
-                {#            <div>#}
-                {#                <b>{{ _('License:') }}</b> {% snippet "snippets/license.html", pkg_dict=package, text_only=True %}#}
-                {#            </div>#}
+                  <div>
+                      <b>{{ _('Total records:') }}</b> {{ details['record_count'] }}
+                  </div>
                   <div>
                       <b>{{ _('Retrieved:') }}</b> {{ query_doi.timestamp }}
                   </div>
+                  {% if has_changed %}
                   <div>
-                      <b>{{ _('Total records:') }}</b> {{ query_doi.count }}
+                      <b>{{ _('Resource count at save time:') }}</b> {{ saved_details['resource_count'] }}
                   </div>
+                  <div>
+                      <b>{{ _('Total records at save time:') }}</b> {{ saved_details['record_count'] }}
+                  </div>
+                  <div>
+                      <b>{{ _('Missing resources:') }}</b> {{ saved_details['missing_resources'] }}
+                  </div>
+                  <div>
+                      <b>{{ _('Missing records:') }}</b> {{ saved_details['missing_records'] }}
+                  </div>
+                  {% endif %}
               </div>
           {% endblock %}
 
           {% block stats %}
               <h3>{{ _('Statistics') }}</h3>
-              <hr>
-              <div class="qd_stats">
+              <div class=" qd_block qd_stats">
                   <div>
-                      <b>{{ _('Total downloads:') }}</b> {{ downloads }}
+                      <b>{{ _('Total downloads:') }}</b> {{ usage_stats['downloads'] }}
                   </div>
                   <div>
-                      <b>{{ _('Total saves:') }}</b> {{ saves }}
+                      <b>{{ _('Total saves:') }}</b> {{ usage_stats['saves'] }}
                   </div>
                   <div>
-                      <b>{{ _('Last downloaded:') }}</b> {{ last_download_timestamp }}
+                      <b>{{ _('Last downloaded:') }}</b> {{ usage_stats['last_download_timestamp'] or _('Never') }}
                   </div>
               </div>
           {% endblock %}
           {% block resource_breakdown %}
+            {% if not is_inaccessible %}
               <h3>{{ _('Resource breakdown') }}</h3>
-              <hr>
-              <div>
+              <div class="qd_block">
                   <table class="qd_breakdown">
-                    {% for resource_id, count in sorted_resource_counts %}
+                    {% for resource_id, count in details['sorted_resource_counts'] %}
                       {% set resource_info = resources[resource_id] %}
                       {% set package_info = packages[resource_info['package_id']] %}
                       {% set resource_url = h.url_for('resource.read', id=package_info['name'], resource_id=resource_id) %}
@@ -91,6 +108,7 @@
                     {% endfor %}
                   </table>
               </div>
+            {% endif %}
           {% endblock %}
         </div>
     </article>
@@ -98,6 +116,20 @@
 
 
 {% block secondary_content %}
+{% if is_inaccessible %}
+    <div class="module, module-narrow module-shallow">
+        <h2 class="module-heading">
+            <i class="fas fa-times fa-lg inline-icon-left"></i>{{ _('Data missing') }}
+        </h2>
+        <div class="module-content">
+            <div class="qd_help_text">
+              {% trans %}
+                  All data associated with this DOI have been deleted, moved, or are no longer available.
+              {% endtrans %}
+            </div>
+        </div>
+    </div>
+{% else %}
     <div class="module module-narrow module-shallow">
         <h2 class="module-heading">
             <i class="fas fa-eye fa-lg inline-icon-left"></i>{{ _('View data') }}
@@ -134,4 +166,5 @@
         </div>
     </div>
     {% endif %}
+{% endif %}
 {% endblock %}
