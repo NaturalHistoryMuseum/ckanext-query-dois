@@ -1,5 +1,11 @@
 # Changelog
 
+## v6.0.2 (2025-08-11)
+
+### Build System(s)
+
+- include db migration files
+
 ## v6.0.1 (2025-06-16)
 
 ### Fix
