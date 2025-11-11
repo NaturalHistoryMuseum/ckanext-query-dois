@@ -9,6 +9,8 @@ import itertools
 import json
 import operator
 from collections import OrderedDict
+from dataclasses import asdict, dataclass
+from typing import Optional
 from urllib.parse import urlencode
 
 from ckan import model
@@ -24,6 +26,23 @@ column_param_mapping = (
     ('domain', QueryDOIStat.domain),
     ('action', QueryDOIStat.action),
 )
+
+
+@dataclass
+class InaccessibleResource:
+    id: Optional[str] = None
+    name: Optional[str] = None
+    package_id: Optional[str] = None
+    package_name: Optional[str] = None
+    package_title: Optional[str] = None
+    record_count: int = 0
+
+    @property
+    def is_unknown(self):
+        return self.name is None
+
+    def as_dict(self):
+        return asdict(self)
 
 
 def get_query_doi(doi):
@@ -281,21 +300,43 @@ def get_package_and_resource_info(resource_ids):
         try:
             resource = raction({}, dict(id=resource_id))
         except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
-            inaccessible_resources.append(resource_id)
+            inaccessible_resources.append(InaccessibleResource(id=resource_id))
             continue
+
         package_id = resource['package_id']
+        if package_id not in packages:
+            # we don't want to save this *yet* in case all the resources are
+            # inaccessible, but we want the package details
+            pkg_dict = paction({}, dict(id=package_id))
+            package = {
+                'title': pkg_dict['title'],
+                'name': pkg_dict['name'],
+                'resource_ids': [],
+            }
+        else:
+            package = packages.get(package_id)
+
+        # for query DOIs, non-datastore counts as inaccessible, but we can still get
+        # the name and package details
+        if not resource.get('datastore_active', False):
+            inaccessible_resources.append(
+                InaccessibleResource(
+                    id=resource_id,
+                    name=resource['name'],
+                    package_id=package_id,
+                    package_name=package['name'],
+                    package_title=package['title'],
+                )
+            )
+            continue
+
+        # now we can save everything
         resources[resource_id] = {
             'name': resource['name'],
             'package_id': package_id,
         }
-        if package_id not in packages:
-            package = paction({}, dict(id=package_id))
-            packages[package_id] = {
-                'title': package['title'],
-                'name': package['name'],
-                'resource_ids': [],
-            }
-        packages[package_id]['resource_ids'].append(resource_id)
+        package['resource_ids'].append(resource_id)
+        packages[package_id] = package
 
     return packages, resources, inaccessible_resources
 
@@ -381,12 +422,12 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
         warnings = [
             toolkit._(
                 'All resources associated with this search have been deleted, moved, '
-                'or are no longer available.'
+                'or are no longer available in their previous format.'
             )
         ]
     else:
         current_slug = create_current_slug(
-            query_doi, ignore_resources=inaccessible_resources
+            query_doi, ignore_resources=[r.id for r in inaccessible_resources]
         )
         if inaccessible_count > 0:
             warnings.append(
@@ -396,6 +437,29 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
                 )
                 + str(inaccessible_count)
             )
+
+    # inaccessible resources
+    unknown = {'resource_count': 0, 'record_count': 0}
+    known = []
+    for res in inaccessible_resources:
+        if res.is_unknown:
+            unknown['resource_count'] += 1
+            unknown['record_count'] += query_doi.resource_counts[res.id]
+        else:
+            res.record_count = query_doi.resource_counts[res.id]
+            known.append(res.as_dict())
+    inaccessible_resource_details = known
+    if unknown['resource_count'] > 0:
+        inaccessible_resource_details.append(
+            InaccessibleResource(
+                id=None,
+                name=' '.join(
+                    [toolkit._('Unknown resources'), f'({unknown["resource_count"]})']
+                ),
+                package_title=toolkit._('Unknown package'),
+                record_count=unknown['record_count'],
+            ).as_dict()
+        )
 
     context = {
         'query_doi': query_doi,
@@ -409,5 +473,6 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
         'has_changed': inaccessible_count > 0,
         'is_inaccessible': len(resources) == 0,
         'warnings': warnings,
+        'inaccessible_resources': inaccessible_resource_details,
     }
     return toolkit.render('query_dois/multisearch_landing_page.html', context)
