@@ -134,7 +134,7 @@ def encode_params(params, version=None, extras=None, for_api=False):
     return urlencode(query_string)
 
 
-def generate_rerun_urls(resource, package, query, rounded_version):
+def generate_rerun_urls(resource, package, query, rounded_version=None):
     """
     Generate a dict containing all the "rerun" URLs needed to allow the user to revisit the data
     either through the website or through the API. The dict returned will look like following:
@@ -161,22 +161,26 @@ def generate_rerun_urls(resource, package, query, rounded_version):
     )
     api_url = '/api/action/datastore_search'
     api_extras = {'resource_id': resource['id']}
-    return {
+    url_dict = {
         'page': {
-            'original': page_url + '?' + encode_params(query, version=rounded_version),
             'current': page_url + '?' + encode_params(query),
-        },
-        'api': {
+        }
+    }
+    if rounded_version is not None:
+        url_dict['page']['original'] = (
+            page_url + '?' + encode_params(query, version=rounded_version)
+        )
+        url_dict['api'] = {
+            'current': api_url
+            + '?'
+            + encode_params(query, extras=api_extras, for_api=True),
             'original': api_url
             + '?'
             + encode_params(
                 query, version=rounded_version, extras=api_extras, for_api=True
             ),
-            'current': api_url
-            + '?'
-            + encode_params(query, extras=api_extras, for_api=True),
-        },
-    }
+        }
+    return url_dict
 
 
 def get_stats(query_doi):
@@ -227,9 +231,11 @@ def render_datastore_search_doi_page(query_doi):
     try:
         resource, package = get_resource_and_package(resource_id)
         is_inaccessible = False
+        in_datastore = resource.get('datastore_active', False)
     except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
         resource = None
         package = None
+        in_datastore = False
         is_inaccessible = True
 
     # we ignore the saves count as it will always be 0 for a datastore_search DOI
@@ -245,7 +251,15 @@ def render_datastore_search_doi_page(query_doi):
         warnings = [
             toolkit._(
                 'All resources associated with this search have been deleted, moved, '
-                'or are no longer available.'
+                'or are no longer available in their previous format.'
+            )
+        ]
+    elif not in_datastore:
+        warnings = [
+            toolkit._(
+                'All records associated with this search have been removed from the '
+                'search index. The data may still exist, but they are no longer '
+                'versioned and cannot be filtered.'
             )
         ]
 
@@ -257,6 +271,7 @@ def render_datastore_search_doi_page(query_doi):
         'version': rounded_version,
         'usage_stats': usage_stats,
         'is_inaccessible': is_inaccessible,
+        'in_datastore': in_datastore,
         'warnings': warnings,
         # these are defaults for if the resource is inaccessible
         'package_doi': None,
@@ -275,7 +290,10 @@ def render_datastore_search_doi_page(query_doi):
                 ),
                 'authors': get_authors([package]),
                 'reruns': generate_rerun_urls(
-                    resource, package, query_doi.query, rounded_version
+                    resource,
+                    package,
+                    query_doi.query,
+                    rounded_version if in_datastore else None,
                 ),
             }
         )
