@@ -109,6 +109,29 @@
                   </table>
               </div>
             {% endif %}
+            {% if has_changed %}
+            <h3>{{ _('Missing data') }}</h3>
+              <div class="qd_block">
+                  <table class="qd_breakdown">
+                    {% for resource in inaccessible_resources %}
+                      {% if not resource['id'] %}
+                        <tr>
+                            <td>{{ resource['package_title'] }} / {{ resource['name'] }}</td>
+                            <td><b>{{ resource['record_count'] }} {{ _('records') }}</b></td>
+                        </tr>
+                      {% else %}
+                        {% set resource_url = h.url_for('resource.read', id=resource['package_name'], resource_id=resource['id']) %}
+                        {% set package_url = h.url_for('dataset.read', id=resource['package_name']) %}
+                        <tr>
+                            <td><a href="{{ package_url }}">{{ resource['package_title'] }}</a> / <a
+                                    href="{{ resource_url }}">{{ resource['name'] }}</a></td>
+                            <td><b>{{ resource['record_count'] }} {{ _('records') }}</b></td>
+                        </tr>
+                      {% endif %}
+                    {% endfor %}
+                  </table>
+              </div>
+            {% endif %}
           {% endblock %}
         </div>
     </article>
