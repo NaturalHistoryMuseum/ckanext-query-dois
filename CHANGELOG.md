@@ -1,5 +1,12 @@
 # Changelog
 
+## v6.0.3 (2025-11-19)
+
+### Fix
+
+- clarify messaging for non-datastore resources (single resource)
+- count non-datastore resources as inacccessible (multisearch)
+
 ## v6.0.2 (2025-08-11)
 
 ### Build System(s)
