@@ -35,7 +35,7 @@
         {% endblock %}
 
         {% block citation %}
-        {% if not is_inaccessible %}
+        {% if package %}
         <h3>{{ _('Cite this as') }}</h3>
         <div class="qd_block">
             <p>
@@ -49,7 +49,7 @@
         {% block details %}
         <h3>{{ _('Details') }}</h3>
         <div class="qd_block qd_details">
-            {% if not is_inaccessible %}
+            {% if package %}
             <div>
                 {% set resource_url = h.url_for('resource.read', id=package['name'], resource_id=resource['id']) %}
                 {% set package_url = h.url_for('dataset.read', id=package['name']) %}
@@ -96,7 +96,7 @@
         <div class="module-content">
             <div class="qd_help_text">
               {% trans %}
-                  All data associated with this DOI have been deleted, moved, or are no longer available.
+                  All data associated with this DOI have been deleted, moved, or are no longer available in their previous format.
               {% endtrans %}
             </div>
         </div>
@@ -113,6 +113,7 @@
             </span>
         </i>
     </h2>
+    {% if reruns.page.original %}
     <div class="module-content">
         <a href="{{ reruns.page.original }}">{{ _('Original') }}</a>
         <i class="fas fa-info-circle fa-xs inline-icon-right qd_tooltip">
@@ -123,6 +124,7 @@
             </span>
         </i>
     </div>
+    {% endif %}
     <div class="module-content">
         <a href="{{ reruns.page.current }}">{{ _('Current') }}</a>
         <i class="fas fa-info-circle fa-xs inline-icon-right qd_tooltip">
@@ -136,6 +138,7 @@
     </div>
 </div>
 
+{% if reruns.api %}
 <div class="module module-narrow module-shallow">
     <h2 class="module-heading">
         <i class="fas fa-flask fa-lg inline-icon-left"></i>{{ _('View with API') }}
@@ -169,8 +172,9 @@
         </i>
     </div>
 </div>
+{% endif %}
 
-{% if h.versioned_datastore_available %}
+{% if h.versioned_datastore_available and is_datastore %}
 <div class="module, module-narrow module-shallow">
     <h2 class="module-heading">
         <i class="far fa-arrow-alt-circle-down fa-lg inline-icon-left"></i>{{ _('Download') }}
