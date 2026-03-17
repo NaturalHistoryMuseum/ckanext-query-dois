@@ -1,5 +1,11 @@
 # Changelog
 
+## v6.0.4 (2026-03-17)
+
+### Performance
+
+- get resource details via current_package_list_with_resources
+
 ## v6.0.3 (2025-11-19)
 
 ### Fix
