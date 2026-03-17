@@ -301,64 +301,6 @@ def render_datastore_search_doi_page(query_doi):
     return toolkit.render('query_dois/single_landing_page.html', context)
 
 
-def get_package_and_resource_info(resource_ids):
-    """
-    Retrieve basic info about the packages and resources from the list of resource ids.
-
-    :param resource_ids: a list of resource ids
-    :returns: two dicts, one of package info and one of resource info
-    """
-    raction = toolkit.get_action('resource_show')
-    paction = toolkit.get_action('package_show')
-
-    packages = {}
-    resources = {}
-    inaccessible_resources = []
-    for resource_id in resource_ids:
-        try:
-            resource = raction({}, dict(id=resource_id))
-        except (toolkit.ObjectNotFound, toolkit.NotAuthorized):
-            inaccessible_resources.append(InaccessibleResource(id=resource_id))
-            continue
-
-        package_id = resource['package_id']
-        if package_id not in packages:
-            # we don't want to save this *yet* in case all the resources are
-            # inaccessible, but we want the package details
-            pkg_dict = paction({}, dict(id=package_id))
-            package = {
-                'title': pkg_dict['title'],
-                'name': pkg_dict['name'],
-                'resource_ids': [],
-            }
-        else:
-            package = packages.get(package_id)
-
-        # for query DOIs, non-datastore counts as inaccessible, but we can still get
-        # the name and package details
-        if not resource.get('datastore_active', False):
-            inaccessible_resources.append(
-                InaccessibleResource(
-                    id=resource_id,
-                    name=resource['name'],
-                    package_id=package_id,
-                    package_name=package['name'],
-                    package_title=package['title'],
-                )
-            )
-            continue
-
-        # now we can save everything
-        resources[resource_id] = {
-            'name': resource['name'],
-            'package_id': package_id,
-        }
-        package['resource_ids'].append(resource_id)
-        packages[package_id] = package
-
-    return packages, resources, inaccessible_resources
-
-
 def create_current_slug(query_doi: QueryDOI, ignore_resources=None) -> str:
     """
     Creates a slug for the given query DOI at the current version, this is done with a
@@ -389,9 +331,56 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
     :param query_doi: the query DOI
     :returns: the rendered page
     """
-    packages, resources, inaccessible_resources = get_package_and_resource_info(
-        query_doi.get_resource_ids()
-    )
+    resource_ids = set(query_doi.get_resource_ids())
+
+    accessible_packages = {}
+    accessible_resources = {}
+    inaccessible_resources = []
+
+    offset = 0
+    action = toolkit.get_action('current_package_list_with_resources')
+    unchecked_resource_ids = resource_ids.copy()
+    while len(unchecked_resource_ids) > 0:
+        # DOI resources should always be public, so ignore anything that isn't
+        context = {'ignore_auth': False, 'user': None}
+        packages = action(context, {'offset': offset, 'limit': 200})
+        if not packages:
+            break
+        for package in packages:
+            package_accessible_resources = []
+            for resource in package.get('resources', []):
+                if resource['id'] in resource_ids:
+                    unchecked_resource_ids.discard(resource['id'])
+                    if resource['datastore_active']:
+                        package_accessible_resources.append(resource['id'])
+                        accessible_resources[resource['id']] = {
+                            'name': resource['name'],
+                            'package_id': package['id'],
+                        }
+                    else:
+                        # non-datastore resources are "inaccessible" as DOI resources,
+                        # but we can still show their details
+                        inaccessible_resources.append(
+                            InaccessibleResource(
+                                id=resource['id'],
+                                name=resource['name'],
+                                package_id=package['id'],
+                                package_name=package['name'],
+                                package_title=package['title'],
+                            )
+                        )
+            if package_accessible_resources:
+                accessible_packages[package['id']] = {
+                    'title': package['title'],
+                    'name': package['name'],
+                    'resource_ids': package_accessible_resources,
+                }
+        offset += len(packages)
+
+    # if it couldn't be found, we don't know what it is
+    for rid in unchecked_resource_ids:
+        inaccessible_resources.append(InaccessibleResource(id=rid))
+
     inaccessible_count = len(inaccessible_resources)
 
     # usage stats
@@ -404,13 +393,17 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
 
     # current details
     sorted_resource_counts = sorted(
-        [(k, v) for k, v in query_doi.resource_counts.items() if k in resources],
+        [
+            (k, v)
+            for k, v in query_doi.resource_counts.items()
+            if k in accessible_resources
+        ],
         key=operator.itemgetter(1),
         reverse=True,
     )
     current_details = {
-        'resource_count': len(resources),
-        'package_count': len(packages),
+        'resource_count': len(accessible_resources),
+        'package_count': len(accessible_packages),
         'sorted_resource_counts': sorted_resource_counts,
         'record_count': query_doi.count
         if inaccessible_count == 0
@@ -420,7 +413,7 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
     # saved details
     if inaccessible_count == 0:
         saved_details = {
-            'resource_count': len(resources),
+            'resource_count': len(accessible_resources),
             'record_count': query_doi.count,
             'missing_resources': 0,
             'missing_records': 0,
@@ -435,7 +428,7 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
 
     # warnings
     warnings = []
-    if len(resources) == 0:
+    if len(accessible_resources) == 0:
         current_slug = None
         warnings = [
             toolkit._(
@@ -484,12 +477,12 @@ def render_multisearch_doi_page(query_doi: QueryDOI):
         'original_slug': query_doi.doi,
         'current_slug': current_slug,
         'usage_stats': usage_stats,
-        'resources': resources,
-        'packages': packages,
+        'resources': accessible_resources,
+        'packages': accessible_packages,
         'details': current_details,
         'saved_details': saved_details,
         'has_changed': inaccessible_count > 0,
-        'is_inaccessible': len(resources) == 0,
+        'is_inaccessible': len(accessible_resources) == 0,
         'warnings': warnings,
         'inaccessible_resources': inaccessible_resource_details,
     }
