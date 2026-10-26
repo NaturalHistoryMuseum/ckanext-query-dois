@@ -74,9 +74,11 @@ def get_client():
 
 def generate_doi(client):
     """
-    Generate a new DOI which isn't currently in use. The database is checked for
-    previous usage, as is Datacite itself. Use whatever value is retuned from this
-    function quickly to avoid double use as this function uses no locking.
+    Generate a new DOI which isn't currently in use.
+
+    The database is checked for previous usage, as is Datacite itself. Use whatever
+    value is retuned from this function quickly to avoid double use as this function
+    uses no locking.
 
     :param client: an instance of the DataCiteMDSClient class
     :returns: the full, unique DOI

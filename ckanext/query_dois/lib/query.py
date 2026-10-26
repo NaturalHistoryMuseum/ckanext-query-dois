@@ -139,9 +139,10 @@ class Query:
         query_version: Optional[str] = None,
     ) -> 'Query':
         """
-        Creates a Query object using the given parameters. The resource_ids are the only
-        required parameters, everything else is optional and will be defaulted to
-        sensible values if needed.
+        Creates a Query object using the given parameters.
+
+        The resource_ids are the only required parameters, everything else is optional
+        and will be defaulted to sensible values if needed.
 
         :param resource_ids: the resource IDs
         :param version: the version to query at (if missing, defaults to now)
