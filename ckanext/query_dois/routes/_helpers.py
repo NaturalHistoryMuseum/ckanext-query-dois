@@ -136,24 +136,18 @@ def encode_params(params, version=None, extras=None, for_api=False):
 
 def generate_rerun_urls(resource, package, query, rounded_version=None):
     """
-    Generate a dict containing all the "rerun" URLs needed to allow the user to revisit the data
-    either through the website or through the API. The dict returned will look like following:
+    Generate a dict containing all the "rerun" URLs needed to allow the user to revisit
+    the data either through the website or through the API. The dict returned will look
+    like following:
 
-        {
-            "page": {
-                "original": ...
-                "current": ...
-            },
-            "api": {
-                "original": ...
-                "current": ...
-            }
-        }
+    {     "page": {         "original": ...         "current": ...     },     "api": {
+    "original": ...         "current": ...     } }
 
     :param resource: the resource dict
     :param package: the package dict
     :param query: the query dict
-    :param rounded_version: the version rounded down to the nearest available on the resource
+    :param rounded_version: the version rounded down to the nearest available on the
+        resource
     :returns: a dict of urls
     """
     page_url = toolkit.url_for(

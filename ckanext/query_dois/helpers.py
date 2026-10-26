@@ -18,8 +18,10 @@ from ckanext.query_dois.model import QueryDOI
 
 def render_filter_value(field, filter_value):
     """
-    Renders the given filter value for the given field. This should be called for each
-    filter value rather than by passing a list or filter values.
+    Renders the given filter value for the given field.
+
+    This should be called for each filter value rather than by passing a list or filter
+    values.
 
     :param field: the field name
     :param filter_value: the filter value for the field

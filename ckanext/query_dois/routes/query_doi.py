@@ -38,8 +38,9 @@ def landing_page(data_centre, identifier):
 @blueprint.route('')
 def doi_stats():
     """
-    Returns statistics in JSON format depending on the request parameters. The return
-    will be a list with a dict representing the QueryDOI as each element.
+    Returns statistics in JSON format depending on the request parameters.
+
+    The return will be a list with a dict representing the QueryDOI as each element.
 
     This endpoint currently only supports filtering on the resource_id.
 
@@ -65,8 +66,9 @@ def doi_stats():
 @blueprint.route('/stats')
 def action_stats():
     """
-    Returns action statistics in JSON format depending on the request parameters. The
-    return will be a list with a dict representing the QueryDOIStat as each element.
+    Returns action statistics in JSON format depending on the request parameters.
+
+    The return will be a list with a dict representing the QueryDOIStat as each element.
 
     :returns: a JSON stringified list of dicts
     """
