@@ -1,5 +1,20 @@
 # Changelog
 
+## v6.0.5 (2026-10-26)
+
+### Refactor
+
+- run pre-commit and refactor all files
+
+### CI System(s)
+
+- update pre-commit config
+- update action versions update the actions to the latest versions
+
+### Chores/Misc
+
+- update team names
+
 ## v6.0.4 (2026-03-17)
 
 ### Performance
