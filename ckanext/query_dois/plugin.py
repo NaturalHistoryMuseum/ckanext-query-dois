@@ -64,6 +64,9 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
     # IVersionedDatastoreDownloads
     def download_after_init(self, request):
         try:
+            # if it's a raw download we can't get a DOI
+            if request.derivative_record.format == 'raw':
+                return
             query = Query.create_from_download_request(request)
             # mint the DOI on datacite if necessary
             mint_multisearch_doi(query)
@@ -78,6 +81,9 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
 
     def download_modify_notifier_template_context(self, request, context):
         try:
+            # if it's a raw download we can't get a DOI
+            if request.derivative_record.format == 'raw':
+                return context
             query = Query.create_from_download_request(request)
             # if a DOI can be created it should already have been created in
             # download_after_init
@@ -95,6 +101,9 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
 
     def download_modify_manifest(self, manifest, request):
         try:
+            # if it's a raw download we can't get a DOI
+            if request.derivative_record.format == 'raw':
+                return manifest
             query = Query.create_from_download_request(request)
             # if a DOI can be created it should already have been created in
             # download_after_init
@@ -112,6 +121,9 @@ class QueryDOIsPlugin(plugins.SingletonPlugin):
 
     def download_after_run(self, request):
         try:
+            # if it's a raw download we can't get a DOI
+            if request.derivative_record.format == 'raw':
+                return
             query = Query.create_from_download_request(request)
             # if a DOI can be created it should already have been created in
             # download_modify_manifest
