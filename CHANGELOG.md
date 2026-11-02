@@ -1,5 +1,11 @@
 # Changelog
 
+## v6.0.6 (2026-11-02)
+
+### Fix
+
+- raw downloads cannot use query dois
+
 ## v6.0.5 (2026-10-26)
 
 ### Refactor
